@@ -1520,13 +1520,8 @@ async function generatePracticeScrambleText() {
   // Keep case selection logic intact; only the conversion from case-alg -> scramble is swapped.
   let solAlg = _cleanAlg(raw).replace(/2'/g, '2');
 
-  // ZBLS hand mode (R/L): mirror the *solution alg* (swap R/L and invert each token),
-  // then generate scramble from that mirrored solution.
-  if (String(currentEvent || '').trim() === 'p_zbls' && practiceZblsHand === 'L') {
-    solAlg = _swapRLAndInvertAlgString(solAlg).replace(/2'/g, '2');
-  }
-
   const ev = String(currentEvent || '').trim();
+  let scramble = '';
 
   // Alg-Trainer preset generators
   const GEN_ZBLL = "RBR'FRB'R'F',RUR'URU2R',U,R'U'RU'R'U2R,F2U'R'LF2L'RU'F2";
@@ -1534,17 +1529,23 @@ async function generatePracticeScrambleText() {
 
   if (ev === 'p_oll' || ev === 'p_pll') {
     // Alg-Trainer: OLL/PLL => PLL-style prescramble, then obfuscate
-    return PRACTICE_AT.generatePreScrambleFromSolution(solAlg, GEN_PLL, 100);
-  }
-
-  if (ev === 'p_zbls' || ev === 'p_zbll') {
+    scramble = PRACTICE_AT.generatePreScrambleFromSolution(solAlg, GEN_PLL, 100);
+  } else if (ev === 'p_zbls' || ev === 'p_zbll') {
     // Alg-Trainer: ZBLS/ZBLL => heavier prescramble, then obfuscate
-    return PRACTICE_AT.generatePreScrambleFromSolution(solAlg, GEN_ZBLL, 1000);
+    scramble = PRACTICE_AT.generatePreScrambleFromSolution(solAlg, GEN_ZBLL, 1000);
+  } else {
+    // Fallback (shouldn't happen): mimic Alg-Trainer "obfuscate inverse"
+    const baseScramble = PRACTICE_AT.invertCompact(solAlg);
+    scramble = PRACTICE_AT.obfuscate(baseScramble);
   }
 
-  // Fallback (shouldn't happen): mimic Alg-Trainer "obfuscate inverse"
-  const baseScramble = PRACTICE_AT.invertCompact(solAlg);
-  return PRACTICE_AT.obfuscate(baseScramble);
+  // ZBLS hand mode (R/L): mirror the *scramble* (swap R/L and invert each token)
+  // after generation for more stable results.
+  if (ev === 'p_zbls' && practiceZblsHand === 'L') {
+    scramble = _swapRLAndInvertAlgString(scramble).replace(/2'/g, '2');
+  }
+
+  return scramble;
 }
 
 const suffixes = ["", "'", "2"];

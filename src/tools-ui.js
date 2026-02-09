@@ -2,10 +2,9 @@
 window.toggleToolsMenu = (e) => { e.stopPropagation(); document.getElementById('toolsDropdown').classList.toggle('show'); };
 window.selectTool = (tool) => {
     activeTool = tool;
-    const isBlind = configs[currentEvent]?.cat === 'blind';
-    document.getElementById('toolLabel').innerText = isBlind
-        ? (currentLang === 'ko' ? '해당 없음(블라인드)' : 'N/A (Blind)')
-        : (tool === 'scramble' ? (currentLang === 'ko' ? '스크램블 이미지' : 'Scramble Image') : (currentLang === 'ko' ? '그래프(추세)' : 'Graph (Trends)'));
+    document.getElementById('toolLabel').innerText = tool === 'scramble'
+        ? (currentLang === 'ko' ? '스크램블 이미지' : 'Scramble Image')
+        : (currentLang === 'ko' ? '그래프(추세)' : 'Graph (Trends)');
     document.getElementById('visualizerWrapper').classList.toggle('hidden', tool !== 'scramble');
     document.getElementById('graphWrapper').classList.toggle('hidden', tool !== 'graph');
     document.querySelectorAll('.tool-option').forEach(opt => opt.classList.remove('active'));

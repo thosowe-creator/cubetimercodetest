@@ -54,7 +54,7 @@ const AUTO_I18N_PAIRS = [
   // Settings rows
   { en: 'Dark Mode', ko: '다크 모드' },
   { en: 'Prevent Sleep (Wake Lock)', ko: '화면 꺼짐 방지(Wake Lock)' },
-  { en: 'WCA Inspection', ko: 'WCA 인스펙션' },
+  { en: 'Inspection', ko: '인스펙션' },
   { en: '15s countdown + voice', ko: '15초 카운트다운 + 음성' },
   { en: 'Hold Duration', ko: '홀드 시간' },
 
@@ -167,4 +167,3 @@ function applyAutoI18n(root = document) {
     node.nodeValue = `${leading}${pair[targetLang]}${trailing}`;
   }
 }
-
