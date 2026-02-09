@@ -27,3 +27,56 @@ let inspectionPenalty = null; // null, '+2', 'DNF'
 let hasSpoken8 = false;
 let hasSpoken12 = false;
 let lastStopTimestamp = 0;
+
+const appState = {
+    get solves() {
+        return solves;
+    },
+    set solves(value) {
+        solves = value;
+    },
+    get sessions() {
+        return sessions;
+    },
+    set sessions(value) {
+        sessions = value;
+    },
+    get currentEvent() {
+        return currentEvent;
+    },
+    set currentEvent(value) {
+        currentEvent = value;
+    },
+    get precision() {
+        return precision;
+    },
+    set precision(value) {
+        precision = value;
+    },
+    get isAo5Mode() {
+        return isAo5Mode;
+    },
+    set isAo5Mode(value) {
+        isAo5Mode = value;
+    },
+    get holdDuration() {
+        return holdDuration;
+    },
+    set holdDuration(value) {
+        holdDuration = value;
+    },
+    get isWakeLockEnabled() {
+        return isWakeLockEnabled;
+    },
+    set isWakeLockEnabled(value) {
+        isWakeLockEnabled = value;
+    },
+    get isInspectionMode() {
+        return isInspectionMode;
+    },
+    set isInspectionMode(value) {
+        isInspectionMode = value;
+    },
+};
+
+window.appState = appState;
