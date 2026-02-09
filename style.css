@@ -127,6 +127,29 @@ html:not(.dark) .timer-display{
   color: rgb(var(--ct-timer-rgb)) !important;
 }
 
+/* Timer state colors should override light-mode base color. */
+#timer.holding-status {
+  color: #ef4444 !important;
+}
+
+#timer.ready-to-start {
+  color: var(--ct-ready-color, #10b981) !important;
+  transform: scale(1.02);
+}
+
+#timer.text-ready {
+  color: var(--ct-ready-color, #10b981) !important;
+  transform: scale(1.02);
+}
+
+#timer.text-running {
+  color: #2563eb !important;
+}
+
+.dark #timer.text-running {
+  color: #60a5fa !important;
+}
+
 html:not(.dark) #scramble{
   color: rgb(var(--ct-scramble-text-rgb)) !important;
 }
