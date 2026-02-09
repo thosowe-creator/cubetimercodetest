@@ -166,7 +166,7 @@ window.openThemePicker = (part) => {
   if (picker) picker.classList.remove('hidden');
   // header back should go back to theme list
   const title = document.getElementById('settingsTitle');
-  if (title) title.textContent = 'Theme';
+  if (title) title.textContent = '테마';
   setPickerForPart(part);
   ensurePickerEvents();
   const sc = document.getElementById('settingsScroll');
@@ -221,7 +221,7 @@ window.openThemeSettings = () => {
   if (theme) theme.classList.remove('hidden');
   if (back) back.classList.remove('hidden');
   if (resetAll) resetAll.classList.remove('hidden');
-  if (title) title.textContent = 'Theme';
+  if (title) title.textContent = '테마';
   // ensure picker is closed when entering theme list
   const picker = document.getElementById('themePickerView');
   if (picker) picker.classList.add('hidden');

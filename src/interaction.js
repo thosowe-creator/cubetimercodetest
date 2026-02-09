@@ -1,4 +1,19 @@
 // --- Interaction Logic with configurable Hold Time ---
+function parseRgb(color) {
+    const match = color && color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!match) return null;
+    return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function getReadyColor(baseColor) {
+    const rgb = parseRgb(baseColor);
+    if (rgb) {
+        const [r, g, b] = rgb;
+        const isGreenish = g > r + 25 && g > b + 25;
+        if (isGreenish) return '#3b82f6';
+    }
+    return '#10b981';
+}
 function handleStart(e) {
     // [FIX] Ignore touches on interactive elements like badges or buttons
     // This allows clicking on stats/settings without triggering the timer
@@ -14,6 +29,7 @@ function handleStart(e) {
         // Space pressed in Idle with inspection ON: Do nothing (wait for release to start inspection)
         return;
     }
+    const baseTimerColor = timerEl ? window.getComputedStyle(timerEl).color : '';
     if (isInspectionMode && inspectionState === 'inspecting') {
         // BT 연결 시에는 키보드로 'Ready' 상태 진입 불가 (오직 간 타이머 핸즈온으로만 가능)
         if (isBtConnected) return;
@@ -22,7 +38,7 @@ function handleStart(e) {
         timerEl.classList.add('holding-status');
         holdTimer = setTimeout(()=> { 
             isReady=true; 
-            timerEl.style.color = '#10b981'; 
+            timerEl.style.color = getReadyColor(baseTimerColor); 
             timerEl.classList.replace('holding-status','ready-to-start'); 
             statusHint.innerText="Ready!"; 
         }, holdDuration); 
@@ -34,7 +50,7 @@ function handleStart(e) {
     
     holdTimer = setTimeout(()=> { 
         isReady=true; 
-        timerEl.style.color = '#10b981'; 
+        timerEl.style.color = getReadyColor(baseTimerColor); 
         timerEl.classList.replace('holding-status','ready-to-start'); 
         statusHint.innerText="Ready!"; 
     }, holdDuration); 
@@ -444,7 +460,18 @@ window.showSolveDetails = (id) => {
     if (overlay) overlay.classList.add('active');
 };
 window.closeModal = () => document.getElementById('modalOverlay').classList.remove('active');
-window.useThisScramble = () => { let s=appState.solves.find(x=>x.id===selectedSolveId); if(s){currentScramble=s.scramble; scrambleEl.innerText=currentScramble; closeModal();} };
+window.useThisScramble = () => {
+    const s = appState.solves.find(x => x.id === selectedSolveId);
+    if (s) {
+        if (typeof window.setCurrentScramble === 'function') {
+            window.setCurrentScramble(s.scramble);
+        } else {
+            currentScramble = s.scramble;
+            scrambleEl.innerText = currentScramble;
+        }
+        closeModal();
+    }
+};
 precisionToggle.onchange = e => { appState.precision = e.target.checked?3:2; updateUI(); timerEl.innerText=(0).toFixed(appState.precision); saveData(); };
 avgModeToggle.onchange = e => { appState.isAo5Mode = e.target.checked; updateUI(); saveData(); };
 manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.classList.toggle('hidden', isManualMode); manualInput.classList.toggle('hidden', !isManualMode); statusHint.innerText = isManualMode ? (currentLang === 'ko' ? '시간 입력 후 Enter' : 'Type time & Enter') : t('holdToReady'); };
@@ -648,6 +675,14 @@ function setupDomEventBindings() {
             case 'retry-scramble':
                 retryScramble();
                 break;
+            case 'scramble-prev':
+                if (typeof window.showPreviousScramble === 'function') {
+                    window.showPreviousScramble();
+                }
+                break;
+            case 'scramble-next':
+                if (!isRunning) generateScramble();
+                break;
             case 'generate-mbf-scrambles':
                 generateMbfScrambles();
                 break;
@@ -701,7 +736,9 @@ const LIGHT_THEME_DEFAULTS = {
   bg: [248, 250, 252],         // #F8FAFC
   card: [255, 255, 255],       // #FFFFFF
   text: [15, 23, 42],          // #0F172A
+  timerText: [15, 23, 42],     // #0F172A
   scramble: [255, 255, 255],   // #FFFFFF
+  scrambleText: [71, 85, 105], // #475569
 };
 
 let lightTheme = structuredClone(LIGHT_THEME_DEFAULTS);
@@ -752,7 +789,9 @@ function applyLightTheme() {
   setRGB('--ct-bg-rgb', lightTheme.bg);
   setRGB('--ct-card-rgb', lightTheme.card);
   setRGB('--ct-text-rgb', lightTheme.text);
+  setRGB('--ct-timer-rgb', lightTheme.timerText);
   setRGB('--ct-scramble-rgb', lightTheme.scramble);
+  setRGB('--ct-scramble-text-rgb', lightTheme.scrambleText);
 }
 
 /* =========================
@@ -801,12 +840,14 @@ function hsvToRgb({ h, s, v }) {
 
 function partLabel(part) {
   return ({
-    accent: 'Accent',
-    bg: 'Background',
-    card: 'Panels',
-    text: 'Text',
-    scramble: 'Scramble Box',
-  })[part] || 'Color';
+    accent: '강조',
+    bg: '배경',
+    card: '패널',
+    text: '텍스트',
+    timerText: '타이머',
+    scramble: '스크램블 박스',
+    scrambleText: '스크램블 텍스트',
+  })[part] || '색상';
 }
 
 function syncThemeRowsUI() {
@@ -815,7 +856,9 @@ function syncThemeRowsUI() {
     bg: 'Bg',
     card: 'Card',
     text: 'Text',
+    timerText: 'Timer',
     scramble: 'Scramble',
+    scrambleText: 'ScrambleText',
   };
   for (const [part, suf] of Object.entries(map)) {
     const rgb = lightTheme[part];

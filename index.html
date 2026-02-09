@@ -176,7 +176,7 @@
 	                    </button>
 	                    <h3 id="settingsTitle" class="font-bold text-slate-700 dark:text-white text-lg">Settings</h3>
 	                </div>
-	                <button id="themeResetAllBtn" data-action="reset-all-theme-light" class="hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Reset Theme</button>
+	                <button id="themeResetAllBtn" data-action="reset-all-theme-light" class="hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">테마 초기화</button>
 	            </div>
 	            <div id="settingsScroll" class="settings-scroll space-y-4 custom-scroll pr-1">
 	                <div id="settingsMainView" class="space-y-4">
@@ -198,7 +198,7 @@
                             <div class="w-4 h-4 rounded" style="background: linear-gradient(135deg, #3b82f6, #a855f7);"></div>
                         </div>
                         <div class="text-left">
-                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Theme</p>
+                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">테마</p>
 </div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M9 18l6-6-6-6"/></svg>
@@ -280,13 +280,13 @@
 
 <!-- Theme Settings View (Light mode only) -->
 	                <div id="themeSettingsView" class="hidden space-y-2">
-	                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600 mb-2">Theme Colors</p>
+	                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600 mb-2">테마 색상</p>
 	                    <div class="space-y-2">
 	                        <button type="button" data-action="open-theme-picker" data-theme-target="accent" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowAccentDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
-	                                    <p class="theme-row-title">Accent</p>
+	                                    <p class="theme-row-title">강조</p>
 	                                    <p id="themeRowAccentHex" class="theme-row-sub">#3B82F6</p>
 	                                </div>
 	                            </div>
@@ -296,7 +296,7 @@
 	                            <div class="theme-row-left">
 	                                <div id="themeRowBgDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
-	                                    <p class="theme-row-title">Background</p>
+	                                    <p class="theme-row-title">배경</p>
 	                                    <p id="themeRowBgHex" class="theme-row-sub">#F8FAFC</p>
 	                                </div>
 	                            </div>
@@ -306,7 +306,7 @@
 	                            <div class="theme-row-left">
 	                                <div id="themeRowCardDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
-	                                    <p class="theme-row-title">Panels</p>
+	                                    <p class="theme-row-title">패널</p>
 	                                    <p id="themeRowCardHex" class="theme-row-sub">#FFFFFF</p>
 	                                </div>
 	                            </div>
@@ -316,23 +316,43 @@
 	                            <div class="theme-row-left">
 	                                <div id="themeRowTextDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
-	                                    <p class="theme-row-title">Text</p>
+	                                    <p class="theme-row-title">텍스트</p>
 	                                    <p id="themeRowTextHex" class="theme-row-sub">#0F172A</p>
 	                                </div>
 	                            </div>
 	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
 	                        </button>
-	                        <button type="button" data-action="open-theme-picker" data-theme-target="scramble" class="theme-row">
-	                            <div class="theme-row-left">
-	                                <div id="themeRowScrambleDot" class="theme-dot"></div>
-	                                <div class="theme-row-text">
-	                                    <p class="theme-row-title">Scramble Box</p>
-	                                    <p id="themeRowScrambleHex" class="theme-row-sub">#FFFFFF</p>
-	                                </div>
-	                            </div>
-	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
-	                        </button>
-	                    </div>
+                        <button type="button" data-action="open-theme-picker" data-theme-target="timerText" class="theme-row">
+                            <div class="theme-row-left">
+                                <div id="themeRowTimerDot" class="theme-dot"></div>
+                                <div class="theme-row-text">
+	                                    <p class="theme-row-title">타이머</p>
+                                    <p id="themeRowTimerHex" class="theme-row-sub">#0F172A</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                        <button type="button" data-action="open-theme-picker" data-theme-target="scramble" class="theme-row">
+                            <div class="theme-row-left">
+                                <div id="themeRowScrambleDot" class="theme-dot"></div>
+                                <div class="theme-row-text">
+	                                    <p class="theme-row-title">스크램블 박스</p>
+                                    <p id="themeRowScrambleHex" class="theme-row-sub">#FFFFFF</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                        <button type="button" data-action="open-theme-picker" data-theme-target="scrambleText" class="theme-row">
+                            <div class="theme-row-left">
+                                <div id="themeRowScrambleTextDot" class="theme-dot"></div>
+                                <div class="theme-row-text">
+	                                    <p class="theme-row-title">스크램블 텍스트</p>
+                                    <p id="themeRowScrambleTextHex" class="theme-row-sub">#475569</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                    </div>
 	                </div>
 
 	                <!-- Theme Color Picker View -->
@@ -341,11 +361,11 @@
 	                        <div class="flex items-center gap-2">
 	                            <div id="themePickerDot" class="theme-dot"></div>
 	                            <div>
-	                                <p id="themePickerTitle" class="text-xs font-bold text-slate-700 dark:text-slate-200">Color</p>
+	                                <p id="themePickerTitle" class="text-xs font-bold text-slate-700 dark:text-slate-200">색상</p>
 	                                <p id="themePickerHex" class="text-[10px] font-black text-slate-400">#FFFFFF</p>
 	                            </div>
 	                        </div>
-	                        <button type="button" data-action="theme-picker-default" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">Default</button>
+	                        <button type="button" data-action="theme-picker-default" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">기본값</button>
 	                    </div>
 	                    <div class="theme-picker-wrap">
 	                        <div class="theme-sv-wrap">
@@ -358,8 +378,8 @@
 	                    <div class="flex items-center justify-between">
 	                        <p id="themePickerRgb" class="text-[10px] font-bold text-slate-400">rgb(255,255,255)</p>
 	                        <div class="flex gap-2">
-	                            <button type="button" data-action="theme-picker-cancel" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Cancel</button>
-	                            <button type="button" data-action="theme-picker-apply" class="px-3 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 text-[11px] font-black text-white active:scale-95 transition-all">Apply</button>
+	                            <button type="button" data-action="theme-picker-cancel" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">취소</button>
+	                            <button type="button" data-action="theme-picker-apply" class="px-3 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 text-[11px] font-black text-white active:scale-95 transition-all">적용</button>
 	                        </div>
 	                    </div>
 	                </div>
@@ -601,6 +621,12 @@
                 <div class="text-center w-full">
                     <h2 class="text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] text-[10px] font-bold mb-3">Scramble</h2>
                     <div id="scrambleBox" class="border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center md:p-8 p-6 relative rounded-3xl scramble-box transition-colors">
+                        <button id="scramblePrevBtn" type="button" class="scramble-nav-btn scramble-nav-prev" data-action="scramble-prev" aria-label="Previous scramble" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button id="scrambleNextBtn" type="button" class="scramble-nav-btn scramble-nav-next" data-action="scramble-next" aria-label="Next scramble" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
                         <!-- Layout-stable scramble area: reserve space to prevent timer shifting -->
                         <div class="h-5 flex items-center justify-center">
                             <div id="scrambleLoadingRow" class="hidden items-center gap-2">

@@ -1,5 +1,46 @@
 // --- Tools & UI ---
 window.toggleToolsMenu = (e) => { e.stopPropagation(); document.getElementById('toolsDropdown').classList.toggle('show'); };
+function updateScrambleNavButtons() {
+    if (!scramblePrevBtn || !scrambleNextBtn) return;
+    const disableForState = isScrambleLoading || isRunning || currentEvent === '333mbf';
+    scramblePrevBtn.disabled = disableForState || !previousScramble || isViewingPreviousScramble;
+    scrambleNextBtn.disabled = disableForState;
+}
+
+function setScrambleDisplay(text) {
+    if (scrambleEl) scrambleEl.innerText = text;
+}
+
+function setCurrentScramble(nextScramble) {
+    const next = String(nextScramble || '').trim();
+    if (latestScramble) previousScramble = latestScramble;
+    latestScramble = next;
+    isViewingPreviousScramble = false;
+    currentScramble = latestScramble;
+    setScrambleDisplay(currentScramble);
+    updateScrambleNavButtons();
+}
+
+function showPreviousScramble() {
+    if (!previousScramble || isViewingPreviousScramble) return;
+    isViewingPreviousScramble = true;
+    currentScramble = previousScramble;
+    setScrambleDisplay(currentScramble);
+    updateScrambleNavButtons();
+}
+
+function showLatestScramble() {
+    if (!isViewingPreviousScramble) return;
+    isViewingPreviousScramble = false;
+    currentScramble = latestScramble;
+    setScrambleDisplay(currentScramble);
+    updateScrambleNavButtons();
+}
+
+window.setCurrentScramble = setCurrentScramble;
+window.showPreviousScramble = showPreviousScramble;
+window.showLatestScramble = showLatestScramble;
+window.updateScrambleNavButtons = updateScrambleNavButtons;
 window.selectTool = (tool) => {
     activeTool = tool;
     document.getElementById('toolLabel').innerText = tool === 'scramble'
@@ -107,6 +148,7 @@ function changeEvent(e) {
         scrambleEl.classList.add('hidden');
         mbfInputArea.classList.remove('hidden');
         setScrambleLoadingState(false);
+        updateScrambleNavButtons();
     } else {
         scrambleEl.classList.remove('hidden');
         mbfInputArea.classList.add('hidden');
@@ -128,6 +170,7 @@ function clearScrambleDiagram() {
 }
 
 function setScrambleLoadingState(isLoading, message = 'Loading scramble…', showRetry = false) {
+    isScrambleLoading = isLoading;
     // null guard: 일부 레이아웃/버전에서 요소가 없을 수 있음
     if (scrambleRetryBtn) {
         scrambleRetryBtn.classList.toggle('hidden', !showRetry);
@@ -150,6 +193,7 @@ function setScrambleLoadingState(isLoading, message = 'Loading scramble…', sho
         // Prevent blind-only message from sticking across events
         if (noVisualizerMsg) noVisualizerMsg.classList.add('hidden');
     }
+    updateScrambleNavButtons();
     scheduleLayout(isLoading ? 'scramble-loading' : 'scramble-ready');
 }
 
@@ -198,8 +242,7 @@ async function generateScramble() {
         try {
             const txt = await generatePracticeScrambleText();
             if (reqId !== scrambleReqId) return;
-            currentScramble = String(txt || '').trim() || 'N/A';
-            if (scrambleEl) scrambleEl.innerText = currentScramble;
+            setCurrentScramble(String(txt || '').trim() || 'N/A');
             setScrambleLoadingState(false);
             updateScrambleDiagram();
             resetPenalty();
@@ -217,8 +260,7 @@ async function generateScramble() {
         try {
             const alg = await cubingFn(mapEventIdForCubing(currentEvent));
             if (reqId !== scrambleReqId) return; // stale
-            currentScramble = alg.toString();
-            if (scrambleEl) scrambleEl.innerText = currentScramble;
+            setCurrentScramble(alg.toString());
             setScrambleLoadingState(false);
             updateScrambleDiagram();
             resetPenalty();
@@ -243,7 +285,7 @@ async function generateScramble() {
             line.push(Math.random() < 0.5 ? "U" : "U'");
             res.push(line.join(" "));
         }
-        currentScramble = res.join("\n");
+        setCurrentScramble(res.join("\n"));
     } else if (currentEvent === 'clock') {
         // WCA-style Clock scramble formatting:
         // - First two tokens should be UR... DR...
@@ -269,7 +311,7 @@ async function generateScramble() {
             res.push(fmt(dial, v));
         });
 
-        currentScramble = res.join(" ");
+        setCurrentScramble(res.join(" "));
     } else if (currentEvent === 'sq1') {
         // NOTE: Internal SQ1 generator is kept only as a fallback.
         let topCuts = [true, false, true, true, false, true, true, false, true, true, false, true];
@@ -305,7 +347,7 @@ async function generateScramble() {
                 movesCount++;
             }
         }
-        currentScramble = scrambleOps.join(" ");
+        setCurrentScramble(scrambleOps.join(" "));
     } else if (['pyra', 'skewb'].includes(currentEvent)) {
         let last = "";
         for (let i = 0; i < conf.len; i++) {
@@ -321,7 +363,7 @@ async function generateScramble() {
                 else if (r === 2) res.push(t + "'");
             });
         }
-        currentScramble = res.join(" ");
+        setCurrentScramble(res.join(" "));
     } else {
         let lastAxis = -1;
         let secondLastAxis = -1;
@@ -360,10 +402,9 @@ async function generateScramble() {
             res.push(orientations[Math.floor(Math.random() * orientations.length)]);
             if (Math.random() > 0.5) res.push(orientations[Math.floor(Math.random() * orientations.length)]);
         }
-        currentScramble = res.join(" ");
+        setCurrentScramble(res.join(" "));
     }
     if (reqId !== scrambleReqId) return; // stale
-    if (scrambleEl) scrambleEl.innerText = currentScramble;
     setScrambleLoadingState(false);
     updateScrambleDiagram();
     resetPenalty();
@@ -415,7 +456,7 @@ window.generateMbfScrambles = async () => {
             </div>`;
     }
     document.getElementById('mbfScrambleOverlay').classList.add('active');
-    currentScramble = `Multi-Blind (${count} Cubes Attempt)`;
+    setCurrentScramble(`Multi-Blind (${count} Cubes Attempt)`);
 };
 window.closeMbfScrambleModal = () => document.getElementById('mbfScrambleOverlay').classList.remove('active');
 window.copyMbfText = () => {
