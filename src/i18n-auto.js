@@ -57,6 +57,16 @@ const AUTO_I18N_PAIRS = [
   { en: 'Inspection', ko: '인스펙션' },
   { en: '15s countdown + voice', ko: '15초 카운트다운 + 음성' },
   { en: 'Hold Duration', ko: '홀드 시간' },
+  { en: 'Average Mode', ko: '평균 모드' },
+  { en: 'Manual Entry', ko: '수동 입력' },
+  { en: 'Precision', ko: '소숫점' },
+  { en: 'Account', ko: '계정' },
+  { en: 'Login', ko: '로그인' },
+  { en: 'Sign Up', ko: '가입' },
+  { en: 'Forgot password?', ko: '비밀번호를 잊으셨나요?' },
+  { en: 'Password', ko: '비밀번호' },
+  { en: 'Email', ko: '이메일' },
+  { en: 'Password reset email sent.', ko: '비밀번호 초기화 이메일이 발송되었습니다.' },
 
   // History footer
   { en: 'Avg of All', ko: '전체 평균' },

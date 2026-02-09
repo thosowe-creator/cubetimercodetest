@@ -82,7 +82,7 @@ function importData(event) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            applyRestoredData(data);
+            applyRestoredData(data, 'Restore complete.');
         } catch (err) {
             alert("Failed to restore data. Invalid JSON.");
         }
@@ -104,12 +104,12 @@ async function restoreFromCloud(uid) {
             return;
         }
         const restored = decompressPayload(data.payload);
-        applyRestoredData(restored);
+        applyRestoredData(restored, 'Cloud restore complete.');
     } catch (err) {
         alert('Cloud restore failed.');
     }
 }
-function applyRestoredData(data) {
+function applyRestoredData(data, successMessage) {
     if (data.solves && data.sessions) {
         solves = data.solves;
         sessions = data.sessions;
@@ -137,6 +137,9 @@ function applyRestoredData(data) {
             if (isWakeLockEnabled) requestWakeLock();
         }
         saveData();
+        if (successMessage) {
+            alert(successMessage);
+        }
         location.reload();
         return;
     }

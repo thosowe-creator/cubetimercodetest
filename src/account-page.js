@@ -2,12 +2,12 @@ const loginTab = document.getElementById('accountTabLogin');
 const signupTab = document.getElementById('accountTabSignup');
 const loginView = document.getElementById('accountLoginView');
 const signupView = document.getElementById('accountSignupView');
-const accountStatus = document.getElementById('accountStatus');
 const accountMessage = document.getElementById('accountMessage');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginSubmit = document.getElementById('loginSubmit');
 const signupSubmit = document.getElementById('signupSubmit');
 const passwordReset = document.getElementById('passwordReset');
+const accountAuthViews = document.getElementById('accountAuthViews');
 
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
@@ -39,6 +39,19 @@ function showMessage(message, isError = false) {
   accountMessage.textContent = message || '';
   accountMessage.classList.toggle('text-red-500', isError);
   accountMessage.classList.toggle('text-slate-400', !isError);
+  if (window.applyAutoI18n) {
+    try { window.applyAutoI18n(accountMessage); } catch (_) {}
+  }
+}
+function setLoggedInUI(user) {
+  if (user) {
+    logoutBtn.classList.remove('hidden');
+    accountAuthViews.classList.add('hidden');
+  } else {
+    logoutBtn.classList.add('hidden');
+    accountAuthViews.classList.remove('hidden');
+    setAccountTab('login');
+  }
 }
 
 loginTab.addEventListener('click', () => setAccountTab('login'));
@@ -112,11 +125,9 @@ logoutBtn.addEventListener('click', async () => {
 });
 
 onAuthStateChanged(window.firebaseAuth, (user) => {
-  if (user) {
-    accountStatus.textContent = 'Logged In';
-    logoutBtn.classList.remove('hidden');
-  } else {
-    accountStatus.textContent = 'Offline';
-    logoutBtn.classList.add('hidden');
-  }
+  setLoggedInUI(user);
 });
+
+if (window.applyAutoI18n) {
+  try { window.applyAutoI18n(document); } catch (_) {}
+}
