@@ -470,10 +470,6 @@ document.getElementById('clearHistoryBtn').onclick = () => {
 };
 
 function setupDomEventBindings() {
-    document.querySelectorAll('[data-stop-propagation]').forEach((el) => {
-        el.addEventListener('click', (event) => event.stopPropagation());
-    });
-
     const importInputEl = document.getElementById('importInput');
     if (importInputEl) importInputEl.addEventListener('change', importData);
 
@@ -503,11 +499,13 @@ function setupDomEventBindings() {
         if (!actionEl) return;
 
         const { action } = actionEl.dataset;
+        const isOverlayClick = () => actionEl.classList.contains('modal-overlay') && event.target !== actionEl;
         switch (action) {
             case 'open-bt-modal':
                 openBTModal();
                 break;
             case 'close-bt-modal':
+                if (isOverlayClick()) return;
                 closeBTModal();
                 break;
             case 'connect-gan-timer':
@@ -556,12 +554,14 @@ function setupDomEventBindings() {
                 openUpdateLog(false);
                 break;
             case 'close-update-log':
+                if (isOverlayClick()) return;
                 closeUpdateLog();
                 break;
             case 'open-known-issues':
                 openKnownIssues();
                 break;
             case 'close-known-issues':
+                if (isOverlayClick()) return;
                 closeKnownIssues();
                 break;
             case 'go-account':
@@ -571,6 +571,7 @@ function setupDomEventBindings() {
                 openSessionModal();
                 break;
             case 'close-session-modal':
+                if (isOverlayClick()) return;
                 closeSessionModal();
                 break;
             case 'create-new-session':
@@ -589,21 +590,25 @@ function setupDomEventBindings() {
                 deleteSession(Number(actionEl.dataset.sessionId));
                 break;
             case 'close-mbf-scramble-modal':
+                if (isOverlayClick()) return;
                 closeMbfScrambleModal();
                 break;
             case 'copy-mbf-text':
                 copyMbfText();
                 break;
             case 'close-mbf-result-modal':
+                if (isOverlayClick()) return;
                 closeMbfResultModal();
                 break;
             case 'save-mbf-result':
                 saveMbfResult();
                 break;
             case 'close-stats-modal':
+                if (isOverlayClick()) return;
                 closeStatsModal();
                 break;
             case 'close-avg-share':
+                if (isOverlayClick()) return;
                 closeAvgShare();
                 break;
             case 'copy-share-text':
@@ -616,6 +621,7 @@ function setupDomEventBindings() {
                 useThisScramble();
                 break;
             case 'close-modal':
+                if (isOverlayClick()) return;
                 closeModal();
                 break;
             case 'handle-outside-case-pool':
