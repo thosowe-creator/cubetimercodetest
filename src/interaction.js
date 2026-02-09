@@ -840,14 +840,14 @@ function hsvToRgb({ h, s, v }) {
 
 function partLabel(part) {
   return ({
-    accent: 'Accent',
-    bg: 'Background',
-    card: 'Panels',
-    text: 'Text',
-    timerText: 'Timer',
-    scramble: 'Scramble Box',
-    scrambleText: 'Scramble Text',
-  })[part] || 'Color';
+    accent: '강조',
+    bg: '배경',
+    card: '패널',
+    text: '텍스트',
+    timerText: '타이머',
+    scramble: '스크램블 박스',
+    scrambleText: '스크램블 텍스트',
+  })[part] || '색상';
 }
 
 function syncThemeRowsUI() {
