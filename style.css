@@ -109,7 +109,9 @@ body {
   --ct-bg-rgb: 248 250 252;
   --ct-card-rgb: 255 255 255;
   --ct-text-rgb: 15 23 42;
+  --ct-timer-rgb: 15 23 42;
   --ct-scramble-rgb: 255 255 255;
+  --ct-scramble-text-rgb: 71 85 105;
 }
 
 html:not(.dark) body{
@@ -121,8 +123,41 @@ html:not(.dark) .scramble-box{
   background-color: rgb(var(--ct-scramble-rgb)) !important;
 }
 
+html:not(.dark) .timer-display{
+  color: rgb(var(--ct-timer-rgb)) !important;
+}
+
+html:not(.dark) #scramble{
+  color: rgb(var(--ct-scramble-text-rgb)) !important;
+}
+
 html:not(.dark) .bg-white{
   background-color: rgb(var(--ct-card-rgb)) !important;
+}
+
+.scramble-nav-btn{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: 1px solid rgba(148,163,184,0.4);
+  background: rgba(248,250,252,0.85);
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, background 0.15s, opacity 0.15s;
+}
+.scramble-nav-btn:hover{ transform: translateY(-50%) scale(1.03); }
+.scramble-nav-btn:disabled{ opacity: 0.35; cursor: not-allowed; }
+.scramble-nav-prev{ left: 0.75rem; }
+.scramble-nav-next{ right: 0.75rem; }
+.dark .scramble-nav-btn{
+  border-color: rgba(71,85,105,0.6);
+  background: rgba(30,41,59,0.9);
+  color: #e2e8f0;
 }
 
 /* =========================
@@ -779,9 +814,9 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
   border-color: rgba(15,23,42,0.65);
 }
 .dark .case-pool-pill.active{
-  background: rgba(255,255,255,0.92);
-  color: rgb(15,23,42);
-  border-color: rgba(255,255,255,0.65);
+  background: rgba(254,226,226,0.92);
+  color: rgb(127,29,29);
+  border-color: rgba(248,113,113,0.65);
 }
 .case-pool-item{
   border: 1px solid rgba(148,163,184,0.35);
@@ -794,7 +829,7 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
   border-color: rgba(15,23,42,0.65);
 }
 .dark .case-pool-item.selected{
-  background: rgba(255,255,255,0.92);
-  color: rgb(15,23,42);
-  border-color: rgba(255,255,255,0.65);
+  background: rgba(254,226,226,0.92);
+  color: rgb(127,29,29);
+  border-color: rgba(248,113,113,0.65);
 }
