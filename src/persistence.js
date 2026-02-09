@@ -1,16 +1,16 @@
 // --- Data Persistence ---
 function buildBackupPayload() {
     return {
-        solves: solves,
-        sessions: sessions,
+        solves: appState.solves,
+        sessions: appState.sessions,
         settings: {
-            precision,
-            isAo5Mode,
-            currentEvent,
-            holdDuration,
+            precision: appState.precision,
+            isAo5Mode: appState.isAo5Mode,
+            currentEvent: appState.currentEvent,
+            holdDuration: appState.holdDuration,
             isDarkMode: document.documentElement.classList.contains('dark'),
-            isWakeLockEnabled,
-            isInspectionMode
+            isWakeLockEnabled: appState.isWakeLockEnabled,
+            isInspectionMode: appState.isInspectionMode
         }
     };
 }
@@ -30,14 +30,10 @@ function base64ToBytes(base64) {
     return bytes;
 }
 function compressPayload(payload) {
-    const json = JSON.stringify(payload);
-    const compressed = window.pako.deflate(json, { level: 9 });
-    return bytesToBase64(compressed);
+    return JSON.stringify(payload);
 }
-function decompressPayload(base64) {
-    const bytes = base64ToBytes(base64);
-    const json = window.pako.inflate(bytes, { to: 'string' });
-    return JSON.parse(json);
+function decompressPayload(payload) {
+    return JSON.parse(payload);
 }
 async function exportData() {
     const payload = buildBackupPayload();
@@ -111,52 +107,56 @@ async function restoreFromCloud(uid) {
 }
 function applyRestoredData(data, successMessage) {
     if (data.solves && data.sessions) {
-        solves = data.solves;
-        sessions = data.sessions;
+        appState.solves = data.solves;
+        appState.sessions = data.sessions;
         if (data.settings) {
-            precision = data.settings.precision || 2;
-            isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
-            currentEvent = data.settings.currentEvent || '333';
-            holdDuration = data.settings.holdDuration || 300;
-            isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
+            appState.precision = data.settings.precision || 2;
+            appState.isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
+            appState.currentEvent = data.settings.currentEvent || '333';
+            appState.holdDuration = data.settings.holdDuration || 300;
+            appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
             const isDark = data.settings.isDarkMode || false;
-            isInspectionMode = data.settings.isInspectionMode || false;
+            appState.isInspectionMode = data.settings.isInspectionMode || false;
 
-            precisionToggle.checked = (precision === 3);
-            avgModeToggle.checked = isAo5Mode;
+            precisionToggle.checked = (appState.precision === 3);
+            avgModeToggle.checked = appState.isAo5Mode;
             darkModeToggle.checked = isDark;
-            wakeLockToggle.checked = isWakeLockEnabled;
-            inspectionToggle.checked = isInspectionMode;
+            wakeLockToggle.checked = appState.isWakeLockEnabled;
+            inspectionToggle.checked = appState.isInspectionMode;
 
             toggleInspection(inspectionToggle);
-            if (!isInspectionMode) {
-                holdDurationSlider.value = holdDuration / 1000;
+            if (!appState.isInspectionMode) {
+                holdDurationSlider.value = appState.holdDuration / 1000;
                 updateHoldDuration(holdDurationSlider.value);
             }
             document.documentElement.classList.toggle('dark', isDark);
-            if (isWakeLockEnabled) requestWakeLock();
+            if (appState.isWakeLockEnabled) requestWakeLock();
         }
         saveData();
         if (successMessage) {
             alert(successMessage);
         }
-        location.reload();
+        initSessionIfNeeded(appState.currentEvent);
+        if (eventSelect) eventSelect.value = appState.currentEvent;
+        renderSessionList();
+        updateUI();
+        generateScramble();
         return;
     }
     throw new Error("Invalid format");
 }
 function saveData() {
     const data = {
-        solves: solves,
-        sessions: sessions,
+        solves: appState.solves,
+        sessions: appState.sessions,
         settings: { 
-            precision, 
-            isAo5Mode, 
-            currentEvent, 
-            holdDuration,
+            precision: appState.precision, 
+            isAo5Mode: appState.isAo5Mode, 
+            currentEvent: appState.currentEvent, 
+            holdDuration: appState.holdDuration,
             isDarkMode: document.documentElement.classList.contains('dark'),
-            isWakeLockEnabled,
-            isInspectionMode
+            isWakeLockEnabled: appState.isWakeLockEnabled,
+            isInspectionMode: appState.isInspectionMode
         }
     };
     localStorage.setItem('cubeTimerData_v5', JSON.stringify(data));
@@ -166,53 +166,53 @@ function loadData() {
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            solves = data.solves || [];
-            sessions = data.sessions || {};
+            appState.solves = data.solves || [];
+            appState.sessions = data.sessions || {};
             if (data.settings) {
-                precision = data.settings.precision || 2;
-                isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
-                currentEvent = data.settings.currentEvent || '333';
-                holdDuration = data.settings.holdDuration || 300;
+                appState.precision = data.settings.precision || 2;
+                appState.isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
+                appState.currentEvent = data.settings.currentEvent || '333';
+                appState.holdDuration = data.settings.holdDuration || 300;
                 const isDark = data.settings.isDarkMode || false;
-                isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
-                isInspectionMode = data.settings.isInspectionMode || false;
-                precisionToggle.checked = (precision === 3);
-                avgModeToggle.checked = isAo5Mode;
+                appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
+                appState.isInspectionMode = data.settings.isInspectionMode || false;
+                precisionToggle.checked = (appState.precision === 3);
+                avgModeToggle.checked = appState.isAo5Mode;
                 darkModeToggle.checked = isDark;
-                wakeLockToggle.checked = isWakeLockEnabled;
-                inspectionToggle.checked = isInspectionMode;
+                wakeLockToggle.checked = appState.isWakeLockEnabled;
+                inspectionToggle.checked = appState.isInspectionMode;
                 
-                if (isInspectionMode) {
+                if (appState.isInspectionMode) {
                     toggleInspection(inspectionToggle);
                 } else {
-                    holdDurationSlider.value = holdDuration / 1000;
+                    holdDurationSlider.value = appState.holdDuration / 1000;
                     holdDurationValue.innerText = holdDurationSlider.value + "s";
                 }
                 document.documentElement.classList.toggle('dark', isDark);
-                if(isWakeLockEnabled) requestWakeLock();
-                const conf = configs[currentEvent];
-                if (eventSelect) eventSelect.value = currentEvent;
+                if(appState.isWakeLockEnabled) requestWakeLock();
+                const conf = configs[appState.currentEvent];
+                if (eventSelect) eventSelect.value = appState.currentEvent;
                 if (conf) switchCategory(conf.cat, false);
             }
         } catch (e) { console.error("Load failed", e); }
     }
-    initSessionIfNeeded(currentEvent);
+    initSessionIfNeeded(appState.currentEvent);
     
     if (!isBtConnected) {
-        statusHint.innerText = isInspectionMode ? "Start Inspection" : "Hold to Ready";
+        statusHint.innerText = appState.isInspectionMode ? "Start Inspection" : "Hold to Ready";
     }
 }
 function initSessionIfNeeded(eventId) {
-    if (!sessions[eventId] || sessions[eventId].length === 0) {
-        sessions[eventId] = [{ id: Date.now(), name: "Session 1", isActive: true }];
-    } else if (!sessions[eventId].find(s => s.isActive)) {
-        sessions[eventId][0].isActive = true;
+    if (!appState.sessions[eventId] || appState.sessions[eventId].length === 0) {
+        appState.sessions[eventId] = [{ id: Date.now(), name: "Session 1", isActive: true }];
+    } else if (!appState.sessions[eventId].find(s => s.isActive)) {
+        appState.sessions[eventId][0].isActive = true;
     }
 }
 function getCurrentSessionId() {
-    const eventSessions = sessions[currentEvent] || [];
+    const eventSessions = appState.sessions[appState.currentEvent] || [];
     const active = eventSessions.find(s => s.isActive);
     if (active) return active.id;
-    initSessionIfNeeded(currentEvent);
-    return sessions[currentEvent][0].id;
+    initSessionIfNeeded(appState.currentEvent);
+    return appState.sessions[appState.currentEvent][0].id;
 }
