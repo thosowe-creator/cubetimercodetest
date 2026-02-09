@@ -444,7 +444,18 @@ window.showSolveDetails = (id) => {
     if (overlay) overlay.classList.add('active');
 };
 window.closeModal = () => document.getElementById('modalOverlay').classList.remove('active');
-window.useThisScramble = () => { let s=appState.solves.find(x=>x.id===selectedSolveId); if(s){currentScramble=s.scramble; scrambleEl.innerText=currentScramble; closeModal();} };
+window.useThisScramble = () => {
+    const s = appState.solves.find(x => x.id === selectedSolveId);
+    if (s) {
+        if (typeof window.setCurrentScramble === 'function') {
+            window.setCurrentScramble(s.scramble);
+        } else {
+            currentScramble = s.scramble;
+            scrambleEl.innerText = currentScramble;
+        }
+        closeModal();
+    }
+};
 precisionToggle.onchange = e => { appState.precision = e.target.checked?3:2; updateUI(); timerEl.innerText=(0).toFixed(appState.precision); saveData(); };
 avgModeToggle.onchange = e => { appState.isAo5Mode = e.target.checked; updateUI(); saveData(); };
 manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.classList.toggle('hidden', isManualMode); manualInput.classList.toggle('hidden', !isManualMode); statusHint.innerText = isManualMode ? (currentLang === 'ko' ? '시간 입력 후 Enter' : 'Type time & Enter') : t('holdToReady'); };
@@ -648,6 +659,16 @@ function setupDomEventBindings() {
             case 'retry-scramble':
                 retryScramble();
                 break;
+            case 'scramble-prev':
+                if (typeof window.showPreviousScramble === 'function') {
+                    window.showPreviousScramble();
+                }
+                break;
+            case 'scramble-next':
+                if (typeof window.showLatestScramble === 'function') {
+                    window.showLatestScramble();
+                }
+                break;
             case 'generate-mbf-scrambles':
                 generateMbfScrambles();
                 break;
@@ -701,7 +722,9 @@ const LIGHT_THEME_DEFAULTS = {
   bg: [248, 250, 252],         // #F8FAFC
   card: [255, 255, 255],       // #FFFFFF
   text: [15, 23, 42],          // #0F172A
+  timerText: [15, 23, 42],     // #0F172A
   scramble: [255, 255, 255],   // #FFFFFF
+  scrambleText: [71, 85, 105], // #475569
 };
 
 let lightTheme = structuredClone(LIGHT_THEME_DEFAULTS);
@@ -752,7 +775,9 @@ function applyLightTheme() {
   setRGB('--ct-bg-rgb', lightTheme.bg);
   setRGB('--ct-card-rgb', lightTheme.card);
   setRGB('--ct-text-rgb', lightTheme.text);
+  setRGB('--ct-timer-rgb', lightTheme.timerText);
   setRGB('--ct-scramble-rgb', lightTheme.scramble);
+  setRGB('--ct-scramble-text-rgb', lightTheme.scrambleText);
 }
 
 /* =========================
@@ -805,7 +830,9 @@ function partLabel(part) {
     bg: 'Background',
     card: 'Panels',
     text: 'Text',
+    timerText: 'Timer',
     scramble: 'Scramble Box',
+    scrambleText: 'Scramble Text',
   })[part] || 'Color';
 }
 
@@ -815,7 +842,9 @@ function syncThemeRowsUI() {
     bg: 'Bg',
     card: 'Card',
     text: 'Text',
+    timerText: 'Timer',
     scramble: 'Scramble',
+    scrambleText: 'ScrambleText',
   };
   for (const [part, suf] of Object.entries(map)) {
     const rgb = lightTheme[part];
