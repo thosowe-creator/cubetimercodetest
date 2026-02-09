@@ -3,7 +3,7 @@ const APP_VERSION = '2.1';
 const RELEASE_NOTES = [
    {
     version: '2.1',
-    date: '2026.02.05',
+    date: '2026.02.09',
     items: {
       ko: [
         '연습용 종목 및 스크램블 추가',
