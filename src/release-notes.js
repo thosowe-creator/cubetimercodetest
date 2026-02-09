@@ -1,6 +1,38 @@
-// Release Notes / Developer Log (Settings에서 언제든 확인 가능)
-const APP_VERSION = '2';
+// Release Notes / Developer Log
+const APP_VERSION = '2.1';
 const RELEASE_NOTES = [
+   {
+    version: '2.1',
+    date: '2026.02.09',
+    items: {
+      ko: [
+        '연습용 종목 및 스크램블 추가',
+        '테마 사용자 지정 기능 추가',
+        '기타 UI 개선',
+      ],
+      en: [
+        'Added practice events and scrambles',
+        'Added theme customization',
+        'Misc UI improvements',
+      ]
+    }
+  },
+  {
+    version: '2.1',
+    date: '2026.02.05',
+    items: {
+      ko: [
+        '연습용 종목 및 스크램블 추가',
+        '테마 사용자 지정 기능 추가',
+        '기타 UI 개선',
+      ],
+      en: [
+        'Added practice events and scrambles',
+        'Added theme customization',
+        'Misc UI improvements',
+      ]
+    }
+  },
   {
     version: '2.1',
     date: '2026.02.05',
