@@ -67,7 +67,7 @@ function handleGanBTData(event) {
                     ? window.getReadyColor(baseColor)
                     : '#10b981';
                 timerEl.style.setProperty('--ct-ready-color', readyColor);
-                timerEl.style.color = readyColor;
+                timerEl.style.setProperty('color', readyColor, 'important');
                 timerEl.classList.add('text-ready'); 
                 statusHint.innerText = "Ready!";
             }
@@ -76,7 +76,7 @@ function handleGanBTData(event) {
              // If inspecting, this is where we start the solve and end inspection
              if (!isInspectionMode) {
                  timerEl.classList.remove('text-ready', 'text-running');
-                 timerEl.style.color = '';
+                 timerEl.style.removeProperty('color');
                  statusHint.innerText = "Timer Ready (BT)";
              }
         } else if (state === 3) { // RUNNING
@@ -159,10 +159,10 @@ function startTimer() {
         timerRafId = requestAnimationFrame(tick);
     };
     timerRafId = requestAnimationFrame(tick);
-    timerEl.style.color = '';
+    timerEl.style.removeProperty('color');
     statusHint.innerText = "Timing...";
     timerEl.classList.add('text-running');
-    timerEl.classList.remove('text-ready');
+    timerEl.classList.remove('text-ready', 'holding-status', 'ready-to-start');
 }
 function stopTimer(forcedTime = null) {
     if (timerRafId) {
@@ -183,8 +183,8 @@ function stopTimer(forcedTime = null) {
         inspectionPenalty = null;
         setControlsLocked(false);
         // Ensure we don't keep the "running" (blue) timer color after stopping in MBF.
-        timerEl.classList.remove('text-running', 'text-ready', 'text-hold');
-        timerEl.style.color = '';
+        timerEl.classList.remove('text-running', 'text-ready', 'text-hold', 'holding-status', 'ready-to-start');
+        timerEl.style.removeProperty('color');
         timerEl.innerText = formatTime(elapsed);
         statusHint.innerText = "Enter MBF Result";
         openMbfResultModal({ defaultTimeMs: elapsed });
@@ -219,8 +219,8 @@ function stopTimer(forcedTime = null) {
     updateUI();
     generateScramble();
     statusHint.innerText = isBtConnected ? "Ready (Bluetooth)" : (isInspectionMode ? "Start Inspection" : "Hold to Ready");
-    timerEl.classList.remove('text-running', 'text-ready');
-    timerEl.style.color = '';
+    timerEl.classList.remove('text-running', 'text-ready', 'holding-status', 'ready-to-start');
+    timerEl.style.removeProperty('color');
     setControlsLocked(false);
     saveData();
 }
