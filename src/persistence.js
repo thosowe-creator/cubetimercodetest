@@ -30,14 +30,10 @@ function base64ToBytes(base64) {
     return bytes;
 }
 function compressPayload(payload) {
-    const json = JSON.stringify(payload);
-    const compressed = window.pako.deflate(json, { level: 9 });
-    return bytesToBase64(compressed);
+    return JSON.stringify(payload);
 }
-function decompressPayload(base64) {
-    const bytes = base64ToBytes(base64);
-    const json = window.pako.inflate(bytes, { to: 'string' });
-    return JSON.parse(json);
+function decompressPayload(payload) {
+    return JSON.parse(payload);
 }
 async function exportData() {
     const payload = buildBackupPayload();
