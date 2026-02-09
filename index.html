@@ -36,7 +36,7 @@
     <!-- cubing.js: scrambles + scramble diagrams -->
     <script type="module">
       import { randomScrambleForEvent } from 'https://cdn.cubing.net/v0/js/cubing/scramble';
-      // Expose for non-module script.js
+      // Expose for non-module scripts
       window.__randomScrambleForEvent = randomScrambleForEvent;
     </script>
     <script src="https://cdn.cubing.net/v0/js/scramble-display" type="module"></script>
@@ -720,6 +720,31 @@
     </nav>
 
     <!-- 외부 스크립트 연결 -->
-    <script src="script.js"></script>
+    <script src="src/state.js"></script>
+    <script src="src/i18n-core.js"></script>
+    <script src="src/i18n-auto.js"></script>
+    <script src="src/i18n-observer.js"></script>
+    <script src="src/release-notes.js"></script>
+    <script src="src/dom-cache.js"></script>
+    <script src="src/layout.js"></script>
+    <script src="src/scramble-config.js"></script>
+    <script src="src/practice-alg-trainer.js"></script>
+    <script src="src/practice-state.js"></script>
+    <script src="src/mobile-tabs.js"></script>
+    <script src="src/update-log.js"></script>
+    <script src="src/inspection.js"></script>
+    <script src="src/theme.js"></script>
+    <script src="src/wake-lock.js"></script>
+    <script src="src/bluetooth-timer.js"></script>
+    <script src="src/penalties.js"></script>
+    <script src="src/persistence.js"></script>
+    <script src="src/cube.js"></script>
+    <script src="src/tools-ui.js"></script>
+    <script src="src/history-ui.js"></script>
+    <script src="src/history-scroll.js"></script>
+    <script src="src/stats-modal.js"></script>
+    <script src="src/interaction.js"></script>
+    <script src="src/picker.js"></script>
+    <script src="src/update-check.js"></script>
 </body>
 </html>
