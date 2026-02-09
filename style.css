@@ -794,7 +794,7 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
   border-color: rgba(15,23,42,0.65);
 }
 .dark .case-pool-item.selected{
-  background: rgba(255,255,255,0.92);
-  color: rgb(15,23,42);
-  border-color: rgba(255,255,255,0.65);
+  background: rgba(254,226,226,0.92);
+  color: rgb(127,29,29);
+  border-color: rgba(248,113,113,0.65);
 }
