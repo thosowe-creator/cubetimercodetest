@@ -11,6 +11,7 @@ let currentScramble = "";
 let latestScramble = "";
 let previousScramble = "";
 let isViewingPreviousScramble = false;
+let isScrambleLoading = false;
 let precision = 2;
 let isManualMode = false;
 let holdTimer = null;

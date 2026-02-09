@@ -2,8 +2,9 @@
 window.toggleToolsMenu = (e) => { e.stopPropagation(); document.getElementById('toolsDropdown').classList.toggle('show'); };
 function updateScrambleNavButtons() {
     if (!scramblePrevBtn || !scrambleNextBtn) return;
-    scramblePrevBtn.disabled = !previousScramble || isViewingPreviousScramble;
-    scrambleNextBtn.disabled = !isViewingPreviousScramble;
+    const disableForState = isScrambleLoading || isRunning || currentEvent === '333mbf';
+    scramblePrevBtn.disabled = disableForState || !previousScramble || isViewingPreviousScramble;
+    scrambleNextBtn.disabled = disableForState;
 }
 
 function setScrambleDisplay(text) {
@@ -169,6 +170,7 @@ function clearScrambleDiagram() {
 }
 
 function setScrambleLoadingState(isLoading, message = 'Loading scramble…', showRetry = false) {
+    isScrambleLoading = isLoading;
     // null guard: 일부 레이아웃/버전에서 요소가 없을 수 있음
     if (scrambleRetryBtn) {
         scrambleRetryBtn.classList.toggle('hidden', !showRetry);
@@ -192,6 +194,7 @@ function setScrambleLoadingState(isLoading, message = 'Loading scramble…', sho
         // Prevent blind-only message from sticking across events
         if (noVisualizerMsg) noVisualizerMsg.classList.add('hidden');
     }
+    updateScrambleNavButtons();
     scheduleLayout(isLoading ? 'scramble-loading' : 'scramble-ready');
 }
 
@@ -403,7 +406,6 @@ async function generateScramble() {
         setCurrentScramble(res.join(" "));
     }
     if (reqId !== scrambleReqId) return; // stale
-    if (scrambleEl) scrambleEl.innerText = currentScramble;
     setScrambleLoadingState(false);
     updateScrambleDiagram();
     resetPenalty();

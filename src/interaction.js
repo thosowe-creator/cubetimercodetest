@@ -1,4 +1,19 @@
 // --- Interaction Logic with configurable Hold Time ---
+function parseRgb(color) {
+    const match = color && color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!match) return null;
+    return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function getReadyColor(baseColor) {
+    const rgb = parseRgb(baseColor);
+    if (rgb) {
+        const [r, g, b] = rgb;
+        const isGreenish = g > r + 25 && g > b + 25;
+        if (isGreenish) return '#3b82f6';
+    }
+    return '#10b981';
+}
 function handleStart(e) {
     // [FIX] Ignore touches on interactive elements like badges or buttons
     // This allows clicking on stats/settings without triggering the timer
@@ -14,6 +29,7 @@ function handleStart(e) {
         // Space pressed in Idle with inspection ON: Do nothing (wait for release to start inspection)
         return;
     }
+    const baseTimerColor = timerEl ? window.getComputedStyle(timerEl).color : '';
     if (isInspectionMode && inspectionState === 'inspecting') {
         // BT 연결 시에는 키보드로 'Ready' 상태 진입 불가 (오직 간 타이머 핸즈온으로만 가능)
         if (isBtConnected) return;
@@ -22,7 +38,7 @@ function handleStart(e) {
         timerEl.classList.add('holding-status');
         holdTimer = setTimeout(()=> { 
             isReady=true; 
-            timerEl.style.color = '#10b981'; 
+            timerEl.style.color = getReadyColor(baseTimerColor); 
             timerEl.classList.replace('holding-status','ready-to-start'); 
             statusHint.innerText="Ready!"; 
         }, holdDuration); 
@@ -34,7 +50,7 @@ function handleStart(e) {
     
     holdTimer = setTimeout(()=> { 
         isReady=true; 
-        timerEl.style.color = '#10b981'; 
+        timerEl.style.color = getReadyColor(baseTimerColor); 
         timerEl.classList.replace('holding-status','ready-to-start'); 
         statusHint.innerText="Ready!"; 
     }, holdDuration); 
@@ -665,9 +681,7 @@ function setupDomEventBindings() {
                 }
                 break;
             case 'scramble-next':
-                if (typeof window.showLatestScramble === 'function') {
-                    window.showLatestScramble();
-                }
+                if (!isRunning) generateScramble();
                 break;
             case 'generate-mbf-scrambles':
                 generateMbfScrambles();
