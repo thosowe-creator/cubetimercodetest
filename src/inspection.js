@@ -25,7 +25,7 @@ function startInspection() {
     hasSpoken12 = false;
     
     timerEl.classList.remove('text-ready');
-    timerEl.style.color = '#ef4444'; // Red color for inspection countdown
+    timerEl.style.setProperty('color', '#ef4444', 'important'); // Red color for inspection countdown
     statusHint.innerText = "Inspection";
     if(inspectionInterval) clearInterval(inspectionInterval);
     inspectionInterval = setInterval(() => {
@@ -55,7 +55,7 @@ function startInspection() {
 function stopInspection() {
     if(inspectionInterval) clearInterval(inspectionInterval);
     inspectionState = 'none';
-    timerEl.style.color = '';
+    timerEl.style.removeProperty('color');
     // Calculate penalty one last time to be precise
     if (isInspectionMode && inspectionStartTime > 0) {
         const elapsed = (Date.now() - inspectionStartTime) / 1000;
