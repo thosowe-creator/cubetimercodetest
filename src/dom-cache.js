@@ -12,6 +12,8 @@ let lastScrambleTrigger = null; // retry 용
 let pendingMbfDraft = null;
 const timerEl = document.getElementById('timer');
 const scrambleEl = document.getElementById('scramble');
+const scramblePrevBtn = document.getElementById('scramblePrevBtn');
+const scrambleNextBtn = document.getElementById('scrambleNextBtn');
 const mbfInputArea = document.getElementById('mbfInputArea');
 const mbfCubeInput = document.getElementById('mbfCubeInput');
 const manualInput = document.getElementById('manualInput');
@@ -47,4 +49,3 @@ const timerSection = document.getElementById('timerSection');
 const historySection = document.getElementById('historySection');
 const mobTabTimer = document.getElementById('mob-tab-timer');
 const mobTabHistory = document.getElementById('mob-tab-history')
-
