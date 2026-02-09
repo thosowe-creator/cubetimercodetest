@@ -189,6 +189,7 @@ function setScrambleLoadingState(isLoading, message = 'Loading scramble…', sho
         lockTimerLayout();
         // 종목 변경/재생성 시 이전 내용 즉시 숨김
         if (scrambleEl) scrambleEl.innerText = '';
+        updateScrambleNavButtons();
         clearScrambleDiagram();
         // Prevent blind-only message from sticking across events
         if (noVisualizerMsg) noVisualizerMsg.classList.add('hidden');
