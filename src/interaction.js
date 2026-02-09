@@ -35,27 +35,27 @@ function handleStart(e) {
         // BT 연결 시에는 키보드로 'Ready' 상태 진입 불가 (오직 간 타이머 핸즈온으로만 가능)
         if (isBtConnected) return;
         // Pressed during inspection -> Ready to solve
-        timerEl.style.color = '#ef4444'; 
+        timerEl.style.setProperty('color', '#ef4444', 'important');
         timerEl.classList.add('holding-status');
         holdTimer = setTimeout(()=> { 
             isReady=true; 
             const readyColor = getReadyColor(baseTimerColor);
             timerEl.style.setProperty('--ct-ready-color', readyColor);
-            timerEl.style.color = readyColor; 
+            timerEl.style.setProperty('color', readyColor, 'important');
             timerEl.classList.replace('holding-status','ready-to-start'); 
             statusHint.innerText="Ready!"; 
         }, holdDuration); 
         return;
     }
     // Standard Logic (BT 연결 시 여기 도달 안함)
-    timerEl.style.color = '#ef4444'; 
+    timerEl.style.setProperty('color', '#ef4444', 'important');
     timerEl.classList.add('holding-status');
     
     holdTimer = setTimeout(()=> { 
         isReady=true; 
         const readyColor = getReadyColor(baseTimerColor);
         timerEl.style.setProperty('--ct-ready-color', readyColor);
-        timerEl.style.color = readyColor; 
+        timerEl.style.setProperty('color', readyColor, 'important');
         timerEl.classList.replace('holding-status','ready-to-start'); 
         statusHint.innerText="Ready!"; 
     }, holdDuration); 
@@ -88,7 +88,7 @@ function handleEnd(e) {
         startTimer();
     } else { 
         // Reset color logic for dark mode
-        timerEl.style.color = ''; 
+        timerEl.style.removeProperty('color'); 
         
         timerEl.classList.remove('holding-status','ready-to-start'); 
         isReady=false; 
@@ -97,7 +97,7 @@ function handleEnd(e) {
             statusHint.innerText= isInspectionMode ? "Start Inspection" : "Hold to Ready";
         } else {
             // Returned to inspecting state without starting
-            timerEl.style.color = '#ef4444'; 
+            timerEl.style.setProperty('color', '#ef4444', 'important');
         }
     }
 }
@@ -794,7 +794,7 @@ function applyLightTheme() {
   setRGB('--ct-bg-rgb', lightTheme.bg);
   setRGB('--ct-card-rgb', lightTheme.card);
   setRGB('--ct-text-rgb', lightTheme.text);
-  setRGB('--ct-timer-rgb', lightTheme.timerText);
+  setRGB('--ct-timer-rgb', LIGHT_THEME_DEFAULTS.timerText);
   setRGB('--ct-scramble-rgb', lightTheme.scramble);
   setRGB('--ct-scramble-text-rgb', lightTheme.scrambleText);
 }
@@ -849,7 +849,6 @@ function partLabel(part) {
     bg: { en: 'Background', ko: '배경' },
     card: { en: 'Panels', ko: '패널' },
     text: { en: 'Text', ko: '텍스트' },
-    timerText: { en: 'Timer', ko: '타이머' },
     scramble: { en: 'Scramble Box', ko: '스크램블 박스' },
     scrambleText: { en: 'Scramble Text', ko: '스크램블 텍스트' },
   };
@@ -864,7 +863,6 @@ function syncThemeRowsUI() {
     bg: 'Bg',
     card: 'Card',
     text: 'Text',
-    timerText: 'Timer',
     scramble: 'Scramble',
     scrambleText: 'ScrambleText',
   };

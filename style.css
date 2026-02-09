@@ -127,6 +127,35 @@ html:not(.dark) .timer-display{
   color: rgb(var(--ct-timer-rgb)) !important;
 }
 
+/* Light mode: apply theme text color inside main UI (exclude modals). */
+html:not(.dark) :is(header, #timerSection, #scrambleBox, #toolContainer, #historySection)
+  :where(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700, .text-slate-800) {
+  color: rgb(var(--ct-text-rgb)) !important;
+}
+
+/* Timer state colors should override light-mode base color. */
+#timer.holding-status {
+  color: #ef4444 !important;
+}
+
+#timer.ready-to-start {
+  color: var(--ct-ready-color, #10b981) !important;
+  transform: scale(1.02);
+}
+
+#timer.text-ready {
+  color: var(--ct-ready-color, #10b981) !important;
+  transform: scale(1.02);
+}
+
+#timer.text-running {
+  color: #2563eb !important;
+}
+
+.dark #timer.text-running {
+  color: #60a5fa !important;
+}
+
 html:not(.dark) #scramble{
   color: rgb(var(--ct-scramble-text-rgb)) !important;
 }
