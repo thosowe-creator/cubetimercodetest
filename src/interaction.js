@@ -85,36 +85,138 @@ window.closeSessionModal = () => { document.getElementById('sessionOverlay').cla
 // ... (Session Management Functions - Logic Preserved) ...
 function renderSessionList() {
     const listContainer = document.getElementById('sessionList');
-    const eventSessions = sessions[currentEvent] || [];
+    const eventSessions = appState.sessions[appState.currentEvent] || [];
     document.getElementById('sessionCountLabel').innerText = `${eventSessions.length}/10`;
-    listContainer.innerHTML = eventSessions.map(s => {
+    listContainer.innerHTML = '';
+    eventSessions.forEach((s) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 group';
+
         if (editingSessionId === s.id) {
-            return `<div class="flex items-center gap-2"><input type="text" id="editSessionInput" value="${s.name}" class="flex-1 bg-white dark:bg-slate-800 border border-blue-400 rounded-xl px-3 py-2.5 text-xs font-bold outline-none dark:text-white" autofocus onkeydown="if(event.key==='Enter') saveSessionName(${s.id})" onblur="saveSessionName(${s.id})"><button onclick="saveSessionName(${s.id})" class="p-2 text-blue-600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button></div>`;
+            const inputWrap = document.createElement('div');
+            inputWrap.className = 'flex items-center gap-2';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'editSessionInput';
+            input.value = s.name;
+            input.className = 'flex-1 bg-white dark:bg-slate-800 border border-blue-400 rounded-xl px-3 py-2.5 text-xs font-bold outline-none dark:text-white';
+            input.autofocus = true;
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') saveSessionName(s.id);
+            });
+            input.addEventListener('blur', () => saveSessionName(s.id));
+            inputWrap.appendChild(input);
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'p-2 text-blue-600';
+            saveBtn.dataset.action = 'save-session-name';
+            saveBtn.dataset.sessionId = String(s.id);
+            saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+            inputWrap.appendChild(saveBtn);
+
+            row.appendChild(inputWrap);
+        } else {
+            const sessionButtonWrap = document.createElement('div');
+            sessionButtonWrap.className = `flex-1 flex items-center gap-2 p-1 rounded-xl border ${s.isActive ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'} hover:bg-slate-100 dark:hover:bg-slate-700 transition-all`;
+
+            const sessionBtn = document.createElement('button');
+            sessionBtn.className = 'flex-1 text-left p-2.5 text-xs font-bold truncate';
+            sessionBtn.dataset.action = 'switch-session';
+            sessionBtn.dataset.sessionId = String(s.id);
+            sessionBtn.textContent = s.name;
+            sessionButtonWrap.appendChild(sessionBtn);
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-blue-500 transition-all';
+            editBtn.dataset.action = 'edit-session-name';
+            editBtn.dataset.sessionId = String(s.id);
+            editBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+            sessionButtonWrap.appendChild(editBtn);
+
+            row.appendChild(sessionButtonWrap);
+
+            if (eventSessions.length > 1) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all';
+                deleteBtn.dataset.action = 'delete-session';
+                deleteBtn.dataset.sessionId = String(s.id);
+                deleteBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+                row.appendChild(deleteBtn);
+            }
         }
-        return `<div class="flex items-center gap-2 group"><div class="flex-1 flex items-center gap-2 p-1 rounded-xl border ${s.isActive ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400'} hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"><button onclick="switchSession(${s.id})" class="flex-1 text-left p-2.5 text-xs font-bold truncate">${s.name}</button><button onclick="editSessionName(${s.id})" class="p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-blue-500 transition-all"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div>${eventSessions.length > 1 ? `<button onclick="deleteSession(${s.id})" class="p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>` : ''}</div>`;
-    }).join('');
-    if (editingSessionId) document.getElementById('editSessionInput').focus();
+
+        listContainer.appendChild(row);
+    });
+    if (editingSessionId) {
+        const editInput = document.getElementById('editSessionInput');
+        if (editInput) editInput.focus();
+    }
     document.getElementById('sessionCreateForm').classList.toggle('hidden', eventSessions.length >= 10);
 }
 // ... (Remaining window functions - Logic Preserved) ...
 window.editSessionName = (id) => { editingSessionId = id; renderSessionList(); };
-window.saveSessionName = (id) => { const input = document.getElementById('editSessionInput'); if (!input) return; const newName = input.value.trim(); if (newName) { const s = sessions[currentEvent].find(x => x.id === id); if (s) s.name = newName; } editingSessionId = null; renderSessionList(); updateUI(); saveData(); };
-window.createNewSession = () => { const nameInput = document.getElementById('newSessionName'); const name = nameInput.value.trim() || `Session ${sessions[currentEvent].length + 1}`; if (sessions[currentEvent].length >= 10) return; sessions[currentEvent].forEach(s => s.isActive = false); sessions[currentEvent].push({ id: Date.now(), name: name, isActive: true }); nameInput.value = ""; renderSessionList(); updateUI(); saveData(); timerEl.innerText = (0).toFixed(precision); resetPenalty(); };
-window.switchSession = (id) => { sessions[currentEvent].forEach(s => s.isActive = (s.id === id)); renderSessionList(); updateUI(); saveData(); timerEl.innerText = (0).toFixed(precision); resetPenalty(); closeSessionModal(); };
-window.deleteSession = (id) => { const eventSessions = sessions[currentEvent]; if (!eventSessions || eventSessions.length <= 1) return; const targetIdx = eventSessions.findIndex(s => s.id === id); if (targetIdx === -1) return; const wasActive = eventSessions[targetIdx].isActive; sessions[currentEvent] = eventSessions.filter(s => s.id !== id); solves = solves.filter(s => !(s.event === currentEvent && s.sessionId === id)); if (wasActive && sessions[currentEvent].length > 0) sessions[currentEvent][0].isActive = true; renderSessionList(); updateUI(); saveData(); };
+window.saveSessionName = (id) => {
+    const input = document.getElementById('editSessionInput');
+    if (!input) return;
+    const newName = input.value.trim();
+    if (newName) {
+        const session = appState.sessions[appState.currentEvent].find(x => x.id === id);
+        if (session) session.name = newName;
+    }
+    editingSessionId = null;
+    renderSessionList();
+    updateUI();
+    saveData();
+};
+window.createNewSession = () => {
+    const nameInput = document.getElementById('newSessionName');
+    const name = nameInput.value.trim() || `Session ${appState.sessions[appState.currentEvent].length + 1}`;
+    if (appState.sessions[appState.currentEvent].length >= 10) return;
+    appState.sessions[appState.currentEvent].forEach(s => s.isActive = false);
+    appState.sessions[appState.currentEvent].push({ id: Date.now(), name: name, isActive: true });
+    nameInput.value = "";
+    renderSessionList();
+    updateUI();
+    saveData();
+    timerEl.innerText = (0).toFixed(appState.precision);
+    resetPenalty();
+};
+window.switchSession = (id) => {
+    appState.sessions[appState.currentEvent].forEach(s => s.isActive = (s.id === id));
+    renderSessionList();
+    updateUI();
+    saveData();
+    timerEl.innerText = (0).toFixed(appState.precision);
+    resetPenalty();
+    closeSessionModal();
+};
+window.deleteSession = (id) => {
+    const eventSessions = appState.sessions[appState.currentEvent];
+    if (!eventSessions || eventSessions.length <= 1) return;
+    const targetIdx = eventSessions.findIndex(s => s.id === id);
+    if (targetIdx === -1) return;
+    const wasActive = eventSessions[targetIdx].isActive;
+    appState.sessions[appState.currentEvent] = eventSessions.filter(s => s.id !== id);
+    appState.solves = appState.solves.filter(s => !(s.event === appState.currentEvent && s.sessionId === id));
+    if (wasActive && appState.sessions[appState.currentEvent].length > 0) appState.sessions[appState.currentEvent][0].isActive = true;
+    renderSessionList();
+    updateUI();
+    saveData();
+};
 window.openAvgShare = (type) => {
     const sid = getCurrentSessionId();
-    const count = (type === 'primary') ? (isAo5Mode ? 5 : 3) : 12;
-    const filtered = solves.filter(s => s.event === currentEvent && s.sessionId === sid);
+    const count = (type === 'primary') ? (appState.isAo5Mode ? 5 : 3) : 12;
+    const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
     if (filtered.length < count) return;
     const list = filtered.slice(0, count);
-    const avgValue = calculateAvg(filtered, count, (type === 'primary' && !isAo5Mode));
+    const avgValue = calculateAvg(filtered, count, (type === 'primary' && !appState.isAo5Mode));
 
     const dateStr = list[0].date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
     const datePrefix = currentLang === 'ko' ? '날짜 :' : 'Date :';
     document.getElementById('shareDate').innerText = `${datePrefix} ${dateStr}.`;
 
-    const label = (type === 'primary' && !isAo5Mode)
+    const label = (type === 'primary' && !appState.isAo5Mode)
         ? (currentLang === 'ko' ? 'Mo3 :' : 'Mean of 3 :')
         : (currentLang === 'ko' ? `Ao${count} :` : `Average of ${count} :`);
     const overlay = document.getElementById('avgShareOverlay');
@@ -126,12 +228,37 @@ window.openAvgShare = (type) => {
     document.getElementById('shareAvg').innerText = avgValue;
 
     const listContainer = document.getElementById('shareList');
-    listContainer.innerHTML = list.map((s, idx) => `<div class="flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"><div class="flex items-center gap-3"><span class="text-[10px] font-bold text-slate-400 w-4">${count - idx}.</span><span class="font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]">${s.penalty==='DNF'?'DNF':formatTime(s.penalty==='+2'?s.time+2000:s.time)}${s.penalty==='+2'?'+':''}</span><span class="text-[10px] text-slate-400 font-medium italic truncate flex-grow">${s.scramble}</span></div></div>`).reverse().join('');
+    listContainer.innerHTML = '';
+    list.slice().reverse().forEach((s, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700';
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-3';
+
+        const indexLabel = document.createElement('span');
+        indexLabel.className = 'text-[10px] font-bold text-slate-400 w-4';
+        indexLabel.textContent = `${count - idx}.`;
+
+        const timeLabel = document.createElement('span');
+        timeLabel.className = 'font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]';
+        timeLabel.textContent = s.penalty === 'DNF' ? 'DNF' : `${formatTime(s.penalty === '+2' ? s.time + 2000 : s.time)}${s.penalty === '+2' ? '+' : ''}`;
+
+        const scrambleLabel = document.createElement('span');
+        scrambleLabel.className = 'text-[10px] text-slate-400 font-medium italic truncate flex-grow';
+        scrambleLabel.textContent = s.scramble;
+
+        row.appendChild(indexLabel);
+        row.appendChild(timeLabel);
+        row.appendChild(scrambleLabel);
+        wrapper.appendChild(row);
+        listContainer.appendChild(wrapper);
+    });
 
     document.getElementById('avgShareOverlay').classList.add('active');
 };
 window.openSingleShare = () => {
-    const s = solves.find(x => x.id === selectedSolveId);
+    const s = appState.solves.find(x => x.id === selectedSolveId);
     if (!s) return;
     closeModal();
     const dateStr = s.date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
@@ -145,19 +272,40 @@ window.openSingleShare = () => {
     }
 
     const listContainer = document.getElementById('shareList');
+    listContainer.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700';
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-3';
+    const indexLabel = document.createElement('span');
+    indexLabel.className = 'text-[10px] font-bold text-slate-400 w-4';
+    indexLabel.textContent = '1.';
+    const timeLabel = document.createElement('span');
+    timeLabel.className = 'font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]';
+    const scrambleLabel = document.createElement('span');
+    scrambleLabel.className = 'text-[10px] text-slate-400 font-medium italic truncate flex-grow';
+
     if (s.event === '333mbf' && s.mbf) {
         const res = s.mbf.resultText || `${s.mbf.solved}/${s.mbf.attempted} ${formatClockTime(s.mbf.timeMs || s.time)}`;
         document.getElementById('shareAvg').innerText = res;
-        listContainer.innerHTML = `<div class="flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"><div class="flex items-center gap-3"><span class="text-[10px] font-bold text-slate-400 w-4">1.</span><span class="font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]">${res}</span><span class="text-[10px] text-slate-400 font-medium italic truncate flex-grow">${(s.scramble || '').toString()}</span></div></div>`;
+        timeLabel.textContent = res;
+        scrambleLabel.textContent = (s.scramble || '').toString();
     } else {
-        const res = (s.penalty==='DNF') ? 'DNF' : (formatTime(s.penalty==='+2'?s.time+2000:s.time) + (s.penalty==='+2'?'+':''));
+        const res = (s.penalty === 'DNF') ? 'DNF' : (formatTime(s.penalty === '+2' ? s.time + 2000 : s.time) + (s.penalty === '+2' ? '+' : ''));
         document.getElementById('shareAvg').innerText = res;
-        listContainer.innerHTML = `<div class="flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700"><div class="flex items-center gap-3"><span class="text-[10px] font-bold text-slate-400 w-4">1.</span><span class="font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]">${s.penalty==='DNF'?'DNF':formatTime(s.penalty==='+2'?s.time+2000:s.time)}${s.penalty==='+2'?'+':''}</span><span class="text-[10px] text-slate-400 font-medium italic truncate flex-grow">${s.scramble}</span></div></div>`;
+        timeLabel.textContent = res;
+        scrambleLabel.textContent = s.scramble;
     }
+
+    row.appendChild(indexLabel);
+    row.appendChild(timeLabel);
+    row.appendChild(scrambleLabel);
+    wrapper.appendChild(row);
+    listContainer.appendChild(wrapper);
     document.getElementById('avgShareOverlay').classList.add('active');
 };
 window.closeAvgShare = () => document.getElementById('avgShareOverlay').classList.remove('active');
-window.copyShareText = () => {
+window.copyShareText = async () => {
     const date = document.getElementById('shareDate').innerText;
     const avgLabel = document.getElementById('shareLabel').innerText;
     const avgVal = document.getElementById('shareAvg').innerText;
@@ -169,36 +317,42 @@ window.copyShareText = () => {
     let text = `[CubeTimer]\n\n${date}\n\n${avgLabel} ${avgVal}\n\n`;
 
     if (isSingle) {
-        const s = solves.find(x => x.id === selectedSolveId);
+        const s = appState.solves.find(x => x.id === selectedSolveId);
         if (s) text += `1. ${avgVal}   ${s.scramble}\n`;
     } else {
         const n = (Number.isFinite(count) && count > 0) ? count : 12;
         const sid = getCurrentSessionId();
-        const filtered = solves.filter(s => s.event === currentEvent && s.sessionId === sid).slice(0, n);
+        const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(0, n);
         filtered.reverse().forEach((s, i) => {
             text += `${i + 1}. ${s.penalty === 'DNF' ? 'DNF' : formatTime(s.penalty === '+2' ? s.time + 2000 : s.time)}${s.penalty === '+2' ? '+' : ''}   ${s.scramble}\n`;
         });
     }
 
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
     try {
-        document.execCommand('copy');
-        const btn = document.querySelector('[onclick="copyShareText()"]');
-        const original = btn.innerHTML;
-        btn.innerHTML = (currentLang === 'ko') ? '복사됨!' : 'Copied!';
-        btn.classList.add('bg-green-600');
-        setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.remove('bg-green-600');
-            try { applyAutoI18n(document); } catch (_) {}
-        }, 2000);
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+        const btn = document.querySelector('[data-action="copy-share-text"]');
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = (currentLang === 'ko') ? '복사됨!' : 'Copied!';
+            btn.classList.add('bg-green-600');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove('bg-green-600');
+                try { applyAutoI18n(document); } catch (_) {}
+            }, 2000);
+        }
     } catch (err) {
         console.error('Copy failed', err);
     }
-    document.body.removeChild(textArea);
 };
 window.addEventListener('keydown', (e) => {
     const tag = (document.activeElement?.tagName || '').toUpperCase();
@@ -224,11 +378,11 @@ window.addEventListener('keydown', (e) => {
     if (isManualMode && e.code === 'Enter') {
         let v = parseFloat(manualInput.value);
         if (v > 0) {
-            solves.unshift({
+            appState.solves.unshift({
                 id: Date.now(),
                 time: v * 1000,
                 scramble: currentScramble,
-                event: currentEvent,
+                event: appState.currentEvent,
                 sessionId: getCurrentSessionId(),
                 penalty: null,
                 date: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "")
@@ -265,14 +419,14 @@ window.openSettings = () => {
 window.closeSettings = () => { document.getElementById('settingsModal').classList.add('scale-95','opacity-0'); setTimeout(()=>document.getElementById('settingsOverlay').classList.remove('active'), 200); saveData(); };
 window.handleOutsideSettingsClick = (e) => { if(e.target === document.getElementById('settingsOverlay')) closeSettings(); };
 window.showSolveDetails = (id) => {
-    const s = solves.find(x => x.id === id);
+    const s = appState.solves.find(x => x.id === id);
     if (!s) return;
     selectedSolveId = id;
     const timeEl = document.getElementById('modalTime');
     const eventEl = document.getElementById('modalEvent');
     const scrEl = document.getElementById('modalScramble');
     const overlay = document.getElementById('modalOverlay');
-    const useBtn = document.querySelector('[onclick="useThisScramble()"]');
+    const useBtn = document.querySelector('[data-action="use-this-scramble"]');
 
     if (s.event === '333mbf' && s.mbf) {
         if (timeEl) timeEl.innerText = s.mbf.resultText || `${s.mbf.solved}/${s.mbf.attempted} ${formatClockTime(s.mbf.timeMs || s.time)}`;
@@ -290,9 +444,9 @@ window.showSolveDetails = (id) => {
     if (overlay) overlay.classList.add('active');
 };
 window.closeModal = () => document.getElementById('modalOverlay').classList.remove('active');
-window.useThisScramble = () => { let s=solves.find(x=>x.id===selectedSolveId); if(s){currentScramble=s.scramble; scrambleEl.innerText=currentScramble; closeModal();} };
-precisionToggle.onchange = e => { precision = e.target.checked?3:2; updateUI(); timerEl.innerText=(0).toFixed(precision); saveData(); };
-avgModeToggle.onchange = e => { isAo5Mode = e.target.checked; updateUI(); saveData(); };
+window.useThisScramble = () => { let s=appState.solves.find(x=>x.id===selectedSolveId); if(s){currentScramble=s.scramble; scrambleEl.innerText=currentScramble; closeModal();} };
+precisionToggle.onchange = e => { appState.precision = e.target.checked?3:2; updateUI(); timerEl.innerText=(0).toFixed(appState.precision); saveData(); };
+avgModeToggle.onchange = e => { appState.isAo5Mode = e.target.checked; updateUI(); saveData(); };
 manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.classList.toggle('hidden', isManualMode); manualInput.classList.toggle('hidden', !isManualMode); statusHint.innerText = isManualMode ? (currentLang === 'ko' ? '시간 입력 후 Enter' : 'Type time & Enter') : t('holdToReady'); };
 document.getElementById('clearHistoryBtn').onclick = () => {
   const sid = getCurrentSessionId();
@@ -306,14 +460,230 @@ document.getElementById('clearHistoryBtn').onclick = () => {
     document.body.removeChild(document.getElementById('clearConfirmModal'));
   };
   document.getElementById('confirmClear').onclick = () => {
-    solves = solves.filter(s => !(s.event === currentEvent && s.sessionId === sid));
+    appState.solves = appState.solves.filter(s => !(s.event === appState.currentEvent && s.sessionId === sid));
     updateUI();
     saveData();
     document.body.removeChild(document.getElementById('clearConfirmModal'));
-    timerEl.innerText = (0).toFixed(precision);
+    timerEl.innerText = (0).toFixed(appState.precision);
     resetPenalty();
   };
 };
+
+function setupDomEventBindings() {
+    document.querySelectorAll('[data-stop-propagation]').forEach((el) => {
+        el.addEventListener('click', (event) => event.stopPropagation());
+    });
+
+    const importInputEl = document.getElementById('importInput');
+    if (importInputEl) importInputEl.addEventListener('change', importData);
+
+    const darkModeToggleEl = document.getElementById('darkModeToggle');
+    if (darkModeToggleEl) darkModeToggleEl.addEventListener('change', (event) => toggleDarkMode(event.target));
+
+    const langSelectEl = document.getElementById('langSelect');
+    if (langSelectEl) langSelectEl.addEventListener('change', (event) => setLanguage(event.target.value));
+
+    const wakeLockToggleEl = document.getElementById('wakeLockToggle');
+    if (wakeLockToggleEl) wakeLockToggleEl.addEventListener('change', (event) => toggleWakeLock(event.target));
+
+    const inspectionToggleEl = document.getElementById('inspectionToggle');
+    if (inspectionToggleEl) inspectionToggleEl.addEventListener('change', (event) => toggleInspection(event.target));
+
+    const holdDurationSliderEl = document.getElementById('holdDurationSlider');
+    if (holdDurationSliderEl) holdDurationSliderEl.addEventListener('input', (event) => updateHoldDuration(event.target.value));
+
+    const eventSelectEl = document.getElementById('eventSelect');
+    if (eventSelectEl) eventSelectEl.addEventListener('change', (event) => changeEvent(event.target.value));
+
+    const caseSelectEl = document.getElementById('caseSelect');
+    if (caseSelectEl) caseSelectEl.addEventListener('change', (event) => changePracticeCase(event.target.value));
+
+    document.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-action]');
+        if (!actionEl) return;
+
+        const { action } = actionEl.dataset;
+        switch (action) {
+            case 'open-bt-modal':
+                openBTModal();
+                break;
+            case 'close-bt-modal':
+                closeBTModal();
+                break;
+            case 'connect-gan-timer':
+                connectGanTimer();
+                break;
+            case 'disconnect-bt':
+                disconnectBT();
+                break;
+            case 'export-data':
+                exportData();
+                break;
+            case 'trigger-import':
+                triggerImport();
+                break;
+            case 'open-settings':
+                openSettings();
+                break;
+            case 'close-settings':
+                closeSettings();
+                break;
+            case 'handle-outside-settings':
+                handleOutsideSettingsClick(event);
+                break;
+            case 'close-theme-settings':
+                closeThemeSettings();
+                break;
+            case 'reset-all-theme-light':
+                resetAllThemeLight();
+                break;
+            case 'open-theme-settings':
+                openThemeSettings();
+                break;
+            case 'open-theme-picker':
+                openThemePicker(actionEl.dataset.themeTarget);
+                break;
+            case 'theme-picker-default':
+                themePickerDefault();
+                break;
+            case 'theme-picker-cancel':
+                themePickerCancel();
+                break;
+            case 'theme-picker-apply':
+                themePickerApply();
+                break;
+            case 'open-update-log':
+                openUpdateLog(false);
+                break;
+            case 'close-update-log':
+                closeUpdateLog();
+                break;
+            case 'open-known-issues':
+                openKnownIssues();
+                break;
+            case 'close-known-issues':
+                closeKnownIssues();
+                break;
+            case 'go-account':
+                window.location.href = 'account.html';
+                break;
+            case 'open-session-modal':
+                openSessionModal();
+                break;
+            case 'close-session-modal':
+                closeSessionModal();
+                break;
+            case 'create-new-session':
+                createNewSession();
+                break;
+            case 'edit-session-name':
+                editSessionName(Number(actionEl.dataset.sessionId));
+                break;
+            case 'save-session-name':
+                saveSessionName(Number(actionEl.dataset.sessionId));
+                break;
+            case 'switch-session':
+                switchSession(Number(actionEl.dataset.sessionId));
+                break;
+            case 'delete-session':
+                deleteSession(Number(actionEl.dataset.sessionId));
+                break;
+            case 'close-mbf-scramble-modal':
+                closeMbfScrambleModal();
+                break;
+            case 'copy-mbf-text':
+                copyMbfText();
+                break;
+            case 'close-mbf-result-modal':
+                closeMbfResultModal();
+                break;
+            case 'save-mbf-result':
+                saveMbfResult();
+                break;
+            case 'close-stats-modal':
+                closeStatsModal();
+                break;
+            case 'close-avg-share':
+                closeAvgShare();
+                break;
+            case 'copy-share-text':
+                copyShareText();
+                break;
+            case 'open-single-share':
+                openSingleShare();
+                break;
+            case 'use-this-scramble':
+                useThisScramble();
+                break;
+            case 'close-modal':
+                closeModal();
+                break;
+            case 'handle-outside-case-pool':
+                handleOutsideCasePoolClick(event);
+                break;
+            case 'close-case-pool-modal':
+                closeCasePoolModal();
+                break;
+            case 'set-case-pool-mode':
+                setCasePoolMode(actionEl.dataset.casePoolMode);
+                break;
+            case 'set-zbls-hand-draft':
+                setZblsHandDraft(actionEl.dataset.zblsHand);
+                break;
+            case 'clear-case-pool-selection':
+                clearCasePoolSelection();
+                break;
+            case 'apply-case-pool-selection':
+                applyCasePoolSelection();
+                break;
+            case 'open-case-pool-modal':
+                openCasePoolModal();
+                break;
+            case 'retry-scramble':
+                retryScramble();
+                break;
+            case 'generate-mbf-scrambles':
+                generateMbfScrambles();
+                break;
+            case 'open-avg-share':
+                openAvgShare(actionEl.dataset.shareType);
+                break;
+            case 'show-extended-stats':
+                showExtendedStats();
+                break;
+            case 'toggle-tools-menu':
+                toggleToolsMenu(event);
+                break;
+            case 'select-tool':
+                selectTool(actionEl.dataset.tool);
+                break;
+            case 'switch-category':
+                switchCategory(actionEl.dataset.category);
+                break;
+            case 'change-event':
+                changeEvent(actionEl.dataset.event);
+                break;
+            case 'switch-mobile-tab':
+                switchMobileTab(actionEl.dataset.tab);
+                break;
+            case 'show-solve-details':
+                showSolveDetails(Number(actionEl.dataset.solveId));
+                break;
+            case 'toggle-solve-penalty':
+                event.stopPropagation();
+                toggleSolvePenalty(Number(actionEl.dataset.solveId), actionEl.dataset.penalty);
+                break;
+            case 'delete-solve':
+                event.stopPropagation();
+                deleteSolve(Number(actionEl.dataset.solveId));
+                break;
+            default:
+                break;
+        }
+    });
+}
+
+setupDomEventBindings();
 
 /* =========================
    Theme Settings (Light mode only)
@@ -457,4 +827,3 @@ window.resetAllThemeLight = () => {
   saveLightTheme();
   syncThemeRowsUI();
 };
-

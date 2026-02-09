@@ -53,16 +53,16 @@
             <h1 class="font-bold text-slate-700 dark:text-slate-200 tracking-tight text-lg md:text-xl">CubeTimer</h1>
         </div>
         <div class="flex items-center gap-2 md:gap-4">
-            <button onclick="openBTModal()" id="btToggleBtn" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-all flex items-center justify-center">
+            <button data-action="open-bt-modal" id="btToggleBtn" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-all flex items-center justify-center">
                 <svg id="btStatusIcon" class="disconnected" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>
             </button>
             <div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
-                <button onclick="exportData()" class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span>Backup</span></button>
+                <button data-action="export-data" class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span>Backup</span></button>
                 <div class="w-px h-3 bg-slate-300 dark:bg-slate-600"></div>
-                <button onclick="triggerImport()" class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"><span>Restore</span></button>
-                <input type="file" id="importInput" class="hidden" accept=".json" onchange="importData(event)">
+                <button data-action="trigger-import" class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"><span>Restore</span></button>
+                <input type="file" id="importInput" class="hidden" accept=".json">
             </div>
-            <button onclick="openSettings()" class="hidden md:block p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button data-action="open-settings" class="hidden md:block p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
     </header>
 
@@ -70,8 +70,8 @@
     <!-- ... (All modals kept exactly the same logic, just existing in HTML) ... -->
     
     <!-- Bluetooth Modal -->
-    <div id="btOverlay" class="modal-overlay" onclick="closeBTModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-8" onclick="event.stopPropagation()">
+    <div id="btOverlay" class="modal-overlay" data-action="close-bt-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-8" data-stop-propagation>
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <svg id="btModalIcon" class="text-blue-500" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>
@@ -86,16 +86,16 @@
                 </div>
             </div>
             <div class="space-y-3">
-                <button id="btConnectBtn" onclick="connectGanTimer()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">Connect Timer</button>
-                <button id="btDisconnectBtn" onclick="disconnectBT()" class="hidden w-full py-4 bg-red-50 dark:bg-red-900/20 text-red-500 font-bold rounded-2xl active:scale-95 transition-all">Disconnect</button>
-                <button onclick="closeBTModal()" class="w-full py-4 text-slate-400 font-bold text-sm">Close</button>
+                <button id="btConnectBtn" data-action="connect-gan-timer" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">Connect Timer</button>
+                <button id="btDisconnectBtn" data-action="disconnect-bt" class="hidden w-full py-4 bg-red-50 dark:bg-red-900/20 text-red-500 font-bold rounded-2xl active:scale-95 transition-all">Disconnect</button>
+                <button data-action="close-bt-modal" class="w-full py-4 text-slate-400 font-bold text-sm">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Sessions Modal -->
-    <div id="sessionOverlay" class="modal-overlay" onclick="closeSessionModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="sessionOverlay" class="modal-overlay" data-action="close-session-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
             <div class="flex justify-between items-center mb-6">
                 <h3 class="font-bold text-slate-700 dark:text-white text-lg">Sessions</h3>
                 <span id="sessionCountLabel" class="text-[11px] font-bold text-slate-400">0/10</span>
@@ -105,31 +105,31 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Create New Session</p>
                 <div class="flex gap-2">
                     <input type="text" id="newSessionName" placeholder="Session Name" class="flex-1 bg-slate-50 dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm outline-none focus:border-blue-400 transition-all">
-                    <button onclick="createNewSession()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all">Add</button>
+                    <button data-action="create-new-session" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all">Add</button>
                 </div>
             </div>
-            <button onclick="closeSessionModal()" class="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
+            <button data-action="close-session-modal" class="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
         </div>
     </div>
 
     <!-- Multi-Blind Scramble Modal -->
-    <div id="mbfScrambleOverlay" class="modal-overlay" onclick="closeMbfScrambleModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl shadow-2xl p-6 md:p-8 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+    <div id="mbfScrambleOverlay" class="modal-overlay" data-action="close-mbf-scramble-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl shadow-2xl p-6 md:p-8 flex flex-col max-h-[90vh]" data-stop-propagation>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-slate-700 dark:text-white text-lg">Multi-Blind Scrambles</h3>
                 <span id="mbfCubeCountDisplay" class="text-[10px] font-bold bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-3 py-1 rounded-full uppercase tracking-tighter">10 Cubes</span>
             </div>
             <div id="mbfScrambleList" class="flex-grow overflow-y-auto space-y-4 custom-scroll pr-2 mb-6 text-sm"></div>
             <div class="flex gap-3">
-                <button onclick="copyMbfText()" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm">Copy All</button>
-                <button onclick="closeMbfScrambleModal()" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
+                <button data-action="copy-mbf-text" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm">Copy All</button>
+                <button data-action="close-mbf-scramble-modal" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Multi-Blind Result Modal (WCA style input) -->
-    <div id="mbfResultOverlay" class="modal-overlay" onclick="closeMbfResultModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="mbfResultOverlay" class="modal-overlay" data-action="close-mbf-result-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-slate-700 dark:text-white text-lg">MBF Result</h3>
                 <span class="text-[10px] font-black bg-blue-600 text-white px-2 py-1 rounded-md uppercase">333mbf</span>
@@ -151,48 +151,48 @@
             </div>
             <div id="mbfResultError" class="hidden mt-4 text-[11px] font-bold text-red-500"></div>
             <div class="flex gap-2 mt-6">
-                <button onclick="saveMbfResult()" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm shadow-lg active:scale-95 transition-all">Save</button>
-                <button onclick="closeMbfResultModal()" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Cancel</button>
+                <button data-action="save-mbf-result" class="flex-1 py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm shadow-lg active:scale-95 transition-all">Save</button>
+                <button data-action="close-mbf-result-modal" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- Detailed Stats Modal -->
-    <div id="statsOverlay" class="modal-overlay" onclick="closeStatsModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="statsOverlay" class="modal-overlay" data-action="close-stats-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
             <h3 class="font-bold text-slate-700 dark:text-white text-lg mb-6">Detailed Stats</h3>
             <div class="space-y-3" id="statsContent"></div>
-            <button onclick="closeStatsModal()" class="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
+            <button data-action="close-stats-modal" class="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
         </div>
     </div>
 
     <!-- Settings Modal -->
-    <div id="settingsOverlay" class="modal-overlay" onclick="handleOutsideSettingsClick(event)">
-	        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-4 sm:p-6 transform transition-all scale-95 opacity-0 duration-200" id="settingsModal" onclick="event.stopPropagation()">
+    <div id="settingsOverlay" class="modal-overlay" data-action="handle-outside-settings">
+	        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-4 sm:p-6 transform transition-all scale-95 opacity-0 duration-200" id="settingsModal" data-stop-propagation>
 	            <div id="settingsHeader" class="flex items-center justify-between mb-3">
 	                <div class="flex items-center gap-2">
-	                    <button id="themeBackBtn" onclick="closeThemeSettings()" class="hidden w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all" aria-label="Back">
+	                    <button id="themeBackBtn" data-action="close-theme-settings" class="hidden w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all" aria-label="Back">
 	                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
 	                    </button>
 	                    <h3 id="settingsTitle" class="font-bold text-slate-700 dark:text-white text-lg">Settings</h3>
 	                </div>
-	                <button id="themeResetAllBtn" onclick="resetAllThemeLight()" class="hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Reset Theme</button>
+	                <button id="themeResetAllBtn" data-action="reset-all-theme-light" class="hidden px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Reset Theme</button>
 	            </div>
 	            <div id="settingsScroll" class="settings-scroll space-y-4 custom-scroll pr-1">
 	                <div id="settingsMainView" class="space-y-4">
                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300">Dark Mode</p></div>
-                    <label class="switch"><input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></label>
                 </div>
                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300" id="langLabel">Language</p></div>
-                    <select id="langSelect" onchange="setLanguage(this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-200 outline-none">
+                    <select id="langSelect" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 dark:text-slate-200 outline-none">
                         <option value="ko">한국어</option>
                         <option value="en">English</option>
                     </select>
                 </div>
 
-                <button type="button" onclick="openThemeSettings()" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
+                <button type="button" data-action="open-theme-settings" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                             <div class="w-4 h-4 rounded" style="background: linear-gradient(135deg, #3b82f6, #a855f7);"></div>
@@ -208,21 +208,21 @@
 
 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300">Prevent Sleep (Wake Lock)</p></div>
-                    <label class="switch"><input type="checkbox" id="wakeLockToggle" onchange="toggleWakeLock(this)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="wakeLockToggle"><span class="slider"></span></label>
                 </div>
                 <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-2xl border border-yellow-100 dark:border-yellow-800">
                     <div>
                         <p class="text-xs font-bold text-yellow-700 dark:text-yellow-400">Inspection</p>
                         <p class="text-[9px] text-yellow-600/70 dark:text-yellow-500/70 font-medium">15s countdown + voice</p>
                     </div>
-                    <label class="switch"><input type="checkbox" id="inspectionToggle" onchange="toggleInspection(this)"><span class="slider"></span></label>
+                    <label class="switch"><input type="checkbox" id="inspectionToggle"><span class="slider"></span></label>
                 </div>
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl" id="holdDurationContainer">
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Hold Duration</p>
                         <span id="holdDurationValue" class="text-[10px] font-bold text-blue-500">0.3s</span>
                     </div>
-                    <input type="range" id="holdDurationSlider" min="0.0" max="1.0" step="0.1" value="0.3" oninput="updateHoldDuration(this.value)">
+                    <input type="range" id="holdDurationSlider" min="0.0" max="1.0" step="0.1" value="0.3">
                 </div>
                 <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300">Average Mode</p></div>
@@ -238,10 +238,10 @@
                 </div>
                 <!-- PC Backup Import moved here for mobile if needed, but keeping in header for now -->
                 <div class="md:hidden flex gap-2 pt-2">
-                    <button onclick="exportData()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Backup</button>
-                    <button onclick="triggerImport()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Restore</button>
+                    <button data-action="export-data" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Backup</button>
+                    <button data-action="trigger-import" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Restore</button>
                 </div>
-                <button type="button" onclick="window.location.href='account.html'" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
+                <button type="button" data-action="go-account" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
@@ -258,8 +258,8 @@
 	                <div class="pt-2">
                     <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600 mb-2">About</p>
                     <div class="flex gap-2">
-                        <button onclick="openUpdateLog(false)" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Update Log</button>
-                        <button onclick="openKnownIssues()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Developer Log</button>
+                        <button data-action="open-update-log" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Update Log</button>
+                        <button data-action="open-known-issues" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl">Developer Log</button>
                     </div>
                 </div>
 	                </div>
@@ -282,7 +282,7 @@
 	                <div id="themeSettingsView" class="hidden space-y-2">
 	                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 dark:text-slate-600 mb-2">Theme Colors</p>
 	                    <div class="space-y-2">
-	                        <button type="button" onclick="openThemePicker('accent')" class="theme-row">
+	                        <button type="button" data-action="open-theme-picker" data-theme-target="accent" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowAccentDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
@@ -292,7 +292,7 @@
 	                            </div>
 	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
 	                        </button>
-	                        <button type="button" onclick="openThemePicker('bg')" class="theme-row">
+	                        <button type="button" data-action="open-theme-picker" data-theme-target="bg" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowBgDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
@@ -302,7 +302,7 @@
 	                            </div>
 	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
 	                        </button>
-	                        <button type="button" onclick="openThemePicker('card')" class="theme-row">
+	                        <button type="button" data-action="open-theme-picker" data-theme-target="card" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowCardDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
@@ -312,7 +312,7 @@
 	                            </div>
 	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
 	                        </button>
-	                        <button type="button" onclick="openThemePicker('text')" class="theme-row">
+	                        <button type="button" data-action="open-theme-picker" data-theme-target="text" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowTextDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
@@ -322,7 +322,7 @@
 	                            </div>
 	                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron"><path d="M9 18l6-6-6-6"/></svg>
 	                        </button>
-	                        <button type="button" onclick="openThemePicker('scramble')" class="theme-row">
+	                        <button type="button" data-action="open-theme-picker" data-theme-target="scramble" class="theme-row">
 	                            <div class="theme-row-left">
 	                                <div id="themeRowScrambleDot" class="theme-dot"></div>
 	                                <div class="theme-row-text">
@@ -345,7 +345,7 @@
 	                                <p id="themePickerHex" class="text-[10px] font-black text-slate-400">#FFFFFF</p>
 	                            </div>
 	                        </div>
-	                        <button type="button" onclick="themePickerDefault()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">Default</button>
+	                        <button type="button" data-action="theme-picker-default" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">Default</button>
 	                    </div>
 	                    <div class="theme-picker-wrap">
 	                        <div class="theme-sv-wrap">
@@ -358,8 +358,8 @@
 	                    <div class="flex items-center justify-between">
 	                        <p id="themePickerRgb" class="text-[10px] font-bold text-slate-400">rgb(255,255,255)</p>
 	                        <div class="flex gap-2">
-	                            <button type="button" onclick="themePickerCancel()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Cancel</button>
-	                            <button type="button" onclick="themePickerApply()" class="px-3 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 text-[11px] font-black text-white active:scale-95 transition-all">Apply</button>
+	                            <button type="button" data-action="theme-picker-cancel" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all">Cancel</button>
+	                            <button type="button" data-action="theme-picker-apply" class="px-3 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 text-[11px] font-black text-white active:scale-95 transition-all">Apply</button>
 	                        </div>
 	                    </div>
 	                </div>
@@ -367,20 +367,20 @@
 
             <!-- Sticky footer so Save & Close is always reachable on mobile -->
             <div class="settings-footer sticky bottom-0 bg-white dark:bg-slate-900 pt-3 pb-2 border-t border-slate-100 dark:border-slate-800">
-                <button onclick="closeSettings()" class="w-full py-3 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl shadow-lg text-sm">Save & Close</button>
+                <button data-action="close-settings" class="w-full py-3 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl shadow-lg text-sm">Save & Close</button>
             </div>
         </div>
     </div>
 
 
     <!-- Case Pool Modal (Practice: ZBLS/ZBLL) -->
-    <div id="casePoolOverlay" class="modal-overlay" onclick="handleOutsideCasePoolClick(event)">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-4 sm:p-6 transform transition-all scale-95 opacity-0 duration-200" id="casePoolModal" onclick="event.stopPropagation()">
+    <div id="casePoolOverlay" class="modal-overlay" data-action="handle-outside-case-pool">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-4 sm:p-6 transform transition-all scale-95 opacity-0 duration-200" id="casePoolModal" data-stop-propagation>
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <h3 id="casePoolTitle" class="font-bold text-slate-700 dark:text-white text-lg">Case Selection</h3>
                 </div>
-                <button onclick="closeCasePoolModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all" aria-label="Close">
+                <button data-action="close-case-pool-modal" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all" aria-label="Close">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
             </div>
@@ -392,8 +392,8 @@
                         <p id="casePoolModeHint" class="text-[10px] font-black text-slate-400">Random from all cases</p>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button id="casePoolModeAny" type="button" class="case-pool-pill" onclick="setCasePoolMode('any')">Random</button>
-                        <button id="casePoolModePool" type="button" class="case-pool-pill" onclick="setCasePoolMode('pool')">Selected</button>
+                        <button id="casePoolModeAny" type="button" class="case-pool-pill" data-action="set-case-pool-mode" data-case-pool-mode="any">Random</button>
+                        <button id="casePoolModePool" type="button" class="case-pool-pill" data-action="set-case-pool-mode" data-case-pool-mode="pool">Selected</button>
                     </div>
                 </div>
 
@@ -404,29 +404,29 @@
                         <p class="text-[10px] font-black text-slate-400">R / L</p>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button id="zblsHandR" type="button" class="case-pool-pill" onclick="setZblsHandDraft('R')">R</button>
-                        <button id="zblsHandL" type="button" class="case-pool-pill" onclick="setZblsHandDraft('L')">L</button>
+                        <button id="zblsHandR" type="button" class="case-pool-pill" data-action="set-zbls-hand-draft" data-zbls-hand="R">R</button>
+                        <button id="zblsHandL" type="button" class="case-pool-pill" data-action="set-zbls-hand-draft" data-zbls-hand="L">L</button>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <button id="casePoolClearBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all" onclick="clearCasePoolSelection()">Clear selection</button>
+                    <button id="casePoolClearBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 active:scale-95 transition-all" data-action="clear-case-pool-selection">Clear selection</button>
                     <p id="casePoolCount" class="text-[11px] font-black text-slate-500 dark:text-slate-300"></p>
                 </div>
 
                 <div id="casePoolList" class="case-pool-list custom-scroll pr-1"></div>
 
                 <div class="flex gap-2 pt-1">
-                    <button type="button" class="flex-1 px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-black text-slate-700 dark:text-slate-200 active:scale-95 transition-all" onclick="closeCasePoolModal()">Close</button>
-                    <button id="casePoolApplyBtn" type="button" class="flex-1 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-white font-black text-white dark:text-slate-900 active:scale-95 transition-all" onclick="applyCasePoolSelection()">Apply</button>
+                    <button type="button" class="flex-1 px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-black text-slate-700 dark:text-slate-200 active:scale-95 transition-all" data-action="close-case-pool-modal">Close</button>
+                    <button id="casePoolApplyBtn" type="button" class="flex-1 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-white font-black text-white dark:text-slate-900 active:scale-95 transition-all" data-action="apply-case-pool-selection">Apply</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Avg Share Modal -->
-    <div id="avgShareOverlay" class="modal-overlay" onclick="closeAvgShare()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl p-8" onclick="event.stopPropagation()">
+    <div id="avgShareOverlay" class="modal-overlay" data-action="close-avg-share">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl p-8" data-stop-propagation>
             <div class="flex flex-col mb-6">
                 <h4 class="font-bold text-blue-500 uppercase text-[10px] tracking-widest mb-1">[CubeTimer]</h4>
                 <p id="shareDate" class="text-slate-400 text-xs font-bold mb-4">Date : -</p>
@@ -437,15 +437,15 @@
             </div>
             <div id="shareList" class="space-y-3 mb-8 max-h-[300px] overflow-y-auto custom-scroll pr-2"></div>
             <div class="flex gap-3">
-                <button onclick="copyShareText()" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">Copy Text</button>
-                <button onclick="closeAvgShare()" class="px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
+                <button data-action="copy-share-text" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">Copy Text</button>
+                <button data-action="close-avg-share" class="px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
             </div>
         </div>
     </div>
 
     <!-- Solve Detail Modal -->
-    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="modalOverlay" class="modal-overlay" data-action="close-modal">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl p-6" data-stop-propagation>
             <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-widest mb-4">Solve Details</h4>
             <div id="modalTime" class="text-3xl font-bold text-slate-800 dark:text-white mb-1">0.00</div>
             <div id="modalEvent" class="text-[10px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded w-fit mb-4">3x3x3</div>
@@ -454,18 +454,18 @@
                 <div id="modalScramble" class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-slate-600 dark:text-slate-300 font-bold text-xs leading-relaxed border border-slate-100 dark:border-slate-700 italic whitespace-pre-line">-</div>
             </div>
             <div class="flex flex-col gap-2">
-                <button onclick="openSingleShare()" class="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">Share Single</button>
+                <button data-action="open-single-share" class="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">Share Single</button>
                 <div class="flex gap-2">
-                    <button onclick="useThisScramble()" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm">Use Scramble</button>
-                    <button onclick="closeModal()" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
+                    <button data-action="use-this-scramble" class="flex-1 py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm">Use Scramble</button>
+                    <button data-action="close-modal" class="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Update Log Modal -->
-    <div id="updateLogOverlay" class="modal-overlay" onclick="closeUpdateLog()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="updateLogOverlay" class="modal-overlay" data-action="close-update-log">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
             <div class="flex items-center gap-2 mb-6">
                 <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 dark:text-blue-400"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -479,13 +479,13 @@
                 </div>
                 <ul id="updateList" class="space-y-2 text-sm font-medium text-slate-600 dark:text-slate-300 marker:text-blue-500 list-disc pl-4"></ul>
             </div>
-            <button onclick="closeUpdateLog()" class="w-full py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:bg-slate-700 transition-colors">Okay, Got it!</button>
+            <button data-action="close-update-log" class="w-full py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:bg-slate-700 transition-colors">Okay, Got it!</button>
         </div>
     </div>
 
     <!-- Developer Log Modal -->
-    <div id="knownIssuesOverlay" class="modal-overlay" onclick="closeKnownIssues()">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" onclick="event.stopPropagation()">
+    <div id="knownIssuesOverlay" class="modal-overlay" data-action="close-known-issues">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
             <div class="flex items-center gap-2 mb-6">
                 <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600 dark:text-purple-400"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
@@ -495,7 +495,7 @@
             <div class="mb-6">
                 <ul id="knownIssuesList" class="space-y-3 text-sm font-medium text-slate-600 dark:text-slate-300"></ul>
             </div>
-            <button onclick="closeKnownIssues()" class="w-full py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:bg-slate-700 transition-colors">Close</button>
+            <button data-action="close-known-issues" class="w-full py-3.5 bg-slate-800 dark:bg-slate-700 text-white font-bold rounded-xl text-sm shadow-lg hover:bg-slate-700 transition-colors">Close</button>
         </div>
     </div>
 
@@ -510,7 +510,7 @@
                 <div class="flex flex-col items-center gap-3"> 
                     <h2 class="text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] text-[10px] font-bold">Event</h2>
                     <div class="w-full max-w-md">
-                        <select id="eventSelect" onchange="changeEvent(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 transition-all" aria-label="Event selector">
+                        <select id="eventSelect" class="w-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 transition-all" aria-label="Event selector">
                             <optgroup label="NxN">
                                 <option value="333">3x3</option>
                                 <option value="222">2x2</option>
@@ -547,40 +547,40 @@
                 <!-- Category Select -->
                 <div id="legacyCategorySelect" class="hidden flex flex-col items-center gap-4">
                     <div class="flex gap-1 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
-                        <button onclick="switchCategory('standard')" id="cat-standard" class="category-btn active px-6 py-2.5 text-xs font-bold rounded-full transition-colors">NxN</button>
-                        <button onclick="switchCategory('nonstandard')" id="cat-nonstandard" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Etc.</button>
-                        <button onclick="switchCategory('blind')" id="cat-blind" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Blind</button>
-                        <button onclick="switchCategory(\'practice\')" id="cat-practice" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Practice</button>
+                        <button data-action="switch-category" data-category="standard" id="cat-standard" class="category-btn active px-6 py-2.5 text-xs font-bold rounded-full transition-colors">NxN</button>
+                        <button data-action="switch-category" data-category="nonstandard" id="cat-nonstandard" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Etc.</button>
+                        <button data-action="switch-category" data-category="blind" id="cat-blind" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Blind</button>
+                        <button data-action="switch-category" data-category="practice" id="cat-practice" class="category-btn px-6 py-2.5 text-xs font-bold rounded-full transition-colors text-slate-500 dark:text-slate-400">Practice</button>
                     </div>
                     <div class="flex items-center gap-2 w-full">
                         <div id="eventTabScroll" class="bg-white dark:bg-slate-900 p-1 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex overflow-x-auto max-w-full custom-scroll flex-1">
                         <div id="group-standard" class="flex gap-1">
-                            <button onclick="changeEvent('333')" class="event-tab active px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333">3x3</button>
-                            <button onclick="changeEvent('222')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-222">2x2</button>
-                            <button onclick="changeEvent('444')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-444">4x4</button>
-                            <button onclick="changeEvent('555')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-555">5x5</button>
-                            <button onclick="changeEvent('666')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-666">6x6</button>
-                            <button onclick="changeEvent('777')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-777">7x7</button>
-                            <button onclick="changeEvent('333oh')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333oh">3x3 OH</button>
+                            <button data-action="change-event" data-event="333" class="event-tab active px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333">3x3</button>
+                            <button data-action="change-event" data-event="222" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-222">2x2</button>
+                            <button data-action="change-event" data-event="444" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-444">4x4</button>
+                            <button data-action="change-event" data-event="555" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-555">5x5</button>
+                            <button data-action="change-event" data-event="666" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-666">6x6</button>
+                            <button data-action="change-event" data-event="777" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-777">7x7</button>
+                            <button data-action="change-event" data-event="333oh" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333oh">3x3 OH</button>
                         </div>
                         <!-- ... other groups hidden by default ... -->
                         <div id="group-nonstandard" class="hidden flex gap-1">
-                            <button onclick="changeEvent('clock')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-clock">Clock</button>
-                            <button onclick="changeEvent('minx')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-minx">Megaminx</button>
-                            <button onclick="changeEvent('pyra')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-pyra">Pyraminx</button>
-                            <button onclick="changeEvent('skewb')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-skewb">Skewb</button>
-                            <button onclick="changeEvent('sq1')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-sq1">Square-1</button>
+                            <button data-action="change-event" data-event="clock" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-clock">Clock</button>
+                            <button data-action="change-event" data-event="minx" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-minx">Megaminx</button>
+                            <button data-action="change-event" data-event="pyra" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-pyra">Pyraminx</button>
+                            <button data-action="change-event" data-event="skewb" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-skewb">Skewb</button>
+                            <button data-action="change-event" data-event="sq1" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-sq1">Square-1</button>
                         </div>
                         <div id="group-blind" class="hidden flex gap-1">
-                            <button onclick="changeEvent('333bf')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333bf">3BLD</button>
-                            <button onclick="changeEvent('444bf')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-444bf">4BLD</button>
-                            <button onclick="changeEvent('555bf')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-555bf">5BLD</button>
-                            <button onclick="changeEvent('333mbf')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333mbf">Multi-BLD</button>
+                            <button data-action="change-event" data-event="333bf" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333bf">3BLD</button>
+                            <button data-action="change-event" data-event="444bf" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-444bf">4BLD</button>
+                            <button data-action="change-event" data-event="555bf" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-555bf">5BLD</button>
+                            <button data-action="change-event" data-event="333mbf" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-333mbf">Multi-BLD</button>
                         </div>
-                        <div id="group-practice" class="hidden flex gap-1">                            <button onclick="changeEvent('p_oll')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_oll">OLL</button>
-                            <button onclick="changeEvent('p_pll')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_pll">PLL</button>
-                            <button onclick="changeEvent('p_zbls')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_zbls">ZBLS</button>
-                            <button onclick="changeEvent('p_zbll')" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_zbll">ZBLL</button>
+                        <div id="group-practice" class="hidden flex gap-1">                            <button data-action="change-event" data-event="p_oll" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_oll">OLL</button>
+                            <button data-action="change-event" data-event="p_pll" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_pll">PLL</button>
+                            <button data-action="change-event" data-event="p_zbls" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_zbls">ZBLS</button>
+                            <button data-action="change-event" data-event="p_zbll" class="event-tab px-5 py-2.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400" id="tab-p_zbll">ZBLL</button>
                         </div>
 
                         </div>
@@ -588,10 +588,10 @@
                         <!-- Case selector (only for ZBLS/ZBLL) -->
                         <div id="caseSelectWrap" class="hidden w-full flex items-center justify-center gap-2 px-2 mt-2 flex-wrap">
                             <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Case</span>
-                            <button id="casePoolOpenBtn" type="button" class="case-tab" onclick="openCasePoolModal()"></button>
+                            <button id="casePoolOpenBtn" type="button" class="case-tab" data-action="open-case-pool-modal"></button>
                             <span id="casePoolSummary" class="text-[10px] font-black tracking-widest text-slate-400"></span>
                             <div id="caseTabs" class="hidden"></div>
-                            <select id="caseSelect" onchange="changePracticeCase(this.value)" class="hidden"></select>
+                            <select id="caseSelect" class="hidden"></select>
                         </div>
 
                     </div>
@@ -613,14 +613,14 @@
 
                         <div class="scramble-bottom-area relative w-full flex items-center justify-center">
                             <div id="scrambleDiagramSkeleton" class="hidden scramble-skeleton"></div>
-                            <button id="scrambleRetryBtn" onclick="retryScramble()" class="hidden px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold active:scale-95 transition-all">Failed. Tap to retry.</button>
+                            <button id="scrambleRetryBtn" data-action="retry-scramble" class="hidden px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold active:scale-95 transition-all">Failed. Tap to retry.</button>
                         </div>
 
                         <div id="mbfInputArea" class="hidden flex flex-col items-center gap-4 w-full">
                             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Enter number of cubes</p>
                             <div class="flex gap-2 w-full max-w-xs">
                                 <input type="number" id="mbfCubeInput" min="2" max="100" placeholder="e.g. 10" class="flex-1 bg-slate-50 dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-lg font-bold text-center outline-none focus:border-blue-400 transition-all">
-                                <button onclick="generateMbfScrambles()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold active:scale-95 transition-all shadow-md">Go</button>
+                                <button data-action="generate-mbf-scrambles" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold active:scale-95 transition-all shadow-md">Go</button>
                             </div>
                         </div>
                     </div>
@@ -636,11 +636,11 @@
                     </div>
                     
                     <div class="flex gap-6 mt-8">
-                        <div class="avg-badge" onclick="openAvgShare('primary')">
+                        <div class="avg-badge" data-action="open-avg-share" data-share-type="primary">
                             <span id="labelPrimaryAvg" class="text-[11px] uppercase font-bold text-blue-400 mb-2 tracking-widest">Ao5</span>
                             <span id="displayPrimaryAvg" class="text-2xl md:text-3xl text-slate-700 dark:text-slate-200 font-bold tracking-tighter">-</span>
                         </div>
-                        <div class="avg-badge" onclick="openAvgShare('ao12')">
+                        <div class="avg-badge" data-action="open-avg-share" data-share-type="ao12">
                             <span class="text-[11px] uppercase font-bold text-purple-400 mb-2 tracking-widest">Ao12</span>
                             <span id="displayAo12" class="text-2xl md:text-3xl text-slate-700 dark:text-slate-200 font-bold tracking-tighter">-</span>
                         </div>
@@ -655,7 +655,7 @@
             <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0 rounded-t-3xl">
                 <div class="flex items-center gap-2">
                     <h3 class="font-bold text-slate-700 dark:text-slate-200 text-base">History</h3>
-                    <button onclick="openSessionModal()" class="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors rounded-full text-slate-500 dark:text-slate-400 group">
+                    <button data-action="open-session-modal" class="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors rounded-full text-slate-500 dark:text-slate-400 group">
                         <span id="currentSessionNameDisplay" class="text-[10px] font-bold max-w-[80px] truncate">Session 1</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-slate-600"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
@@ -671,7 +671,7 @@
                     <div class="flex flex-col">
                         <div class="flex items-center gap-1.5">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Avg of All</span>
-                            <button onclick="showExtendedStats()" class="text-[9px] font-bold text-blue-500 hover:underline cursor-pointer">(More)</button>
+                            <button data-action="show-extended-stats" class="text-[9px] font-bold text-blue-500 hover:underline cursor-pointer">(More)</button>
                         </div>
                         <span id="sessionAvg" class="text-sm font-bold text-slate-700 dark:text-slate-200">-</span>
                     </div>
@@ -685,13 +685,13 @@
                     <div class="flex items-center justify-between mb-3 px-2">
                         <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400" id="toolLabel">Scramble Image</span>
                         <div class="relative">
-                            <button onclick="toggleToolsMenu(event)" class="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-300 transition-all shadow-sm active:scale-95">
+                            <button data-action="toggle-tools-menu" class="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-300 transition-all shadow-sm active:scale-95">
                                 Tools
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
                             </button>
                             <div id="toolsDropdown" class="tools-dropdown">
-                                <button onclick="selectTool('scramble')" class="tool-option active" id="tool-opt-scramble">Scramble Image</button>
-                                <button onclick="selectTool('graph')" class="tool-option" id="tool-opt-graph">Graph (Trends)</button>
+                                <button data-action="select-tool" data-tool="scramble" class="tool-option active" id="tool-opt-scramble">Scramble Image</button>
+                                <button data-action="select-tool" data-tool="graph" class="tool-option" id="tool-opt-graph">Graph (Trends)</button>
                             </div>
                         </div>
                     </div>
@@ -717,15 +717,15 @@
 
     <!-- Mobile Bottom Navigation (Hidden on PC) -->
     <nav class="md:hidden fixed bottom-0 w-full bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-around items-center h-16 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <button onclick="switchMobileTab('timer')" id="mob-tab-timer" class="flex flex-col items-center justify-center w-full h-full text-blue-600 dark:text-blue-400">
+        <button data-action="switch-mobile-tab" data-tab="timer" id="mob-tab-timer" class="flex flex-col items-center justify-center w-full h-full text-blue-600 dark:text-blue-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span class="text-[10px] font-bold mt-1">Timer</span>
         </button>
-        <button onclick="switchMobileTab('history')" id="mob-tab-history" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+        <button data-action="switch-mobile-tab" data-tab="history" id="mob-tab-history" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
             <span class="text-[10px] font-bold mt-1">Stats</span>
         </button>
-        <button onclick="openSettings()" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+        <button data-action="open-settings" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span class="text-[10px] font-bold mt-1">Settings</span>
         </button>
