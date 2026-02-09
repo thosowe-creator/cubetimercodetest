@@ -438,7 +438,7 @@ html:not(.dark) .category-btn.active { background-color: rgb(var(--ct-accent-rgb
 html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb)); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
 
 /* Status Colors */
-.text-ready { color: #10b981 !important; transform: scale(1.02); } 
+.text-ready { color: var(--ct-ready-color, #10b981) !important; transform: scale(1.02); } 
 .text-hold { color: #ef4444 !important; }
 .text-running { color: #2563eb !important; }
 .dark .text-running { color: #60a5fa !important; } /* Lighter blue for dark mode */

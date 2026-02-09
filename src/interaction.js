@@ -14,6 +14,7 @@ function getReadyColor(baseColor) {
     }
     return '#10b981';
 }
+window.getReadyColor = getReadyColor;
 function handleStart(e) {
     // [FIX] Ignore touches on interactive elements like badges or buttons
     // This allows clicking on stats/settings without triggering the timer
@@ -38,7 +39,9 @@ function handleStart(e) {
         timerEl.classList.add('holding-status');
         holdTimer = setTimeout(()=> { 
             isReady=true; 
-            timerEl.style.color = getReadyColor(baseTimerColor); 
+            const readyColor = getReadyColor(baseTimerColor);
+            timerEl.style.setProperty('--ct-ready-color', readyColor);
+            timerEl.style.color = readyColor; 
             timerEl.classList.replace('holding-status','ready-to-start'); 
             statusHint.innerText="Ready!"; 
         }, holdDuration); 
@@ -50,7 +53,9 @@ function handleStart(e) {
     
     holdTimer = setTimeout(()=> { 
         isReady=true; 
-        timerEl.style.color = getReadyColor(baseTimerColor); 
+        const readyColor = getReadyColor(baseTimerColor);
+        timerEl.style.setProperty('--ct-ready-color', readyColor);
+        timerEl.style.color = readyColor; 
         timerEl.classList.replace('holding-status','ready-to-start'); 
         statusHint.innerText="Ready!"; 
     }, holdDuration); 
@@ -839,15 +844,18 @@ function hsvToRgb({ h, s, v }) {
 }
 
 function partLabel(part) {
-  return ({
-    accent: '강조',
-    bg: '배경',
-    card: '패널',
-    text: '텍스트',
-    timerText: '타이머',
-    scramble: '스크램블 박스',
-    scrambleText: '스크램블 텍스트',
-  })[part] || '색상';
+  const labels = {
+    accent: { en: 'Accent', ko: '강조' },
+    bg: { en: 'Background', ko: '배경' },
+    card: { en: 'Panels', ko: '패널' },
+    text: { en: 'Text', ko: '텍스트' },
+    timerText: { en: 'Timer', ko: '타이머' },
+    scramble: { en: 'Scramble Box', ko: '스크램블 박스' },
+    scrambleText: { en: 'Scramble Text', ko: '스크램블 텍스트' },
+  };
+  const entry = labels[part];
+  if (!entry) return currentLang === 'ko' ? '색상' : 'Color';
+  return currentLang === 'ko' ? entry.ko : entry.en;
 }
 
 function syncThemeRowsUI() {

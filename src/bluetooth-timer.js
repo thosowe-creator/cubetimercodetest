@@ -62,6 +62,12 @@ function handleGanBTData(event) {
             // If inspecting, do not reset ready state (user puts hands on timer during inspection)
             if (!isInspectionMode) {
                 isReady = false;
+                const baseColor = timerEl ? window.getComputedStyle(timerEl).color : '';
+                const readyColor = typeof window.getReadyColor === 'function'
+                    ? window.getReadyColor(baseColor)
+                    : '#10b981';
+                timerEl.style.setProperty('--ct-ready-color', readyColor);
+                timerEl.style.color = readyColor;
                 timerEl.classList.add('text-ready'); 
                 statusHint.innerText = "Ready!";
             }
@@ -70,6 +76,7 @@ function handleGanBTData(event) {
              // If inspecting, this is where we start the solve and end inspection
              if (!isInspectionMode) {
                  timerEl.classList.remove('text-ready', 'text-running');
+                 timerEl.style.color = '';
                  statusHint.innerText = "Timer Ready (BT)";
              }
         } else if (state === 3) { // RUNNING
