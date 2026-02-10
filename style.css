@@ -123,7 +123,7 @@ html:not(.dark) .scramble-box{
   background-color: rgb(var(--ct-scramble-rgb)) !important;
 }
 
-html:not(.dark) .timer-display{
+html:not(.dark) #timer.timer-display{
   color: rgb(var(--ct-timer-rgb)) !important;
 }
 
