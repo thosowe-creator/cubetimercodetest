@@ -76,12 +76,31 @@ function updateUI() {
 
     solveCountEl.innerText = filtered.length;
 
+    const bestAverageLabelEl = document.getElementById('bestAverageLabel');
+    const bestSingleLabelEl = document.getElementById('bestSingleLabel');
+    const moreAverageBtnEl = document.getElementById('moreAverageBtn');
+    const isKorean = currentLang === 'ko';
+
+    if (bestAverageLabelEl) {
+        bestAverageLabelEl.innerText = isKorean
+            ? '최고 평균'
+            : (appState.isAo5Mode ? 'Best Average' : 'Best Mean');
+    }
+    if (bestSingleLabelEl) {
+        bestSingleLabelEl.innerText = isKorean ? '최고 싱글' : 'Best Single';
+    }
+    if (moreAverageBtnEl) {
+        moreAverageBtnEl.innerText = isKorean
+            ? '평균 더보기'
+            : (appState.isAo5Mode ? 'More Average' : 'More Mean');
+    }
+
     // Stats
     if (appState.currentEvent === '333mbf') {
         labelPrimaryAvg.innerText = "-";
         displayPrimaryAvg.innerText = "-";
         displayAo12.innerText = "-";
-        sessionAvgEl.innerText = "-";
+        bestAverageEl.innerText = "-";
         bestSolveEl.innerText = "-";
         if (activeTool === 'graph') renderHistoryGraph();
         return;
@@ -100,9 +119,43 @@ function updateUI() {
         .filter(s => s.penalty !== 'DNF')
         .map(s => s.penalty === '+2' ? s.time + 2000 : s.time);
 
-    sessionAvgEl.innerText = valid.length
-        ? formatTime(valid.reduce((a, b) => a + b, 0) / valid.length)
-        : "-";
+    const primaryAvgCount = appState.isAo5Mode ? 5 : 3;
+    const primaryAvgIsMean = !appState.isAo5Mode;
+
+    const calculateWindowAverageMs = (slice, count, mean = false) => {
+        const dnfCount = slice.filter(s => s.penalty === "DNF").length;
+        let removeCount = Math.ceil(count * 0.05);
+        if (count <= 12) removeCount = 1;
+        if (dnfCount >= removeCount + (mean ? 0 : 1)) return null;
+
+        const nums = slice.map(s => s.penalty === "DNF" ? Infinity : (s.penalty === "+2" ? s.time + 2000 : s.time));
+        if (mean) {
+            const sum = nums.reduce((a, b) => a + b, 0);
+            if (!Number.isFinite(sum)) return null;
+            return sum / count;
+        }
+
+        nums.sort((a, b) => a - b);
+        for (let i = 0; i < removeCount; i++) {
+            nums.pop();
+            nums.shift();
+        }
+
+        if (!nums.length || nums.some(n => !Number.isFinite(n))) return null;
+        return nums.reduce((a, b) => a + b, 0) / nums.length;
+    };
+
+    let bestAverageMs = null;
+    for (let i = 0; i <= filtered.length - primaryAvgCount; i++) {
+        const windowSlice = filtered.slice(i, i + primaryAvgCount);
+        const avgMs = calculateWindowAverageMs(windowSlice, primaryAvgCount, primaryAvgIsMean);
+        if (avgMs === null) continue;
+        if (bestAverageMs === null || avgMs < bestAverageMs) bestAverageMs = avgMs;
+    }
+
+    bestAverageEl.innerText = (bestAverageMs === null)
+        ? "-"
+        : formatTime(bestAverageMs);
 
     bestSolveEl.innerText = valid.length
         ? formatTime(Math.min(...valid))
