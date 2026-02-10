@@ -91,8 +91,8 @@ function updateUI() {
     }
     if (moreAverageBtnEl) {
         moreAverageBtnEl.innerText = isKorean
-            ? '평균 더보기'
-            : (appState.isAo5Mode ? 'More Average' : 'More Mean');
+            ? '(평균 더보기)'
+            : (appState.isAo5Mode ? '(More Average)' : '(More Mean)');
     }
 
     // Stats
@@ -101,7 +101,11 @@ function updateUI() {
         displayPrimaryAvg.innerText = "-";
         displayAo12.innerText = "-";
         bestAverageEl.innerText = "-";
+        delete bestAverageEl.dataset.bestStart;
+        delete bestAverageEl.dataset.bestCount;
+        delete bestAverageEl.dataset.bestIsMean;
         bestSolveEl.innerText = "-";
+        delete bestSolveEl.dataset.solveId;
         if (activeTool === 'graph') renderHistoryGraph();
         return;
     }
@@ -118,6 +122,13 @@ function updateUI() {
     const valid = filtered
         .filter(s => s.penalty !== 'DNF')
         .map(s => s.penalty === '+2' ? s.time + 2000 : s.time);
+
+    const validWithMeta = filtered
+        .filter(s => s.penalty !== 'DNF')
+        .map(s => ({
+            id: s.id,
+            value: s.penalty === '+2' ? s.time + 2000 : s.time,
+        }));
 
     const primaryAvgCount = appState.isAo5Mode ? 5 : 3;
     const primaryAvgIsMean = !appState.isAo5Mode;
@@ -146,20 +157,37 @@ function updateUI() {
     };
 
     let bestAverageMs = null;
+    let bestAverageStart = -1;
     for (let i = 0; i <= filtered.length - primaryAvgCount; i++) {
         const windowSlice = filtered.slice(i, i + primaryAvgCount);
         const avgMs = calculateWindowAverageMs(windowSlice, primaryAvgCount, primaryAvgIsMean);
         if (avgMs === null) continue;
-        if (bestAverageMs === null || avgMs < bestAverageMs) bestAverageMs = avgMs;
+        if (bestAverageMs === null || avgMs < bestAverageMs) {
+            bestAverageMs = avgMs;
+            bestAverageStart = i;
+        }
     }
 
-    bestAverageEl.innerText = (bestAverageMs === null)
-        ? "-"
-        : formatTime(bestAverageMs);
+    if (bestAverageMs === null) {
+        bestAverageEl.innerText = "-";
+        delete bestAverageEl.dataset.bestStart;
+        delete bestAverageEl.dataset.bestCount;
+        delete bestAverageEl.dataset.bestIsMean;
+    } else {
+        bestAverageEl.innerText = formatTime(bestAverageMs);
+        bestAverageEl.dataset.bestStart = String(bestAverageStart);
+        bestAverageEl.dataset.bestCount = String(primaryAvgCount);
+        bestAverageEl.dataset.bestIsMean = primaryAvgIsMean ? '1' : '0';
+    }
 
-    bestSolveEl.innerText = valid.length
-        ? formatTime(Math.min(...valid))
-        : "-";
+    if (validWithMeta.length) {
+        const bestSingle = validWithMeta.reduce((best, current) => (current.value < best.value ? current : best), validWithMeta[0]);
+        bestSolveEl.innerText = formatTime(bestSingle.value);
+        bestSolveEl.dataset.solveId = String(bestSingle.id);
+    } else {
+        bestSolveEl.innerText = "-";
+        delete bestSolveEl.dataset.solveId;
+    }
 
     if (activeTool === 'graph') renderHistoryGraph();
 }
