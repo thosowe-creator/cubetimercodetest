@@ -10,7 +10,10 @@ function buildBackupPayload() {
             holdDuration: appState.holdDuration,
             isDarkMode: document.documentElement.classList.contains('dark'),
             isWakeLockEnabled: appState.isWakeLockEnabled,
-            isInspectionMode: appState.isInspectionMode
+            isInspectionMode: appState.isInspectionMode,
+            lightTheme: typeof window.getLightThemeForBackup === 'function'
+                ? window.getLightThemeForBackup()
+                : null
         }
     };
 }
@@ -132,6 +135,9 @@ function applyRestoredData(data, successMessage) {
             document.documentElement.classList.toggle('dark', isDark);
             if (typeof window.setThemeSettingsAccess === 'function') {
                 window.setThemeSettingsAccess(isDark);
+            }
+            if (typeof window.applyLightThemeBackup === 'function') {
+                window.applyLightThemeBackup(data.settings.lightTheme);
             }
             if (appState.isWakeLockEnabled) requestWakeLock();
         }

@@ -891,3 +891,28 @@ window.resetAllThemeLight = () => {
   saveLightTheme();
   syncThemeRowsUI();
 };
+
+function normalizeLightThemeFromBackup(theme) {
+  if (!theme || typeof theme !== 'object') {
+    return structuredClone(LIGHT_THEME_DEFAULTS);
+  }
+  const next = {};
+  for (const key of Object.keys(LIGHT_THEME_DEFAULTS)) {
+    const value = theme[key];
+    if (Array.isArray(value) && value.length === 3) {
+      next[key] = [clamp255(value[0]), clamp255(value[1]), clamp255(value[2])];
+    } else {
+      next[key] = structuredClone(LIGHT_THEME_DEFAULTS[key]);
+    }
+  }
+  return next;
+}
+
+window.getLightThemeForBackup = () => structuredClone(lightTheme);
+
+window.applyLightThemeBackup = (theme) => {
+  lightTheme = normalizeLightThemeFromBackup(theme);
+  applyLightTheme();
+  saveLightTheme();
+  syncThemeRowsUI();
+};
