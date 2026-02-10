@@ -76,6 +76,25 @@ function updateUI() {
 
     solveCountEl.innerText = filtered.length;
 
+    const bestAverageLabelEl = document.getElementById('bestAverageLabel');
+    const bestSingleLabelEl = document.getElementById('bestSingleLabel');
+    const moreAverageBtnEl = document.getElementById('moreAverageBtn');
+    const isKorean = currentLang === 'ko';
+
+    if (bestAverageLabelEl) {
+        bestAverageLabelEl.innerText = isKorean
+            ? '최고 평균'
+            : (appState.isAo5Mode ? 'Best Average' : 'Best Mean');
+    }
+    if (bestSingleLabelEl) {
+        bestSingleLabelEl.innerText = isKorean ? '최고 싱글' : 'Best Single';
+    }
+    if (moreAverageBtnEl) {
+        moreAverageBtnEl.innerText = isKorean
+            ? '평균 더보기'
+            : (appState.isAo5Mode ? 'More Average' : 'More Mean');
+    }
+
     // Stats
     if (appState.currentEvent === '333mbf') {
         labelPrimaryAvg.innerText = "-";

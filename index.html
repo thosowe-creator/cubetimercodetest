@@ -696,13 +696,13 @@
                 <div class="p-5 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Best Average</span>
-                            <button data-action="show-extended-stats" class="text-[9px] font-bold text-blue-500 hover:underline cursor-pointer">(More)</button>
+                            <span id="bestAverageLabel" class="text-[10px] font-bold text-slate-400 tracking-tighter">Best Average</span>
+                            <button id="moreAverageBtn" data-action="show-extended-stats" class="text-[9px] font-bold text-blue-500 hover:underline cursor-pointer">More Average</button>
                         </div>
-                        <span id="bestAverage" class="text-sm font-bold text-slate-700 dark:text-slate-200">-</span>
+                        <span id="bestAverage" class="text-sm font-bold text-blue-600 dark:text-blue-400">-</span>
                     </div>
                     <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Best Single</span>
+                        <span id="bestSingleLabel" class="text-[10px] font-bold text-slate-400 tracking-tighter">Best Single</span>
                         <span id="bestSolve" class="text-sm font-bold text-blue-600 dark:text-blue-400">-</span>
                     </div>
                 </div>
