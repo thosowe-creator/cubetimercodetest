@@ -227,17 +227,22 @@ window.deleteSession = (id) => {
 };
 window.openAvgShare = (type) => {
     const sid = getCurrentSessionId();
-    const count = (type === 'primary') ? (appState.isAo5Mode ? 5 : 3) : 12;
+    const parsedCount = Number(type);
+    const isPrimary = type === 'primary';
+    const count = isPrimary
+        ? (appState.isAo5Mode ? 5 : 3)
+        : (Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 12);
+    const isMean = isPrimary && !appState.isAo5Mode;
     const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
     if (filtered.length < count) return;
     const list = filtered.slice(0, count);
-    const avgValue = calculateAvg(filtered, count, (type === 'primary' && !appState.isAo5Mode));
+    const avgValue = calculateAvg(filtered, count, isMean);
 
     const dateStr = list[0].date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
     const datePrefix = currentLang === 'ko' ? '날짜 :' : 'Date :';
     document.getElementById('shareDate').innerText = `${datePrefix} ${dateStr}.`;
 
-    const label = (type === 'primary' && !appState.isAo5Mode)
+    const label = isMean
         ? (currentLang === 'ko' ? 'Mo3 :' : 'Mean of 3 :')
         : (currentLang === 'ko' ? `Ao${count} :` : `Average of ${count} :`);
     const overlay = document.getElementById('avgShareOverlay');
@@ -693,6 +698,10 @@ function setupDomEventBindings() {
                 break;
             case 'open-avg-share':
                 openAvgShare(actionEl.dataset.shareType);
+                break;
+            case 'open-extended-avg-share':
+                closeStatsModal();
+                openAvgShare(actionEl.dataset.shareCount);
                 break;
             case 'show-extended-stats':
                 showExtendedStats();
