@@ -123,13 +123,13 @@ html:not(.dark) .scramble-box{
   background-color: rgb(var(--ct-scramble-rgb)) !important;
 }
 
-html:not(.dark) .timer-display{
+html:not(.dark) #timer.timer-display{
   color: rgb(var(--ct-timer-rgb)) !important;
 }
 
 /* Light mode: apply theme text color inside main UI (exclude modals). */
 html:not(.dark) :is(header, #timerSection, #scrambleBox, #toolContainer, #historySection)
-  :where(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700, .text-slate-800) {
+  :where(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700, .text-slate-800):not(#timer) {
   color: rgb(var(--ct-text-rgb)) !important;
 }
 

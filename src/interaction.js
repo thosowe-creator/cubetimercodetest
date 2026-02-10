@@ -797,6 +797,13 @@ function applyLightTheme() {
   setRGB('--ct-timer-rgb', lightTheme.timerText);
   setRGB('--ct-scramble-rgb', lightTheme.scramble);
   setRGB('--ct-scramble-text-rgb', lightTheme.scrambleText);
+  if (typeof timerEl !== 'undefined' && timerEl) {
+    timerEl.style.setProperty(
+      'color',
+      `rgb(${lightTheme.timerText[0]}, ${lightTheme.timerText[1]}, ${lightTheme.timerText[2]})`,
+      'important'
+    );
+  }
 }
 
 /* =========================
