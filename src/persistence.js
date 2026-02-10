@@ -133,6 +133,13 @@ function applyRestoredData(data, successMessage) {
                 updateHoldDuration(holdDurationSlider.value);
             }
             document.documentElement.classList.toggle('dark', isDark);
+            if (typeof timerEl !== 'undefined' && timerEl) {
+                if (isDark) {
+                    timerEl.style.removeProperty('color');
+                } else if (typeof applyLightTheme === 'function') {
+                    applyLightTheme();
+                }
+            }
             if (typeof window.setThemeSettingsAccess === 'function') {
                 window.setThemeSettingsAccess(isDark);
             }
@@ -198,6 +205,13 @@ function loadData() {
                     holdDurationValue.innerText = holdDurationSlider.value + "s";
                 }
                 document.documentElement.classList.toggle('dark', isDark);
+                if (typeof timerEl !== 'undefined' && timerEl) {
+                    if (isDark) {
+                        timerEl.style.removeProperty('color');
+                    } else if (typeof applyLightTheme === 'function') {
+                        applyLightTheme();
+                    }
+                }
                 if (typeof window.setThemeSettingsAccess === 'function') {
                     window.setThemeSettingsAccess(isDark);
                 }

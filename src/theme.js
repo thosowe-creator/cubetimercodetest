@@ -15,6 +15,13 @@ window.setThemeSettingsAccess = (isDark) => {
 function toggleDarkMode(checkbox) {
     const isDark = checkbox.checked;
     document.documentElement.classList.toggle('dark', isDark);
+    if (typeof timerEl !== 'undefined' && timerEl) {
+        if (isDark) {
+            timerEl.style.removeProperty('color');
+        } else if (typeof applyLightTheme === 'function') {
+            applyLightTheme();
+        }
+    }
     if (typeof window.setThemeSettingsAccess === 'function') {
         window.setThemeSettingsAccess(isDark);
     }
