@@ -82,8 +82,12 @@ const AUTO_I18N_PAIRS = [
 
   // History footer
   { en: 'Avg of All', ko: '전체 평균' },
+  { en: 'Best Single', ko: '최고 싱글' },
+  { en: 'Best Average', ko: '최고 평균' },
+  { en: 'Best Mean', ko: '최고 평균' },
   { en: '(More)', ko: '(더보기)' },
-  { en: 'Personal Best', ko: '개인 최고' },
+  { en: 'More Average', ko: '평균 더보기' },
+  { en: 'More Mean', ko: '평균 더보기' },
 
   // Scramble status defaults
   { en: 'Generating...', ko: '생성 중…' },

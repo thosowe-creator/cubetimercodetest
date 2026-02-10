@@ -13,19 +13,37 @@ window.showExtendedStats = () => {
     const ao50 = calculateAvg(filtered, 50);
     const ao100 = calculateAvg(filtered, 100);
     
+    const titleEl = document.getElementById('statsTitle');
+    if (titleEl) {
+        if (currentLang === 'ko') {
+            titleEl.innerText = '평균 더보기';
+        } else {
+            titleEl.innerText = appState.isAo5Mode ? 'More Average' : 'More Mean';
+        }
+    }
+
     const content = document.getElementById('statsContent');
     content.innerHTML = `
-        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao25</span>
-            <span class="text-lg font-bold text-slate-700 dark:text-white">${ao25}</span>
+        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl gap-2">
+            <div class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao25</span>
+                <span class="text-lg font-bold text-slate-700 dark:text-white">${ao25}</span>
+            </div>
+            <button data-action="open-extended-avg-share" data-share-count="25" class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white">Share</button>
         </div>
-        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao50</span>
-            <span class="text-lg font-bold text-slate-700 dark:text-white">${ao50}</span>
+        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl gap-2">
+            <div class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao50</span>
+                <span class="text-lg font-bold text-slate-700 dark:text-white">${ao50}</span>
+            </div>
+            <button data-action="open-extended-avg-share" data-share-count="50" class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white">Share</button>
         </div>
-        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao100</span>
-            <span class="text-lg font-bold text-slate-700 dark:text-white">${ao100}</span>
+        <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl gap-2">
+            <div class="flex flex-col gap-1">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Current Ao100</span>
+                <span class="text-lg font-bold text-slate-700 dark:text-white">${ao100}</span>
+            </div>
+            <button data-action="open-extended-avg-share" data-share-count="100" class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white">Share</button>
         </div>
     `;
     document.getElementById('statsOverlay').classList.add('active');

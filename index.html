@@ -160,7 +160,7 @@
     <!-- Detailed Stats Modal -->
     <div id="statsOverlay" class="modal-overlay" data-action="close-stats-modal">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm shadow-2xl p-6" data-stop-propagation>
-            <h3 class="font-bold text-slate-700 dark:text-white text-lg mb-6">Detailed Stats</h3>
+            <h3 id="statsTitle" class="font-bold text-slate-700 dark:text-white text-lg mb-6">More Average</h3>
             <div class="space-y-3" id="statsContent"></div>
             <button data-action="close-stats-modal" class="w-full mt-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-sm">Close</button>
         </div>
@@ -696,14 +696,14 @@
                 <div class="p-5 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Avg of All</span>
-                            <button data-action="show-extended-stats" class="text-[9px] font-bold text-blue-500 hover:underline cursor-pointer">(More)</button>
+                            <span id="bestAverageLabel" class="text-[10px] font-bold text-slate-400 tracking-tighter">Best Average</span>
+                            <button id="moreAverageBtn" data-action="show-extended-stats" class="text-[8px] font-bold text-blue-500 hover:underline cursor-pointer">(More Average)</button>
                         </div>
-                        <span id="sessionAvg" class="text-sm font-bold text-slate-700 dark:text-slate-200">-</span>
+                        <span id="bestAverage" data-action="open-best-average-share" class="text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">-</span>
                     </div>
                     <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Personal Best</span>
-                        <span id="bestSolve" class="text-sm font-bold text-blue-600 dark:text-blue-400">-</span>
+                        <span id="bestSingleLabel" class="text-[10px] font-bold text-slate-400 tracking-tighter">Best Single</span>
+                        <span id="bestSolve" data-action="open-best-single-share" class="text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">-</span>
                     </div>
                 </div>
                 
