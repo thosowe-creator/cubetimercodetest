@@ -794,7 +794,7 @@ function applyLightTheme() {
   setRGB('--ct-bg-rgb', lightTheme.bg);
   setRGB('--ct-card-rgb', lightTheme.card);
   setRGB('--ct-text-rgb', lightTheme.text);
-  setRGB('--ct-timer-rgb', LIGHT_THEME_DEFAULTS.timerText);
+  setRGB('--ct-timer-rgb', lightTheme.timerText);
   setRGB('--ct-scramble-rgb', lightTheme.scramble);
   setRGB('--ct-scramble-text-rgb', lightTheme.scrambleText);
 }
@@ -849,6 +849,7 @@ function partLabel(part) {
     bg: { en: 'Background', ko: '배경' },
     card: { en: 'Panels', ko: '패널' },
     text: { en: 'Text', ko: '텍스트' },
+    timerText: { en: 'Timer', ko: '타이머' },
     scramble: { en: 'Scramble Box', ko: '스크램블 박스' },
     scrambleText: { en: 'Scramble Text', ko: '스크램블 텍스트' },
   };
@@ -863,6 +864,7 @@ function syncThemeRowsUI() {
     bg: 'Bg',
     card: 'Card',
     text: 'Text',
+    timerText: 'TimerText',
     scramble: 'Scramble',
     scrambleText: 'ScrambleText',
   };
