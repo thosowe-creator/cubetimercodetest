@@ -13,6 +13,15 @@ window.showExtendedStats = () => {
     const ao50 = calculateAvg(filtered, 50);
     const ao100 = calculateAvg(filtered, 100);
     
+    const titleEl = document.getElementById('statsTitle');
+    if (titleEl) {
+        if (currentLang === 'ko') {
+            titleEl.innerText = '평균 더보기';
+        } else {
+            titleEl.innerText = appState.isAo5Mode ? 'More Average' : 'More Mean';
+        }
+    }
+
     const content = document.getElementById('statsContent');
     content.innerHTML = `
         <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl gap-2">

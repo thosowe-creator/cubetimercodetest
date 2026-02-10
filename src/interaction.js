@@ -249,6 +249,8 @@ window.openAvgShare = (type) => {
     if (overlay) {
         overlay.dataset.shareMode = 'avg';
         overlay.dataset.shareCount = String(count);
+        overlay.dataset.shareStart = '0';
+        overlay.dataset.shareSolveId = '';
     }
     document.getElementById('shareLabel').innerText = label;
     document.getElementById('shareAvg').innerText = avgValue;
@@ -295,6 +297,8 @@ window.openSingleShareById = (solveId) => {
     if (overlay) {
         overlay.dataset.shareMode = 'single';
         overlay.dataset.shareCount = '';
+        overlay.dataset.shareStart = '';
+        overlay.dataset.shareSolveId = String(solveId);
     }
 
     const listContainer = document.getElementById('shareList');
@@ -360,6 +364,8 @@ window.openBestAverageShare = () => {
     if (overlay) {
         overlay.dataset.shareMode = 'avg';
         overlay.dataset.shareCount = String(count);
+        overlay.dataset.shareStart = String(start);
+        overlay.dataset.shareSolveId = '';
     }
     document.getElementById('shareLabel').innerText = label;
     document.getElementById('shareAvg').innerText = avgValue;
@@ -407,6 +413,8 @@ window.openSingleShare = () => {
     if (overlay) {
         overlay.dataset.shareMode = 'single';
         overlay.dataset.shareCount = '';
+        overlay.dataset.shareStart = '';
+        overlay.dataset.shareSolveId = String(selectedSolveId);
     }
 
     const listContainer = document.getElementById('shareList');
@@ -450,17 +458,21 @@ window.copyShareText = async () => {
     const overlay = document.getElementById('avgShareOverlay');
     const mode = overlay?.dataset?.shareMode || '';
     const count = parseInt(overlay?.dataset?.shareCount || '0', 10);
+    const start = parseInt(overlay?.dataset?.shareStart || '0', 10);
+    const shareSolveId = parseInt(overlay?.dataset?.shareSolveId || '0', 10);
 
     const isSingle = mode === 'single';
     let text = `[CubeTimer]\n\n${date}\n\n${avgLabel} ${avgVal}\n\n`;
 
     if (isSingle) {
-        const s = appState.solves.find(x => x.id === selectedSolveId);
+        const sidForSingle = Number.isFinite(shareSolveId) && shareSolveId > 0 ? shareSolveId : selectedSolveId;
+        const s = appState.solves.find(x => x.id === sidForSingle);
         if (s) text += `1. ${avgVal}   ${s.scramble}\n`;
     } else {
         const n = (Number.isFinite(count) && count > 0) ? count : 12;
+        const st = (Number.isFinite(start) && start >= 0) ? start : 0;
         const sid = getCurrentSessionId();
-        const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(0, n);
+        const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(st, st + n);
         filtered.reverse().forEach((s, i) => {
             text += `${i + 1}. ${s.penalty === 'DNF' ? 'DNF' : formatTime(s.penalty === '+2' ? s.time + 2000 : s.time)}${s.penalty === '+2' ? '+' : ''}   ${s.scramble}\n`;
         });
