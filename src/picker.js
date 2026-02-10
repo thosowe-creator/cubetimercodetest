@@ -159,6 +159,7 @@ function ensurePickerEvents() {
 }
 
 window.openThemePicker = (part) => {
+  if (document.documentElement.classList.contains('dark')) return;
   if (!LIGHT_THEME_DEFAULTS[part]) return;
   const themeList = document.getElementById('themeSettingsView');
   const picker = document.getElementById('themePickerView');
@@ -209,6 +210,7 @@ window.closeThemePicker = () => {
 };
 
 window.openThemeSettings = () => {
+  if (document.documentElement.classList.contains('dark')) return;
   const main = document.getElementById('settingsMainView');
   const theme = document.getElementById('themeSettingsView');
   const back = document.getElementById('themeBackBtn');

@@ -130,6 +130,9 @@ function applyRestoredData(data, successMessage) {
                 updateHoldDuration(holdDurationSlider.value);
             }
             document.documentElement.classList.toggle('dark', isDark);
+            if (typeof window.setThemeSettingsAccess === 'function') {
+                window.setThemeSettingsAccess(isDark);
+            }
             if (appState.isWakeLockEnabled) requestWakeLock();
         }
         saveData();
@@ -189,6 +192,9 @@ function loadData() {
                     holdDurationValue.innerText = holdDurationSlider.value + "s";
                 }
                 document.documentElement.classList.toggle('dark', isDark);
+                if (typeof window.setThemeSettingsAccess === 'function') {
+                    window.setThemeSettingsAccess(isDark);
+                }
                 if(appState.isWakeLockEnabled) requestWakeLock();
                 const conf = configs[appState.currentEvent];
                 if (eventSelect) eventSelect.value = appState.currentEvent;
