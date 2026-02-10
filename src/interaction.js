@@ -227,17 +227,22 @@ window.deleteSession = (id) => {
 };
 window.openAvgShare = (type) => {
     const sid = getCurrentSessionId();
-    const count = (type === 'primary') ? (appState.isAo5Mode ? 5 : 3) : 12;
+    const parsedCount = Number(type);
+    const isPrimary = type === 'primary';
+    const count = isPrimary
+        ? (appState.isAo5Mode ? 5 : 3)
+        : (Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 12);
+    const isMean = isPrimary && !appState.isAo5Mode;
     const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
     if (filtered.length < count) return;
     const list = filtered.slice(0, count);
-    const avgValue = calculateAvg(filtered, count, (type === 'primary' && !appState.isAo5Mode));
+    const avgValue = calculateAvg(filtered, count, isMean);
 
     const dateStr = list[0].date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
     const datePrefix = currentLang === 'ko' ? '날짜 :' : 'Date :';
     document.getElementById('shareDate').innerText = `${datePrefix} ${dateStr}.`;
 
-    const label = (type === 'primary' && !appState.isAo5Mode)
+    const label = isMean
         ? (currentLang === 'ko' ? 'Mo3 :' : 'Mean of 3 :')
         : (currentLang === 'ko' ? `Ao${count} :` : `Average of ${count} :`);
     const overlay = document.getElementById('avgShareOverlay');
@@ -278,6 +283,118 @@ window.openAvgShare = (type) => {
 
     document.getElementById('avgShareOverlay').classList.add('active');
 };
+window.openSingleShareById = (solveId) => {
+    const s = appState.solves.find(x => x.id === solveId);
+    if (!s) return;
+    closeModal();
+    const dateStr = s.date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
+    const datePrefix = currentLang === 'ko' ? '날짜 :' : 'Date :';
+    document.getElementById('shareDate').innerText = `${datePrefix} ${dateStr}.`;
+    document.getElementById('shareLabel').innerText = (currentLang === 'ko') ? '싱글 :' : 'Single :';
+    const overlay = document.getElementById('avgShareOverlay');
+    if (overlay) {
+        overlay.dataset.shareMode = 'single';
+        overlay.dataset.shareCount = '';
+    }
+
+    const listContainer = document.getElementById('shareList');
+    listContainer.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700';
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-3';
+    const indexLabel = document.createElement('span');
+    indexLabel.className = 'text-[10px] font-bold text-slate-400 w-4';
+    indexLabel.textContent = '1.';
+    const timeLabel = document.createElement('span');
+    timeLabel.className = 'font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]';
+    const scrambleLabel = document.createElement('span');
+    scrambleLabel.className = 'text-[10px] text-slate-400 font-medium italic truncate flex-grow';
+
+    if (s.event === '333mbf' && s.mbf) {
+        const res = s.mbf.resultText || `${s.mbf.solved}/${s.mbf.attempted} ${formatClockTime(s.mbf.timeMs || s.time)}`;
+        document.getElementById('shareAvg').innerText = res;
+        timeLabel.textContent = res;
+        scrambleLabel.textContent = (s.scramble || '').toString();
+    } else {
+        const res = (s.penalty === 'DNF') ? 'DNF' : (formatTime(s.penalty === '+2' ? s.time + 2000 : s.time) + (s.penalty === '+2' ? '+' : ''));
+        document.getElementById('shareAvg').innerText = res;
+        timeLabel.textContent = res;
+        scrambleLabel.textContent = s.scramble;
+    }
+
+    row.appendChild(indexLabel);
+    row.appendChild(timeLabel);
+    row.appendChild(scrambleLabel);
+    wrapper.appendChild(row);
+    listContainer.appendChild(wrapper);
+    document.getElementById('avgShareOverlay').classList.add('active');
+};
+
+window.openBestSingleShare = () => {
+    const solveId = Number(bestSolveEl?.dataset?.solveId || '0');
+    if (!Number.isFinite(solveId) || solveId <= 0) return;
+    openSingleShareById(solveId);
+};
+
+window.openBestAverageShare = () => {
+    const start = Number(bestAverageEl?.dataset?.bestStart || '-1');
+    const count = Number(bestAverageEl?.dataset?.bestCount || '0');
+    const isMean = (bestAverageEl?.dataset?.bestIsMean || '0') === '1';
+    if (!Number.isFinite(start) || !Number.isFinite(count) || start < 0 || count <= 0) return;
+
+    const sid = getCurrentSessionId();
+    const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
+    if (filtered.length < start + count) return;
+    const list = filtered.slice(start, start + count);
+    const avgValue = calculateAvg(list, count, isMean);
+
+    const dateStr = list[0].date || new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "");
+    const datePrefix = currentLang === 'ko' ? '날짜 :' : 'Date :';
+    document.getElementById('shareDate').innerText = `${datePrefix} ${dateStr}.`;
+
+    const label = isMean
+        ? (currentLang === 'ko' ? 'Mo3 :' : 'Mean of 3 :')
+        : (currentLang === 'ko' ? `Ao${count} :` : `Average of ${count} :`);
+    const overlay = document.getElementById('avgShareOverlay');
+    if (overlay) {
+        overlay.dataset.shareMode = 'avg';
+        overlay.dataset.shareCount = String(count);
+    }
+    document.getElementById('shareLabel').innerText = label;
+    document.getElementById('shareAvg').innerText = avgValue;
+
+    const listContainer = document.getElementById('shareList');
+    listContainer.innerHTML = '';
+    list.slice().reverse().forEach((s, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex flex-col p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700';
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-3';
+
+        const indexLabel = document.createElement('span');
+        indexLabel.className = 'text-[10px] font-bold text-slate-400 w-4';
+        indexLabel.textContent = `${count - idx}.`;
+
+        const timeLabel = document.createElement('span');
+        timeLabel.className = 'font-bold text-slate-800 dark:text-slate-200 text-sm min-w-[50px]';
+        timeLabel.textContent = s.penalty === 'DNF' ? 'DNF' : `${formatTime(s.penalty === '+2' ? s.time + 2000 : s.time)}${s.penalty === '+2' ? '+' : ''}`;
+
+        const scrambleLabel = document.createElement('span');
+        scrambleLabel.className = 'text-[10px] text-slate-400 font-medium italic truncate flex-grow';
+        scrambleLabel.textContent = s.scramble;
+
+        row.appendChild(indexLabel);
+        row.appendChild(timeLabel);
+        row.appendChild(scrambleLabel);
+        wrapper.appendChild(row);
+        listContainer.appendChild(wrapper);
+    });
+
+    document.getElementById('avgShareOverlay').classList.add('active');
+};
+
 window.openSingleShare = () => {
     const s = appState.solves.find(x => x.id === selectedSolveId);
     if (!s) return;
@@ -694,8 +811,18 @@ function setupDomEventBindings() {
             case 'open-avg-share':
                 openAvgShare(actionEl.dataset.shareType);
                 break;
+            case 'open-extended-avg-share':
+                closeStatsModal();
+                openAvgShare(actionEl.dataset.shareCount);
+                break;
             case 'show-extended-stats':
                 showExtendedStats();
+                break;
+            case 'open-best-single-share':
+                openBestSingleShare();
+                break;
+            case 'open-best-average-share':
+                openBestAverageShare();
                 break;
             case 'toggle-tools-menu':
                 toggleToolsMenu(event);
