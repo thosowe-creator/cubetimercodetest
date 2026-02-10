@@ -89,6 +89,9 @@ function applyLanguageToUI() {
     if (closeBtn) closeBtn.textContent = currentLang === 'ko' ? '닫기' : 'Close';
   }
 
+  // Refresh dynamic history/footer labels that are set via updateUI().
+  try { if (typeof updateUI === 'function') updateUI(); } catch (_) {}
+
   // Finally, auto-translate remaining static UI strings & placeholders.
   // This is what makes the whole UI actually switch languages.
   try { applyAutoI18n(document); } catch (_) {}

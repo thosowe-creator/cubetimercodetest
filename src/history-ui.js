@@ -92,7 +92,7 @@ function updateUI() {
     if (moreAverageBtnEl) {
         moreAverageBtnEl.innerText = isKorean
             ? '(평균 더보기)'
-            : (appState.isAo5Mode ? '(More Average)' : '(More Mean)');
+            : '(More Average)';
     }
 
     // Stats
@@ -191,4 +191,3 @@ function updateUI() {
 
     if (activeTool === 'graph') renderHistoryGraph();
 }
-
