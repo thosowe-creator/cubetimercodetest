@@ -774,7 +774,7 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
   /* On mobile, show only ~2 items worth of height, then scroll */
   #historyList{
     flex: 0 0 auto;
-    max-height: var(--mobHistoryListMaxH, 240px);
+    max-height: var(--mobHistoryListMaxH, 140px);
     overflow-y: auto;
     padding-bottom: 0;
   }
@@ -828,6 +828,19 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
+}
+@media (max-width: 767px) {
+  #casePoolModal { max-height: 70dvh; padding: 0.85rem !important; }
+  #casePoolModal .mb-3{ margin-bottom: 0.5rem !important; }
+  #casePoolModal .space-y-3 > :not([hidden]) ~ :not([hidden]){ margin-top: 0.5rem !important; }
+  #casePoolModal .rounded-2xl{ padding: 0.6rem !important; }
+  #casePoolModal .case-pool-pill{ padding: 4px 8px; font-size: 10px; }
+  #casePoolModal .case-pool-list{ max-height: 32dvh; }
+}
+
+@media (max-width: 767px) {
+  #scrambleBox{ justify-content: flex-start; }
+  #scramble{ align-self: stretch; margin-top: 0.15rem; }
 }
 
 .case-pool-pill{
