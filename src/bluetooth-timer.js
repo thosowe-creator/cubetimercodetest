@@ -136,6 +136,7 @@ function onBTDisconnected() {
 }
 
 let currentSplitMarks = [];
+let lastSplitMarks = [];
 
 function getSolveDisplayText(solve) {
     if (solve.penalty === 'DNF') return 'DNF';
@@ -156,15 +157,16 @@ function getSplitTextFromMarks(marks) {
 
 function renderSplitLivePanel() {
     if (!splitLivePanel) return;
-    if (!isRunning || !appState.splitEnabled) {
+    const marks = isRunning ? currentSplitMarks : lastSplitMarks;
+    if (!Array.isArray(marks) || !marks.length) {
         splitLivePanel.classList.add('hidden');
         splitLivePanel.innerHTML = '';
         return;
     }
     splitLivePanel.classList.remove('hidden');
     splitLivePanel.innerHTML = '';
-    currentSplitMarks.forEach((mark, idx) => {
-        const prev = idx === 0 ? 0 : currentSplitMarks[idx - 1];
+    marks.forEach((mark, idx) => {
+        const prev = idx === 0 ? 0 : marks[idx - 1];
         const lap = Math.max(0, mark - prev);
         const row = document.createElement('div');
         row.className = 'split-row';
@@ -213,6 +215,7 @@ function startTimer() {
     if(inspectionInterval) clearInterval(inspectionInterval);
     inspectionState = 'none';
     currentSplitMarks = [];
+    lastSplitMarks = [];
     renderSplitLivePanel();
     // High-precision timer loop (prevents interval drift)
     startPerf = performance.now();
@@ -257,10 +260,14 @@ function stopTimer(forcedTime = null) {
         timerEl.innerText = formatTime(elapsed);
         statusHint.innerText = "Enter MBF Result";
         openMbfResultModal({ defaultTimeMs: elapsed });
+        currentSplitMarks = [];
+        lastSplitMarks = [];
+        renderSplitLivePanel();
         saveData();
         return;
     }
     let finalPenalty = inspectionPenalty;
+    lastSplitMarks = currentSplitMarks.slice();
     if (elapsed > 10 || finalPenalty === 'DNF') {
         const splitMarks = (appState.splitEnabled && currentSplitMarks.length)
             ? currentSplitMarks.map(v => Math.round(v))
