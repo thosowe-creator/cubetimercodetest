@@ -56,7 +56,17 @@ function handleStart(e) {
     if (isBtConnected && !isInspectionMode) return; 
     
     if(e && e.cancelable) e.preventDefault();
-    if(isManualMode || isRunning) { if(isRunning) stopTimer(); return; }
+    if (isRunning) {
+        const isTouchSplit = e && e.type === 'touchstart';
+        if (isTouchSplit && appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function') {
+            const elapsed = performance.now() - startPerf;
+            window.pushSplitMark(elapsed);
+            return;
+        }
+        stopTimer();
+        return;
+    }
+    if (isManualMode) return;
     
     // Inspection Logic Handling
     if (isInspectionMode && inspectionState === 'none') {
