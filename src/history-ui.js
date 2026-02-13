@@ -50,6 +50,14 @@ function updateUI() {
             timeText.textContent = solvePrimaryText(s);
             recordWrap.appendChild(timeText);
 
+            const splitText = (typeof getSplitTextForSolve === 'function') ? getSplitTextForSolve(s) : '';
+            if (splitText) {
+                const splitEl = document.createElement('span');
+                splitEl.className = 'text-[10px] font-bold text-slate-400 truncate';
+                splitEl.textContent = splitText;
+                recordWrap.appendChild(splitEl);
+            }
+
             const controls = document.createElement('div');
             controls.className = 'flex items-center gap-2';
 

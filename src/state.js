@@ -31,6 +31,8 @@ let inspectionPenalty = null; // null, '+2', 'DNF'
 let hasSpoken8 = false;
 let hasSpoken12 = false;
 let lastStopTimestamp = 0;
+let splitEnabled = false;
+let splitCount = 4;
 
 const appState = {
     get solves() {
@@ -80,6 +82,19 @@ const appState = {
     },
     set isInspectionMode(value) {
         isInspectionMode = value;
+    },
+    get splitEnabled() {
+        return splitEnabled;
+    },
+    set splitEnabled(value) {
+        splitEnabled = !!value;
+    },
+    get splitCount() {
+        return splitCount;
+    },
+    set splitCount(value) {
+        const n = Number(value);
+        splitCount = Number.isFinite(n) ? Math.min(8, Math.max(2, Math.round(n))) : 4;
     },
 };
 
