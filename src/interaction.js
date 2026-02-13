@@ -35,6 +35,10 @@ function getSolveShareTimeText(solve) {
     return `${formatTime(solve.penalty === '+2' ? solve.time + 2000 : solve.time)}${solve.penalty === '+2' ? '+' : ''}`;
 }
 
+function getSplitLabel() {
+    return currentLang === 'ko' ? '스플릿' : 'Split';
+}
+
 function appendSplitShareLine(container, solve) {
     const splitText = getSplitTextForSolve(solve);
     if (!splitText) return;
