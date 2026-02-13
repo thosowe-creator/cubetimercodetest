@@ -72,10 +72,15 @@ function renderHistoryGraph() {
     const maxTime = Math.max(...validTimes.filter(t => t !== null));
     const minTime = Math.min(...validTimes.filter(t => t !== null));
     const range = maxTime - minTime || 1;
+    const chartLeft = 4;
+    const chartRight = 98;
+    const chartTop = 12;
+    const chartBottom = 90;
+
     const points = filtered.map((s, i) => {
         const t = s.penalty === 'DNF' ? maxTime : (s.penalty === '+2' ? s.time + 2000 : s.time);
-        const x = (i / (filtered.length - 1)) * 100;
-        const y = 90 - ((t - minTime) / range) * 80;
+        const x = chartLeft + (i / (filtered.length - 1)) * (chartRight - chartLeft);
+        const y = chartBottom - ((t - minTime) / range) * (chartBottom - chartTop);
         return `${x},${y}`;
     }).join(' ');
     polyline.setAttribute('points', points);
