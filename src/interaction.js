@@ -33,12 +33,16 @@ function getSolveShareTimeText(solve) {
     return `${formatTime(solve.penalty === '+2' ? solve.time + 2000 : solve.time)}${solve.penalty === '+2' ? '+' : ''}`;
 }
 
+function getSplitLabel() {
+    return currentLang === 'ko' ? '스플릿' : 'Split';
+}
+
 function appendSplitShareLine(container, solve) {
     const splitText = getSplitTextForSolve(solve);
     if (!splitText) return;
     const splitLine = document.createElement('div');
     splitLine.className = 'mt-2 text-[10px] text-slate-400 font-bold break-all';
-    splitLine.textContent = `Split: ${splitText}`;
+    splitLine.textContent = `${getSplitLabel()}: ${splitText}`;
     container.appendChild(splitLine);
 }
 
@@ -614,14 +618,14 @@ window.copyShareText = async () => {
     if (isSingle) {
         const sidForSingle = Number.isFinite(shareSolveId) && shareSolveId > 0 ? shareSolveId : selectedSolveId;
         const s = appState.solves.find(x => x.id === sidForSingle);
-        if (s) { text += `1. ${avgVal}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`; }
+        if (s) { text += `1. ${avgVal}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   ${getSplitLabel()}: ${splitText}\n`; }
     } else {
         const n = (Number.isFinite(count) && count > 0) ? count : 12;
         const st = (Number.isFinite(start) && start >= 0) ? start : 0;
         const sid = getCurrentSessionId();
         const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(st, st + n);
         filtered.reverse().forEach((s, i) => {
-            text += `${i + 1}. ${getSolveShareTimeText(s)}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`;
+            text += `${i + 1}. ${getSolveShareTimeText(s)}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   ${getSplitLabel()}: ${splitText}\n`;
         });
     }
 
