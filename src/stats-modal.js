@@ -12,6 +12,8 @@ window.showExtendedStats = () => {
     const ao25 = calculateAvg(filtered, 25);
     const ao50 = calculateAvg(filtered, 50);
     const ao100 = calculateAvg(filtered, 100);
+    const overallCount = filtered.length;
+    const overallAvg = overallCount > 0 ? calculateAvg(filtered, overallCount) : '-';
 
     const bestAo25 = findBestAverageWindow(filtered, 25);
     const bestAo50 = findBestAverageWindow(filtered, 50);
@@ -30,6 +32,19 @@ window.showExtendedStats = () => {
     const leftTitle = isKo ? '최고' : 'Best';
     const rightTitle = isKo ? '현재' : 'Current';
     const shareText = isKo ? '공유' : 'Share';
+    const overallTitle = isKo ? '전체 평균' : 'Session Average';
+
+    const renderOverall = () => `
+        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+            <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 flex items-center justify-between gap-3">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black uppercase tracking-wide text-slate-400">${overallTitle}</span>
+                    <span class="text-base font-bold text-slate-700 dark:text-white">${overallAvg}</span>
+                </div>
+                <button data-action="open-extended-avg-share" data-share-count="${overallCount}" class="px-2 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white disabled:opacity-40 disabled:cursor-not-allowed" ${overallCount > 0 ? '' : 'disabled'}>${shareText}</button>
+            </div>
+        </div>
+    `;
 
     const renderRow = (count, best, current) => `
         <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
@@ -56,6 +71,7 @@ window.showExtendedStats = () => {
 
     const content = document.getElementById('statsContent');
     content.innerHTML = `
+        ${renderOverall()}
         ${renderRow(25, bestAo25, ao25)}
         ${renderRow(50, bestAo50, ao50)}
         ${renderRow(100, bestAo100, ao100)}
