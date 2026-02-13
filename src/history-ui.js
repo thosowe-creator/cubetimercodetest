@@ -40,7 +40,7 @@ function updateUI() {
             row.dataset.solveId = String(s.id);
 
             const rowGrid = document.createElement('div');
-            rowGrid.className = 'grid grid-cols-[minmax(0,1fr)_64px_64px] gap-2 items-center';
+            rowGrid.className = 'grid grid-cols-[minmax(0,1fr)_80px_80px] gap-2 items-center';
 
             const recordWrap = document.createElement('div');
             recordWrap.className = 'min-w-0 flex flex-col gap-2';
@@ -82,7 +82,7 @@ function updateUI() {
             recordWrap.appendChild(controls);
 
             const ao5El = document.createElement('span');
-            ao5El.className = `text-xs font-bold text-center ${ao5AtSolve !== '-' ? 'text-blue-600 dark:text-blue-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao5El.className = `text-sm font-bold text-right pr-1 ${ao5AtSolve !== '-' ? 'text-blue-600 dark:text-blue-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
             ao5El.textContent = ao5AtSolve;
             if (ao5AtSolve !== '-') {
                 ao5El.dataset.action = 'open-history-avg-share';
@@ -91,7 +91,7 @@ function updateUI() {
             }
 
             const ao12El = document.createElement('span');
-            ao12El.className = `text-xs font-bold text-center ${ao12AtSolve !== '-' ? 'text-purple-600 dark:text-purple-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao12El.className = `text-sm font-bold text-right pr-1 ${ao12AtSolve !== '-' ? 'text-purple-600 dark:text-purple-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
             ao12El.textContent = ao12AtSolve;
             if (ao12AtSolve !== '-') {
                 ao12El.dataset.action = 'open-history-avg-share';
