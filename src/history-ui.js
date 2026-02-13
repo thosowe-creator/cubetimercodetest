@@ -29,16 +29,26 @@ function updateUI() {
         empty.textContent = 'No solves yet';
         historyList.appendChild(empty);
     } else {
-        subset.forEach((s) => {
+        subset.forEach((s, solveIndex) => {
+            const rowSlice = filtered.slice(solveIndex);
+            const ao5AtSolve = s.event === '333mbf' ? '-' : calculateAvg(rowSlice, 5);
+            const ao12AtSolve = s.event === '333mbf' ? '-' : calculateAvg(rowSlice, 12);
+
             const row = document.createElement('div');
-            row.className = 'bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 rounded-xl flex justify-between items-center group cursor-pointer hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all';
+            row.className = 'bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 rounded-xl group cursor-pointer hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all';
             row.dataset.action = 'show-solve-details';
             row.dataset.solveId = String(s.id);
 
+            const rowGrid = document.createElement('div');
+            rowGrid.className = 'grid grid-cols-[minmax(0,1fr)_64px_64px] gap-2 items-center';
+
+            const recordWrap = document.createElement('div');
+            recordWrap.className = 'min-w-0 flex flex-col gap-2';
+
             const timeText = document.createElement('span');
-            timeText.className = 'font-bold text-slate-700 dark:text-slate-200 text-sm';
+            timeText.className = 'font-bold text-slate-700 dark:text-slate-200 text-sm truncate';
             timeText.textContent = solvePrimaryText(s);
-            row.appendChild(timeText);
+            recordWrap.appendChild(timeText);
 
             const controls = document.createElement('div');
             controls.className = 'flex items-center gap-2';
@@ -69,7 +79,30 @@ function updateUI() {
             deleteBtn.textContent = '×';
             controls.appendChild(deleteBtn);
 
-            row.appendChild(controls);
+            recordWrap.appendChild(controls);
+
+            const ao5El = document.createElement('span');
+            ao5El.className = `text-xs font-bold text-center ${ao5AtSolve !== '-' ? 'text-blue-600 dark:text-blue-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao5El.textContent = ao5AtSolve;
+            if (ao5AtSolve !== '-') {
+                ao5El.dataset.action = 'open-history-avg-share';
+                ao5El.dataset.shareCount = '5';
+                ao5El.dataset.shareStart = String(solveIndex);
+            }
+
+            const ao12El = document.createElement('span');
+            ao12El.className = `text-xs font-bold text-center ${ao12AtSolve !== '-' ? 'text-purple-600 dark:text-purple-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao12El.textContent = ao12AtSolve;
+            if (ao12AtSolve !== '-') {
+                ao12El.dataset.action = 'open-history-avg-share';
+                ao12El.dataset.shareCount = '12';
+                ao12El.dataset.shareStart = String(solveIndex);
+            }
+
+            rowGrid.appendChild(recordWrap);
+            rowGrid.appendChild(ao5El);
+            rowGrid.appendChild(ao12El);
+            row.appendChild(rowGrid);
             historyList.appendChild(row);
         });
     }
@@ -91,8 +124,8 @@ function updateUI() {
     }
     if (moreAverageBtnEl) {
         moreAverageBtnEl.innerText = isKorean
-            ? '(평균 더보기)'
-            : '(More Average)';
+            ? '(평균 상세)'
+            : '(Average Details)';
     }
 
     // Stats
