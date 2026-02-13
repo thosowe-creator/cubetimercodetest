@@ -15,6 +15,33 @@ function getReadyColor(baseColor) {
     return '#10b981';
 }
 window.getReadyColor = getReadyColor;
+
+function getSplitTextForSolve(solve) {
+    if (!solve || !Array.isArray(solve.splitMarks) || !solve.splitMarks.length) return '';
+    if (typeof window.getSplitTextFromMarks === 'function') return window.getSplitTextFromMarks(solve.splitMarks);
+    let prev = 0;
+    return solve.splitMarks.map((m) => {
+        const lap = Math.max(0, Number(m) - prev);
+        prev = Number(m);
+        return formatTime(lap);
+    }).join(' + ');
+}
+
+function getSolveShareTimeText(solve) {
+    if (typeof window.getSolveDisplayText === 'function') return window.getSolveDisplayText(solve);
+    if (solve.penalty === 'DNF') return 'DNF';
+    return `${formatTime(solve.penalty === '+2' ? solve.time + 2000 : solve.time)}${solve.penalty === '+2' ? '+' : ''}`;
+}
+
+function appendSplitShareLine(container, solve) {
+    const splitText = getSplitTextForSolve(solve);
+    if (!splitText) return;
+    const splitLine = document.createElement('div');
+    splitLine.className = 'mt-2 text-[10px] text-slate-400 font-bold break-all';
+    splitLine.textContent = `Split: ${splitText}`;
+    container.appendChild(splitLine);
+}
+
 function handleStart(e) {
     // [FIX] Ignore touches on interactive elements like badges or buttons
     // This allows clicking on stats/settings without triggering the timer
@@ -280,6 +307,7 @@ window.openAvgShare = (type) => {
         row.appendChild(timeLabel);
         row.appendChild(scrambleLabel);
         wrapper.appendChild(row);
+        appendSplitShareLine(wrapper, s);
         listContainer.appendChild(wrapper);
     });
 
@@ -331,6 +359,7 @@ window.openSingleShareById = (solveId) => {
     row.appendChild(timeLabel);
     row.appendChild(scrambleLabel);
     wrapper.appendChild(row);
+    appendSplitShareLine(wrapper, s);
     listContainer.appendChild(wrapper);
     document.getElementById('avgShareOverlay').classList.add('active');
 };
@@ -395,6 +424,7 @@ window.openBestAverageShare = () => {
         row.appendChild(timeLabel);
         row.appendChild(scrambleLabel);
         wrapper.appendChild(row);
+        appendSplitShareLine(wrapper, s);
         listContainer.appendChild(wrapper);
     });
 
@@ -452,6 +482,7 @@ window.openExtendedBestAvgShare = (countRaw, startRaw) => {
         row.appendChild(timeLabel);
         row.appendChild(scrambleLabel);
         wrapper.appendChild(row);
+        appendSplitShareLine(wrapper, s);
         listContainer.appendChild(wrapper);
     });
 
@@ -509,6 +540,7 @@ window.openHistoryAvgShare = (countRaw, startRaw) => {
         row.appendChild(timeLabel);
         row.appendChild(scrambleLabel);
         wrapper.appendChild(row);
+        appendSplitShareLine(wrapper, s);
         listContainer.appendChild(wrapper);
     });
 
@@ -561,6 +593,7 @@ window.openSingleShare = () => {
     row.appendChild(timeLabel);
     row.appendChild(scrambleLabel);
     wrapper.appendChild(row);
+    appendSplitShareLine(wrapper, s);
     listContainer.appendChild(wrapper);
     document.getElementById('avgShareOverlay').classList.add('active');
 };
@@ -581,14 +614,14 @@ window.copyShareText = async () => {
     if (isSingle) {
         const sidForSingle = Number.isFinite(shareSolveId) && shareSolveId > 0 ? shareSolveId : selectedSolveId;
         const s = appState.solves.find(x => x.id === sidForSingle);
-        if (s) text += `1. ${avgVal}   ${s.scramble}\n`;
+        if (s) { text += `1. ${avgVal}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`; }
     } else {
         const n = (Number.isFinite(count) && count > 0) ? count : 12;
         const st = (Number.isFinite(start) && start >= 0) ? start : 0;
         const sid = getCurrentSessionId();
         const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(st, st + n);
         filtered.reverse().forEach((s, i) => {
-            text += `${i + 1}. ${s.penalty === 'DNF' ? 'DNF' : formatTime(s.penalty === '+2' ? s.time + 2000 : s.time)}${s.penalty === '+2' ? '+' : ''}   ${s.scramble}\n`;
+            text += `${i + 1}. ${getSolveShareTimeText(s)}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`;
         });
     }
 
@@ -635,6 +668,13 @@ window.addEventListener('keydown', (e) => {
         // Prevent default always, including key repeat, to stop page scrolling.
         e.preventDefault();
         e.stopPropagation();
+        if (isRunning) {
+            if (!e.repeat && appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function') {
+                const elapsed = performance.now() - startPerf;
+                window.pushSplitMark(elapsed);
+            }
+            return;
+        }
         if (!e.repeat) handleStart(e);
         return;
     }
@@ -705,6 +745,14 @@ window.showSolveDetails = (id) => {
         if (useBtn) useBtn.classList.remove('hidden');
     }
 
+    const splitSection = document.getElementById('modalSplitSection');
+    const splitTextEl = document.getElementById('modalSplitText');
+    const splitText = getSplitTextForSolve(s);
+    if (splitSection && splitTextEl) {
+        splitSection.classList.toggle('hidden', !splitText);
+        splitTextEl.innerText = splitText || '-';
+    }
+
     if (overlay) overlay.classList.add('active');
 };
 window.closeModal = () => document.getElementById('modalOverlay').classList.remove('active');
@@ -723,6 +771,8 @@ window.useThisScramble = () => {
 precisionToggle.onchange = e => { appState.precision = e.target.checked?3:2; updateUI(); timerEl.innerText=(0).toFixed(appState.precision); saveData(); };
 avgModeToggle.onchange = e => { appState.isAo5Mode = e.target.checked; updateUI(); saveData(); };
 manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.classList.toggle('hidden', isManualMode); manualInput.classList.toggle('hidden', !isManualMode); statusHint.innerText = isManualMode ? (currentLang === 'ko' ? '시간 입력 후 Enter' : 'Type time & Enter') : t('holdToReady'); };
+if (splitToggle) splitToggle.checked = appState.splitEnabled;
+if (splitCountSelect) splitCountSelect.value = String(appState.splitCount || 4);
 document.getElementById('clearHistoryBtn').onclick = () => {
   const sid = getCurrentSessionId();
   const msg = 'Clear all history for this session?';
@@ -762,6 +812,18 @@ function setupDomEventBindings() {
 
     const holdDurationSliderEl = document.getElementById('holdDurationSlider');
     if (holdDurationSliderEl) holdDurationSliderEl.addEventListener('input', (event) => updateHoldDuration(event.target.value));
+
+    const splitToggleEl = document.getElementById('splitToggle');
+    if (splitToggleEl) splitToggleEl.addEventListener('change', (event) => {
+        appState.splitEnabled = event.target.checked;
+        saveData();
+    });
+
+    const splitCountSelectEl = document.getElementById('splitCountSelect');
+    if (splitCountSelectEl) splitCountSelectEl.addEventListener('change', (event) => {
+        appState.splitCount = Number(event.target.value);
+        saveData();
+    });
 
     const eventSelectEl = document.getElementById('eventSelect');
     if (eventSelectEl) eventSelectEl.addEventListener('change', (event) => changeEvent(event.target.value));

@@ -217,6 +217,27 @@
                     </div>
                     <label class="switch"><input type="checkbox" id="inspectionToggle"><span class="slider"></span></label>
                 </div>
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700" id="splitSettingsContainer">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Split Timer (Space)</p>
+                            <p class="text-[9px] text-slate-400 font-medium">Splits Record</p>
+                        </div>
+                        <label class="switch"><input type="checkbox" id="splitToggle"><span class="slider"></span></label>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                        <p class="text-[10px] font-bold text-slate-500">Split Count</p>
+                        <select id="splitCountSelect" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-600 dark:text-slate-200 outline-none">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4" selected>4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl" id="holdDurationContainer">
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Hold Duration</p>
@@ -473,6 +494,10 @@
                 <span class="text-[9px] font-bold text-slate-400 uppercase">Scramble</span>
                 <div id="modalScramble" class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-slate-600 dark:text-slate-300 font-bold text-xs leading-relaxed border border-slate-100 dark:border-slate-700 italic whitespace-pre-line">-</div>
             </div>
+            <div id="modalSplitSection" class="space-y-1.5 mb-6 hidden">
+                <span class="text-[9px] font-bold text-slate-400 uppercase">Splits</span>
+                <div id="modalSplitText" class="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl text-slate-500 dark:text-slate-300 font-bold text-[11px] leading-relaxed border border-slate-100 dark:border-slate-700">-</div>
+            </div>
             <div class="flex flex-col gap-2">
                 <button data-action="open-single-share" class="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">Share Single</button>
                 <div class="flex gap-2">
@@ -656,7 +681,8 @@
             <!-- Timer Area -->
             <div id="timerContainer" class="flex flex-col items-center justify-center flex-grow w-full select-none timer-center-shift">
                 <div id="timerInteractiveArea" class="rounded-3xl transition-colors hover:bg-slate-100/30 dark:hover:bg-slate-800/30 w-full h-full flex flex-col justify-center items-center">
-                    <div id="timerDisplayContainer" class="w-full flex justify-center">
+                    <div id="timerDisplayContainer" class="w-full flex justify-center items-start gap-4 md:gap-6">
+                        <div id="splitLivePanel" class="hidden w-[120px] max-h-[160px] overflow-y-auto custom-scroll rounded-xl border border-slate-100 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-2.5 space-y-1.5 text-left"></div>
                         <div id="timer" class="timer-display dark:text-slate-100 transition-all duration-100">0.00</div>
                         <input type="text" id="manualInput" class="manual-input hidden text-blue-500 dark:text-blue-400" placeholder="0.00">
                     </div>

@@ -72,6 +72,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Average Mode', ko: '평균 모드' },
   { en: 'Manual Entry', ko: '수동 입력' },
   { en: 'Precision', ko: '소숫점' },
+  { en: 'Splits Record', ko: '스플릿 기록' },
   { en: 'Account', ko: '계정' },
   { en: 'Login', ko: '로그인' },
   { en: 'Sign Up', ko: '가입' },
