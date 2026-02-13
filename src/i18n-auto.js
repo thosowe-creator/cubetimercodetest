@@ -86,8 +86,9 @@ const AUTO_I18N_PAIRS = [
   { en: 'Best Average', ko: '최고 평균' },
   { en: 'Best Mean', ko: '최고 평균' },
   { en: '(More)', ko: '(더보기)' },
-  { en: 'More Average', ko: '평균 더보기' },
-  { en: 'More Mean', ko: '평균 더보기' },
+  { en: 'More Average', ko: '평균 상세' },
+  { en: 'More Mean', ko: '평균 상세' },
+  { en: 'Average Details', ko: '평균 상세' },
 
   // Scramble status defaults
   { en: 'Generating...', ko: '생성 중…' },

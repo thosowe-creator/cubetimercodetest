@@ -12,6 +12,8 @@ window.showExtendedStats = () => {
     const ao25 = calculateAvg(filtered, 25);
     const ao50 = calculateAvg(filtered, 50);
     const ao100 = calculateAvg(filtered, 100);
+    const overallCount = filtered.length;
+    const overallAvg = overallCount > 0 ? calculateAvg(filtered, overallCount) : '-';
 
     const bestAo25 = findBestAverageWindow(filtered, 25);
     const bestAo50 = findBestAverageWindow(filtered, 50);
@@ -20,16 +22,27 @@ window.showExtendedStats = () => {
     const titleEl = document.getElementById('statsTitle');
     if (titleEl) {
         if (currentLang === 'ko') {
-            titleEl.innerText = '평균 더보기';
+            titleEl.innerText = '평균 상세';
         } else {
-            titleEl.innerText = 'More Average';
+            titleEl.innerText = 'Average Details';
         }
     }
 
     const isKo = currentLang === 'ko';
     const leftTitle = isKo ? '최고' : 'Best';
     const rightTitle = isKo ? '현재' : 'Current';
-    const shareText = isKo ? '공유' : 'Share';
+    const overallTitle = isKo ? '전체 평균' : 'Session Average';
+
+    const renderOverall = () => `
+        <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+            <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 flex items-center justify-between gap-3">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black uppercase tracking-wide text-slate-400">${overallTitle}</span>
+                    <span ${overallCount > 0 ? `data-action="open-extended-avg-share" data-share-count="${overallCount}"` : ''} class="text-base font-bold ${overallCount > 0 ? 'text-blue-600 dark:text-blue-400 cursor-pointer hover:underline' : 'text-slate-700 dark:text-white'}">${overallAvg}</span>
+                </div>
+            </div>
+        </div>
+    `;
 
     const renderRow = (count, best, current) => `
         <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
@@ -39,16 +52,14 @@ window.showExtendedStats = () => {
                         <span class="text-[10px] font-black uppercase tracking-wide text-slate-400">${leftTitle}</span>
                         <span class="text-[10px] font-black text-slate-500 dark:text-slate-400">Ao${count}</span>
                     </div>
-                    <span class="text-base font-bold text-slate-700 dark:text-white">${best.value}</span>
-                    <button data-action="open-extended-best-avg-share" data-share-count="${count}" data-share-start="${best.start}" class="px-2 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white disabled:opacity-40 disabled:cursor-not-allowed" ${best.canShare ? '' : 'disabled'}>${shareText}</button>
+                    <span ${best.canShare ? `data-action="open-extended-best-avg-share" data-share-count="${count}" data-share-start="${best.start}"` : ''} class="text-base font-bold ${best.canShare ? 'text-blue-600 dark:text-blue-400 cursor-pointer hover:underline' : 'text-slate-700 dark:text-white'}">${best.value}</span>
                 </div>
                 <div class="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 flex flex-col gap-2">
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-black uppercase tracking-wide text-slate-400">${rightTitle}</span>
                         <span class="text-[10px] font-black text-slate-500 dark:text-slate-400">Ao${count}</span>
                     </div>
-                    <span class="text-base font-bold text-slate-700 dark:text-white">${current}</span>
-                    <button data-action="open-extended-avg-share" data-share-count="${count}" class="px-2 py-1.5 text-[10px] font-bold rounded-lg bg-blue-600 text-white disabled:opacity-40 disabled:cursor-not-allowed" ${current !== '-' ? '' : 'disabled'}>${shareText}</button>
+                    <span ${current !== '-' ? `data-action="open-extended-avg-share" data-share-count="${count}"` : ''} class="text-base font-bold ${current !== '-' ? 'text-blue-600 dark:text-blue-400 cursor-pointer hover:underline' : 'text-slate-700 dark:text-white'}">${current}</span>
                 </div>
             </div>
         </div>
@@ -56,6 +67,7 @@ window.showExtendedStats = () => {
 
     const content = document.getElementById('statsContent');
     content.innerHTML = `
+        ${renderOverall()}
         ${renderRow(25, bestAo25, ao25)}
         ${renderRow(50, bestAo50, ao50)}
         ${renderRow(100, bestAo100, ao100)}
