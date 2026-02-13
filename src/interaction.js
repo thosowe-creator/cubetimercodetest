@@ -668,6 +668,14 @@ window.copyShareText = async () => {
         console.error('Copy failed', err);
     }
 };
+// Keyboard flow policy (Space):
+// - keydown handles immediate actions while pressed.
+//   * idle -> hold-to-ready/start via handleStart
+//   * running + split ON -> short tap adds split, long press (key repeat) stops
+//   * running + split OFF -> first keydown stops immediately
+// - keyup finalizes hold/release behavior via handleEnd.
+let splitLongPressStopTriggered = false;
+
 window.addEventListener('keydown', (e) => {
     const tag = (document.activeElement?.tagName || '').toUpperCase();
     const isTypingTarget = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
@@ -686,9 +694,21 @@ window.addEventListener('keydown', (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (isRunning) {
-            if (!e.repeat && appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function') {
-                const elapsed = performance.now() - startPerf;
-                window.pushSplitMark(elapsed);
+            const canSplit = appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function';
+            if (canSplit) {
+                // Split mode policy while running:
+                // - short tap (non-repeat): push split mark
+                // - long press (repeat): stop timer once
+                if (!e.repeat) {
+                    splitLongPressStopTriggered = false;
+                    const elapsed = performance.now() - startPerf;
+                    window.pushSplitMark(elapsed);
+                } else if (!splitLongPressStopTriggered) {
+                    splitLongPressStopTriggered = true;
+                    stopTimer();
+                }
+            } else if (!e.repeat) {
+                stopTimer();
             }
             return;
         }
@@ -720,6 +740,7 @@ window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') {
         e.preventDefault();
         e.stopPropagation();
+        splitLongPressStopTriggered = false;
         if (!editingSessionId) handleEnd(e);
     }
 }, { capture: true });
