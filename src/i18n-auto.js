@@ -66,13 +66,14 @@ const AUTO_I18N_PAIRS = [
   // Settings rows
   { en: 'Dark Mode', ko: '다크 모드' },
   { en: 'Prevent Sleep (Wake Lock)', ko: '화면 꺼짐 방지(Wake Lock)' },
-  { en: 'Inspection', ko: '인스펙션' },
+  { en: 'Inspection', ko: '미리보기' },
   { en: '15s countdown + voice', ko: '15초 카운트다운 + 음성' },
   { en: 'Hold Duration', ko: '홀드 시간' },
   { en: 'Average Mode', ko: '평균 모드' },
   { en: 'Manual Entry', ko: '수동 입력' },
   { en: 'Precision', ko: '소숫점' },
-  { en: 'Splits Record', ko: '스플릿 기록' },
+  { en: 'Split Timer', ko: '스플릿 타이머' },
+  { en: 'Split Count', ko: '스플릿 개수' },
   { en: 'Account', ko: '계정' },
   { en: 'Login', ko: '로그인' },
   { en: 'Sign Up', ko: '가입' },
@@ -105,6 +106,17 @@ const AUTO_I18N_PAIRS = [
   { en: 'Date :', ko: '날짜 :' },
 ];
 
+
+const AUTO_I18N_LEGACY_NORMALIZE = new Map([
+  ['Inspection - Preview', 'Inspection'],
+  ['인스펙션 - 미리보기', '미리보기'],
+]);
+
+function normalizeAutoI18nText(text) {
+  const t = String(text || '').trim();
+  return AUTO_I18N_LEGACY_NORMALIZE.get(t) || t;
+}
+
 const AUTO_I18N_LOOKUP = (() => {
   const map = new Map();
   for (const p of AUTO_I18N_PAIRS) {
@@ -126,17 +138,17 @@ function applyAutoI18n(root = document) {
   try {
     const scope = root.querySelectorAll ? root : document;
     for (const el of scope.querySelectorAll('input[placeholder], textarea[placeholder]')) {
-      const ph = (el.getAttribute('placeholder') || '').trim();
+      const ph = normalizeAutoI18nText(el.getAttribute('placeholder'));
       const pair = AUTO_I18N_LOOKUP.get(ph);
       if (pair) el.setAttribute('placeholder', pair[targetLang]);
     }
 
     // Translate common label attributes
     for (const el of scope.querySelectorAll('[aria-label],[title]')) {
-      const aria = (el.getAttribute('aria-label') || '').trim();
+      const aria = normalizeAutoI18nText(el.getAttribute('aria-label'));
       const pairA = aria ? AUTO_I18N_LOOKUP.get(aria) : null;
       if (pairA) el.setAttribute('aria-label', pairA[targetLang]);
-      const title = (el.getAttribute('title') || '').trim();
+      const title = normalizeAutoI18nText(el.getAttribute('title'));
       const pairT = title ? AUTO_I18N_LOOKUP.get(title) : null;
       if (pairT) el.setAttribute('title', pairT[targetLang]);
     }
@@ -146,14 +158,14 @@ function applyAutoI18n(root = document) {
       const type = (el.getAttribute('type') || '').toLowerCase();
       // Only touch value for button-like inputs to avoid corrupting user data.
       if (!['button', 'submit', 'reset'].includes(type)) continue;
-      const v = (el.getAttribute('value') || '').trim();
+      const v = normalizeAutoI18nText(el.getAttribute('value'));
       const pairV = v ? AUTO_I18N_LOOKUP.get(v) : null;
       if (pairV) el.setAttribute('value', pairV[targetLang]);
     }
 
     // Translate data-* label helpers if present
     for (const el of scope.querySelectorAll('[data-label]')) {
-      const v = (el.getAttribute('data-label') || '').trim();
+      const v = normalizeAutoI18nText(el.getAttribute('data-label'));
       const pairV = v ? AUTO_I18N_LOOKUP.get(v) : null;
       if (pairV) el.setAttribute('data-label', pairV[targetLang]);
     }
@@ -173,7 +185,7 @@ function applyAutoI18n(root = document) {
         // Skip script/style/noscript
         const tag = (parent.tagName || '').toUpperCase();
         if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
-        const txt = (node.nodeValue || '').trim();
+        const txt = normalizeAutoI18nText(node.nodeValue);
         if (!txt) return NodeFilter.FILTER_REJECT;
         // Exact-match only (avoid touching dynamic numbers)
         if (!AUTO_I18N_LOOKUP.has(txt)) return NodeFilter.FILTER_REJECT;
@@ -186,7 +198,7 @@ function applyAutoI18n(root = document) {
   let node;
   while ((node = walker.nextNode())) {
     const raw = (node.nodeValue || '');
-    const trimmed = raw.trim();
+    const trimmed = normalizeAutoI18nText(raw);
     const pair = AUTO_I18N_LOOKUP.get(trimmed);
     if (!pair) continue;
     // Preserve leading/trailing whitespace
