@@ -152,7 +152,8 @@ function getSplitTextFromMarks(marks) {
         prev = Number(m);
         return formatTime(lap);
     });
-    return laps.join(' + ');
+    const total = formatTime(Number(marks[marks.length - 1]) || 0);
+    return `${total}=${laps.join('+')}`;
 }
 
 function renderSplitLivePanel() {

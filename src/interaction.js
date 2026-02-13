@@ -20,11 +20,13 @@ function getSplitTextForSolve(solve) {
     if (!solve || !Array.isArray(solve.splitMarks) || !solve.splitMarks.length) return '';
     if (typeof window.getSplitTextFromMarks === 'function') return window.getSplitTextFromMarks(solve.splitMarks);
     let prev = 0;
-    return solve.splitMarks.map((m) => {
+    const laps = solve.splitMarks.map((m) => {
         const lap = Math.max(0, Number(m) - prev);
         prev = Number(m);
         return formatTime(lap);
-    }).join(' + ');
+    });
+    const total = formatTime(Number(solve.splitMarks[solve.splitMarks.length - 1]) || 0);
+    return `${total}=${laps.join('+')}`;
 }
 
 function getSolveShareTimeText(solve) {
@@ -38,7 +40,7 @@ function appendSplitShareLine(container, solve) {
     if (!splitText) return;
     const splitLine = document.createElement('div');
     splitLine.className = 'mt-2 text-[10px] text-slate-400 font-bold break-all';
-    splitLine.textContent = `Split: ${splitText}`;
+    splitLine.textContent = splitText;
     container.appendChild(splitLine);
 }
 
@@ -614,14 +616,15 @@ window.copyShareText = async () => {
     if (isSingle) {
         const sidForSingle = Number.isFinite(shareSolveId) && shareSolveId > 0 ? shareSolveId : selectedSolveId;
         const s = appState.solves.find(x => x.id === sidForSingle);
-        if (s) { text += `1. ${avgVal}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`; }
+        if (s) { const splitText = getSplitTextForSolve(s); text += `1. ${splitText || avgVal}   ${s.scramble}\n`; }
     } else {
         const n = (Number.isFinite(count) && count > 0) ? count : 12;
         const st = (Number.isFinite(start) && start >= 0) ? start : 0;
         const sid = getCurrentSessionId();
         const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid).slice(st, st + n);
         filtered.reverse().forEach((s, i) => {
-            text += `${i + 1}. ${getSolveShareTimeText(s)}   ${s.scramble}\n`; const splitText = getSplitTextForSolve(s); if (splitText) text += `   Split: ${splitText}\n`;
+            const splitText = getSplitTextForSolve(s);
+            text += `${i + 1}. ${splitText || getSolveShareTimeText(s)}   ${s.scramble}\n`;
         });
     }
 
