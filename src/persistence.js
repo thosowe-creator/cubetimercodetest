@@ -11,6 +11,8 @@ function buildBackupPayload() {
             isDarkMode: document.documentElement.classList.contains('dark'),
             isWakeLockEnabled: appState.isWakeLockEnabled,
             isInspectionMode: appState.isInspectionMode,
+            splitEnabled: appState.splitEnabled,
+            splitCount: appState.splitCount,
             lightTheme: typeof window.getLightThemeForBackup === 'function'
                 ? window.getLightThemeForBackup()
                 : null
@@ -120,12 +122,16 @@ function applyRestoredData(data, successMessage) {
             appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
             const isDark = data.settings.isDarkMode || false;
             appState.isInspectionMode = data.settings.isInspectionMode || false;
+            appState.splitEnabled = data.settings.splitEnabled || false;
+            appState.splitCount = data.settings.splitCount || 4;
 
             precisionToggle.checked = (appState.precision === 3);
             avgModeToggle.checked = appState.isAo5Mode;
             darkModeToggle.checked = isDark;
             wakeLockToggle.checked = appState.isWakeLockEnabled;
             inspectionToggle.checked = appState.isInspectionMode;
+            if (splitToggle) splitToggle.checked = appState.splitEnabled;
+            if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
 
             toggleInspection(inspectionToggle);
             if (!appState.isInspectionMode) {
@@ -172,7 +178,9 @@ function saveData() {
             holdDuration: appState.holdDuration,
             isDarkMode: document.documentElement.classList.contains('dark'),
             isWakeLockEnabled: appState.isWakeLockEnabled,
-            isInspectionMode: appState.isInspectionMode
+            isInspectionMode: appState.isInspectionMode,
+            splitEnabled: appState.splitEnabled,
+            splitCount: appState.splitCount
         }
     };
     localStorage.setItem('cubeTimerData_v5', JSON.stringify(data));
@@ -192,11 +200,15 @@ function loadData() {
                 const isDark = data.settings.isDarkMode || false;
                 appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
                 appState.isInspectionMode = data.settings.isInspectionMode || false;
+                appState.splitEnabled = data.settings.splitEnabled || false;
+                appState.splitCount = data.settings.splitCount || 4;
                 precisionToggle.checked = (appState.precision === 3);
                 avgModeToggle.checked = appState.isAo5Mode;
                 darkModeToggle.checked = isDark;
                 wakeLockToggle.checked = appState.isWakeLockEnabled;
                 inspectionToggle.checked = appState.isInspectionMode;
+                if (splitToggle) splitToggle.checked = appState.splitEnabled;
+                if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
                 
                 if (appState.isInspectionMode) {
                     toggleInspection(inspectionToggle);

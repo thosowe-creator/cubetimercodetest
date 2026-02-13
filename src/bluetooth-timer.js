@@ -134,6 +134,73 @@ function onBTDisconnected() {
     document.getElementById('btStatusText').innerText = "Timer Disconnected";
     statusHint.innerText = "Hold to Ready";
 }
+
+let currentSplitMarks = [];
+
+function getSolveDisplayText(solve) {
+    if (solve.penalty === 'DNF') return 'DNF';
+    const base = solve.penalty === '+2' ? solve.time + 2000 : solve.time;
+    return `${formatTime(base)}${solve.penalty === '+2' ? '+' : ''}`;
+}
+
+function getSplitTextFromMarks(marks) {
+    if (!Array.isArray(marks) || !marks.length) return '';
+    let prev = 0;
+    const laps = marks.map((m) => {
+        const lap = Math.max(0, Number(m) - prev);
+        prev = Number(m);
+        return formatTime(lap);
+    });
+    return laps.join(' + ');
+}
+
+function renderSplitLivePanel() {
+    if (!splitLivePanel) return;
+    if (!isRunning || !appState.splitEnabled) {
+        splitLivePanel.classList.add('hidden');
+        splitLivePanel.innerHTML = '';
+        return;
+    }
+    splitLivePanel.classList.remove('hidden');
+    splitLivePanel.innerHTML = '';
+    currentSplitMarks.forEach((mark, idx) => {
+        const prev = idx === 0 ? 0 : currentSplitMarks[idx - 1];
+        const lap = Math.max(0, mark - prev);
+        const row = document.createElement('div');
+        row.className = 'split-row';
+
+        const left = document.createElement('span');
+        left.className = 'split-row-label';
+        left.textContent = `S${idx + 1}`;
+
+        const right = document.createElement('span');
+        right.className = 'split-row-time';
+        right.textContent = formatTime(lap);
+
+        row.appendChild(left);
+        row.appendChild(right);
+        splitLivePanel.appendChild(row);
+    });
+}
+
+function pushSplitMark(markMs) {
+    if (!isRunning || !appState.splitEnabled) return false;
+    const count = Math.max(2, Number(appState.splitCount) || 4);
+    if (currentSplitMarks.length >= count) return false;
+    const ms = Math.max(0, Math.round(markMs));
+    const last = currentSplitMarks.length ? currentSplitMarks[currentSplitMarks.length - 1] : -1;
+    if (ms <= last + 30) return false;
+    currentSplitMarks.push(ms);
+    renderSplitLivePanel();
+    if (currentSplitMarks.length >= count) {
+        stopTimer();
+    }
+    return true;
+}
+window.pushSplitMark = pushSplitMark;
+window.getSplitTextFromMarks = getSplitTextFromMarks;
+window.getSolveDisplayText = getSolveDisplayText;
+
 function setControlsLocked(locked) {
     // RUNNING 중 실수 방지 (모바일 한 손 사용 가이드)
     const disabled = !!locked;
@@ -145,6 +212,8 @@ function setControlsLocked(locked) {
 function startTimer() {
     if(inspectionInterval) clearInterval(inspectionInterval);
     inspectionState = 'none';
+    currentSplitMarks = [];
+    renderSplitLivePanel();
     // High-precision timer loop (prevents interval drift)
     startPerf = performance.now();
     isRunning = true;
@@ -193,6 +262,9 @@ function stopTimer(forcedTime = null) {
     }
     let finalPenalty = inspectionPenalty;
     if (elapsed > 10 || finalPenalty === 'DNF') {
+        const splitMarks = (appState.splitEnabled && currentSplitMarks.length)
+            ? currentSplitMarks.map(v => Math.round(v))
+            : null;
         solves.unshift({
             id: Date.now(),
             time: elapsed,
@@ -200,6 +272,7 @@ function stopTimer(forcedTime = null) {
             event: currentEvent,
             sessionId: getCurrentSessionId(),
             penalty: finalPenalty,
+            splitMarks,
             date: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "")
         });
         if (finalPenalty === 'DNF') {
@@ -222,5 +295,7 @@ function stopTimer(forcedTime = null) {
     timerEl.classList.remove('text-running', 'text-ready', 'holding-status', 'ready-to-start');
     timerEl.style.removeProperty('color');
     setControlsLocked(false);
+    currentSplitMarks = [];
+    renderSplitLivePanel();
     saveData();
 }

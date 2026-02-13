@@ -37,6 +37,9 @@ const wakeLockToggle = document.getElementById('wakeLockToggle');
 const holdDurationSlider = document.getElementById('holdDurationSlider');
 const holdDurationValue = document.getElementById('holdDurationValue');
 const inspectionToggle = document.getElementById('inspectionToggle');
+const splitToggle = document.getElementById('splitToggle');
+const splitCountSelect = document.getElementById('splitCountSelect');
+const splitLivePanel = document.getElementById('splitLivePanel');
 const scrambleDiagram = document.getElementById('scrambleDiagram');
 const eventSelect = document.getElementById('eventSelect');
 // Scramble Loading UI Elements (optional: null guard)
