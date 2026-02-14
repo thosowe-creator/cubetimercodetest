@@ -26,6 +26,7 @@ function showPreviousScramble() {
     isViewingPreviousScramble = true;
     currentScramble = previousScramble;
     setScrambleDisplay(currentScramble);
+    updateScrambleDiagram();
     updateScrambleNavButtons();
 }
 
@@ -34,6 +35,7 @@ function showLatestScramble() {
     isViewingPreviousScramble = false;
     currentScramble = latestScramble;
     setScrambleDisplay(currentScramble);
+    updateScrambleDiagram();
     updateScrambleNavButtons();
 }
 
