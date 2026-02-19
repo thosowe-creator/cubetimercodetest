@@ -81,6 +81,10 @@ const AUTO_I18N_PAIRS = [
   { en: 'Password', ko: '비밀번호' },
   { en: 'Email', ko: '이메일' },
   { en: 'Password reset email sent.', ko: '비밀번호 초기화 이메일이 발송되었습니다.' },
+  { en: 'Create a password', ko: '비밀번호 만들기' },
+  { en: 'Confirm', ko: '비밀번호 확인' },
+  { en: 'Repeat password', ko: '비밀번호 확인' },
+  { en: 'Create Account', ko: '계정 만들기' },
 
   // History footer
   { en: 'Avg of All', ko: '전체 평균' },
