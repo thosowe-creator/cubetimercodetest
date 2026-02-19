@@ -99,3 +99,21 @@ const appState = {
 };
 
 window.appState = appState;
+
+
+const cubeTimerActions = {
+    setRunning(value) {
+        isRunning = !!value;
+    },
+    setReady(value) {
+        isReady = !!value;
+    },
+    setCurrentEvent(value) {
+        appState.currentEvent = value;
+    },
+};
+
+window.CubeTimer = {
+    state: appState,
+    actions: cubeTimerActions,
+};

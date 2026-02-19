@@ -43,6 +43,12 @@ function showMessage(message, isError = false) {
     try { window.applyAutoI18n(accountMessage); } catch (_) {}
   }
 }
+
+function reportAccountError(context, err, fallbackMessage) {
+  console.error(`[Account] ${context}`, err);
+  showMessage((err && err.message) || fallbackMessage, true);
+}
+
 function setLoggedInUI(user) {
   if (user) {
     logoutBtn.classList.remove('hidden');
@@ -57,76 +63,86 @@ function setLoggedInUI(user) {
 loginTab.addEventListener('click', () => setAccountTab('login'));
 signupTab.addEventListener('click', () => setAccountTab('signup'));
 
-const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } = window.firebaseAuthApi;
-const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
-
-loginSubmit.addEventListener('click', async () => {
-  showMessage('');
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value.trim();
-  if (!email || !password) {
-    showMessage('Enter email and password.', true);
+async function initAccountPage() {
+  const firebase = await (window.firebaseReady || Promise.resolve(null));
+  if (!firebase || !window.firebaseAuthApi || !window.firebaseDbApi || !window.firebaseAuth || !window.firebaseDb) {
+    reportAccountError('Firebase bootstrap failed', null, 'Firebase initialization failed. Reload and try again.');
     return;
   }
-  try {
-    await signInWithEmailAndPassword(window.firebaseAuth, email, password);
-    showMessage('Logged in.');
-  } catch (err) {
-    showMessage(err.message || 'Login failed.', true);
-  }
-});
 
-signupSubmit.addEventListener('click', async () => {
-  showMessage('');
-  const email = signupEmail.value.trim();
-  const password = signupPassword.value.trim();
-  const confirm = signupPasswordConfirm.value.trim();
-  if (!email || !password || !confirm) {
-    showMessage('Fill in all fields.', true);
-    return;
-  }
-  if (password !== confirm) {
-    showMessage('Passwords do not match.', true);
-    return;
-  }
-  try {
-    const result = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
-    await setDoc(doc(window.firebaseDb, 'users', result.user.uid), {
-      email: result.user.email,
-      createdAt: serverTimestamp(),
-    }, { merge: true });
-    showMessage('Account created.');
-  } catch (err) {
-    showMessage(err.message || 'Sign up failed.', true);
-  }
-});
+  const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } = window.firebaseAuthApi;
+  const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
 
-passwordReset.addEventListener('click', async () => {
-  showMessage('');
-  const email = loginEmail.value.trim();
-  if (!email) {
-    showMessage('Enter your email first.', true);
-    return;
-  }
-  try {
-    await sendPasswordResetEmail(window.firebaseAuth, email);
-    showMessage('Password reset email sent.');
-  } catch (err) {
-    showMessage(err.message || 'Reset failed.', true);
-  }
-});
+  loginSubmit.addEventListener('click', async () => {
+    showMessage('');
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+    if (!email || !password) {
+      showMessage('Enter email and password.', true);
+      return;
+    }
+    try {
+      await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+      showMessage('Logged in.');
+    } catch (err) {
+      reportAccountError('Login failed', err, 'Login failed.');
+    }
+  });
 
-logoutBtn.addEventListener('click', async () => {
-  try {
-    await signOut(window.firebaseAuth);
-  } catch (err) {
-    showMessage(err.message || 'Logout failed.', true);
-  }
-});
+  signupSubmit.addEventListener('click', async () => {
+    showMessage('');
+    const email = signupEmail.value.trim();
+    const password = signupPassword.value.trim();
+    const confirm = signupPasswordConfirm.value.trim();
+    if (!email || !password || !confirm) {
+      showMessage('Fill in all fields.', true);
+      return;
+    }
+    if (password !== confirm) {
+      showMessage('Passwords do not match.', true);
+      return;
+    }
+    try {
+      const result = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+      await setDoc(doc(window.firebaseDb, 'users', result.user.uid), {
+        email: result.user.email,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+      showMessage('Account created.');
+    } catch (err) {
+      reportAccountError('Signup failed', err, 'Sign up failed.');
+    }
+  });
 
-onAuthStateChanged(window.firebaseAuth, (user) => {
-  setLoggedInUI(user);
-});
+  passwordReset.addEventListener('click', async () => {
+    showMessage('');
+    const email = loginEmail.value.trim();
+    if (!email) {
+      showMessage('Enter your email first.', true);
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(window.firebaseAuth, email);
+      showMessage('Password reset email sent.');
+    } catch (err) {
+      reportAccountError('Password reset failed', err, 'Reset failed.');
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      await signOut(window.firebaseAuth);
+    } catch (err) {
+      reportAccountError('Logout failed', err, 'Logout failed.');
+    }
+  });
+
+  onAuthStateChanged(window.firebaseAuth, (user) => {
+    setLoggedInUI(user);
+  });
+}
+
+initAccountPage();
 
 if (window.applyAutoI18n) {
   try { window.applyAutoI18n(document); } catch (_) {}
