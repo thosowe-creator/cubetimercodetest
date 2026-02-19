@@ -49,6 +49,59 @@ function reportAccountError(context, err, fallbackMessage) {
   showMessage((err && err.message) || fallbackMessage, true);
 }
 
+
+function openPasswordResetModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4';
+    overlay.innerHTML = `
+      <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl p-5">
+        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3">Reset Password</p>
+        <p class="text-[11px] font-bold text-slate-400 mb-3">Enter your account email.</p>
+        <input type="email" id="resetEmailInput" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-200 outline-none focus:border-blue-400 transition-all" />
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button type="button" id="resetCancelBtn" class="py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black">Cancel</button>
+          <button type="button" id="resetSendBtn" class="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black">Send Reset Email</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    if (window.applyAutoI18n) {
+      try { window.applyAutoI18n(overlay); } catch (_) {}
+    }
+
+    const input = overlay.querySelector('#resetEmailInput');
+    const cancelBtn = overlay.querySelector('#resetCancelBtn');
+    const sendBtn = overlay.querySelector('#resetSendBtn');
+
+    const cleanup = (value) => {
+      overlay.remove();
+      resolve(value);
+    };
+
+    cancelBtn?.addEventListener('click', () => cleanup(null));
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) cleanup(null);
+    });
+    sendBtn?.addEventListener('click', () => {
+      const email = (input?.value || '').trim();
+      if (!email) {
+        showMessage('Enter your account email.', true);
+        return;
+      }
+      cleanup(email);
+    });
+
+    input?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendBtn?.click();
+      if (e.key === 'Escape') cleanup(null);
+    });
+
+    input?.focus();
+  });
+}
+
 function setLoggedInUI(user) {
   if (user) {
     logoutBtn.classList.remove('hidden');
@@ -116,11 +169,8 @@ async function initAccountPage() {
 
   passwordReset.addEventListener('click', async () => {
     showMessage('');
-    const email = loginEmail.value.trim();
-    if (!email) {
-      showMessage('Enter your email first.', true);
-      return;
-    }
+    const email = await openPasswordResetModal();
+    if (!email) return;
     try {
       await sendPasswordResetEmail(window.firebaseAuth, email);
       showMessage('Password reset email sent.');
