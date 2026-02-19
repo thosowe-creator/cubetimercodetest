@@ -42,6 +42,7 @@ function decompressPayload(payload) {
 }
 async function exportData() {
     const payload = buildBackupPayload();
+    await (window.firebaseReady || Promise.resolve(null));
     const user = await (window.firebaseAuthReady || Promise.resolve(null));
     if (user) {
         try {
@@ -55,6 +56,7 @@ async function exportData() {
             alert('Backup saved to cloud.');
             return;
         } catch (err) {
+            console.error('[Persistence] Cloud backup failed', err);
             alert('Cloud backup failed.');
         }
     }
@@ -69,6 +71,7 @@ async function exportData() {
     URL.revokeObjectURL(url);
 }
 async function triggerImport() {
+    await (window.firebaseReady || Promise.resolve(null));
     const user = await (window.firebaseAuthReady || Promise.resolve(null));
     if (user) {
         await restoreFromCloud(user.uid);
@@ -85,12 +88,14 @@ function importData(event) {
             const data = JSON.parse(e.target.result);
             applyRestoredData(data, 'Restore complete.');
         } catch (err) {
+            console.error('[Persistence] Local restore parse failed', err);
             alert("Failed to restore data. Invalid JSON.");
         }
     };
     reader.readAsText(file);
 }
 async function restoreFromCloud(uid) {
+    await (window.firebaseReady || Promise.resolve(null));
     try {
         const { doc, getDoc } = window.firebaseDbApi;
         const ref = doc(window.firebaseDb, 'users', uid, 'backups', 'latest');
@@ -107,23 +112,29 @@ async function restoreFromCloud(uid) {
         const restored = decompressPayload(data.payload);
         applyRestoredData(restored, 'Cloud restore complete.');
     } catch (err) {
+        console.error('[Persistence] Cloud restore failed', err);
         alert('Cloud restore failed.');
     }
 }
 function applyRestoredData(data, successMessage) {
+    if (isRunning) {
+        console.warn('[Persistence] Restore blocked while timer is running');
+        alert('Stop the timer before restoring data.');
+        return;
+    }
     if (data.solves && data.sessions) {
         appState.solves = data.solves;
         appState.sessions = data.sessions;
         if (data.settings) {
-            appState.precision = data.settings.precision || 2;
+            appState.precision = data.settings.precision ?? 2;
             appState.isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
-            appState.currentEvent = data.settings.currentEvent || '333';
-            appState.holdDuration = data.settings.holdDuration || 300;
-            appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
-            const isDark = data.settings.isDarkMode || false;
-            appState.isInspectionMode = data.settings.isInspectionMode || false;
-            appState.splitEnabled = data.settings.splitEnabled || false;
-            appState.splitCount = data.settings.splitCount || 4;
+            appState.currentEvent = data.settings.currentEvent ?? '333';
+            appState.holdDuration = data.settings.holdDuration ?? 300;
+            appState.isWakeLockEnabled = data.settings.isWakeLockEnabled ?? false;
+            const isDark = data.settings.isDarkMode ?? false;
+            appState.isInspectionMode = data.settings.isInspectionMode ?? false;
+            appState.splitEnabled = data.settings.splitEnabled ?? false;
+            appState.splitCount = data.settings.splitCount ?? 4;
 
             precisionToggle.checked = (appState.precision === 3);
             avgModeToggle.checked = appState.isAo5Mode;
@@ -190,18 +201,18 @@ function loadData() {
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            appState.solves = data.solves || [];
-            appState.sessions = data.sessions || {};
+            appState.solves = data.solves ?? [];
+            appState.sessions = data.sessions ?? {};
             if (data.settings) {
-                appState.precision = data.settings.precision || 2;
+                appState.precision = data.settings.precision ?? 2;
                 appState.isAo5Mode = data.settings.isAo5Mode !== undefined ? data.settings.isAo5Mode : true;
-                appState.currentEvent = data.settings.currentEvent || '333';
-                appState.holdDuration = data.settings.holdDuration || 300;
-                const isDark = data.settings.isDarkMode || false;
-                appState.isWakeLockEnabled = data.settings.isWakeLockEnabled || false;
-                appState.isInspectionMode = data.settings.isInspectionMode || false;
-                appState.splitEnabled = data.settings.splitEnabled || false;
-                appState.splitCount = data.settings.splitCount || 4;
+                appState.currentEvent = data.settings.currentEvent ?? '333';
+                appState.holdDuration = data.settings.holdDuration ?? 300;
+                const isDark = data.settings.isDarkMode ?? false;
+                appState.isWakeLockEnabled = data.settings.isWakeLockEnabled ?? false;
+                appState.isInspectionMode = data.settings.isInspectionMode ?? false;
+                appState.splitEnabled = data.settings.splitEnabled ?? false;
+                appState.splitCount = data.settings.splitCount ?? 4;
                 precisionToggle.checked = (appState.precision === 3);
                 avgModeToggle.checked = appState.isAo5Mode;
                 darkModeToggle.checked = isDark;
@@ -232,7 +243,7 @@ function loadData() {
                 if (eventSelect) eventSelect.value = appState.currentEvent;
                 if (conf) switchCategory(conf.cat, false);
             }
-        } catch (e) { console.error("Load failed", e); }
+        } catch (e) { console.error('[Persistence] Load failed', e); }
     }
     initSessionIfNeeded(appState.currentEvent);
     

@@ -27,6 +27,7 @@ function ensureI18nObserver() {
   const debounced = () => {
     if (i18nRaf) cancelAnimationFrame(i18nRaf);
     i18nRaf = requestAnimationFrame(() => {
+      if (isRunning) return;
       try {
         // Translate only modal roots (fast)
         for (const r of roots()) applyAutoI18n(r);
@@ -90,10 +91,14 @@ function applyLanguageToUI() {
   }
 
   // Refresh dynamic history/footer labels that are set via updateUI().
-  try { if (typeof updateUI === 'function') updateUI(); } catch (_) {}
+  if (!isRunning) {
+    try { if (typeof updateUI === 'function') updateUI(); } catch (_) {}
+  }
 
   // Finally, auto-translate remaining static UI strings & placeholders.
   // This is what makes the whole UI actually switch languages.
-  try { applyAutoI18n(document); } catch (_) {}
+  if (!isRunning) {
+    try { applyAutoI18n(document); } catch (_) {}
+  }
 }
 

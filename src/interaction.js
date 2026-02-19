@@ -745,8 +745,11 @@ window.addEventListener('keyup', (e) => {
     }
 }, { capture: true });
 const interactiveArea = document.getElementById('timerInteractiveArea');
-interactiveArea.addEventListener('touchstart', handleStart, { passive: false });
-interactiveArea.addEventListener('touchend', handleEnd, { passive: false });
+if (interactiveArea) {
+    interactiveArea.addEventListener('pointerdown', handleStart, { passive: false });
+    interactiveArea.addEventListener('pointerup', handleEnd, { passive: false });
+    interactiveArea.addEventListener('pointercancel', handleEnd, { passive: false });
+}
 // [UPDATED] Toggle Settings: Acts as open/close toggle
 window.openSettings = () => { 
     if (isRunning) return;

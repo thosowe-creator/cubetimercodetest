@@ -28,6 +28,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+let resolveFirebaseReady;
+window.firebaseReady = new Promise((resolve) => {
+  resolveFirebaseReady = resolve;
+});
+
 window.firebaseApp = app;
 window.firebaseAuth = auth;
 window.firebaseDb = db;
@@ -51,3 +56,14 @@ window.firebaseDbApi = {
   getDoc,
   serverTimestamp,
 };
+
+
+if (typeof resolveFirebaseReady === 'function') {
+  resolveFirebaseReady({
+    app,
+    auth,
+    db,
+    authApi: window.firebaseAuthApi,
+    dbApi: window.firebaseDbApi,
+  });
+}
