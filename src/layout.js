@@ -65,45 +65,17 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
 
-    // Mobile: keep same scramble sizing policy across all events (match 3x3 behavior).
+    // Mobile: keep a fixed baseline font so event/scramble length never changes
+    // scramble text size by event/length.
     // Desktop: tone down scramble text by ~10% for a less crowded look.
     const isMobile = window.innerWidth < 768;
-    const computed = window.getComputedStyle(scrambleEl);
-    const baseFontPx = parseFloat(computed.fontSize) || 16;
-    const baseScale = isMobile ? 1.4 : 1.26;
-    scrambleEl.style.fontSize = `${baseFontPx * baseScale}px`;
-
-    // Keep prior mobile readability behavior: if text is very long,
-    // we may shrink font a bit (without forcing internal scroll).
-    if (!isMobile) return;
-
-    const vh = window.innerHeight || 0;
-    // Keep the shrink trigger consistent across events so text size does not
-    // jump just because the event changed.
-    const legacyCap = Math.max(52, Math.min(120, Math.floor(vh * 0.18)));
-
-    let fontPx = parseFloat(window.getComputedStyle(scrambleEl).fontSize) || 16;
-    const minFont = 16; // readability floor (mobile), unified across events
-    const step = 0.75;
-
-    const tighten = (scale) => {
-        scrambleEl.style.lineHeight = scale < 0.9 ? '1.15' : '1.3';
-        scrambleEl.style.letterSpacing = scale < 0.85 ? '-0.02em' : '0';
-    };
-
-    let safety = 0;
-    while (safety++ < 60) {
-        // We only use legacy cap as a shrink trigger, not as a hard height limit.
-        if (scrambleEl.scrollHeight <= legacyCap + 1) break;
-        const next = fontPx - step;
-        if (next < minFont) {
-            scrambleEl.style.fontSize = `${minFont}px`;
-            tighten(minFont / 16);
-            break;
-        }
-        fontPx = next;
-        scrambleEl.style.fontSize = `${fontPx}px`;
-        tighten(fontPx / 16);
+    if (isMobile) {
+        const fixedMobileBase = 15.5;
+        scrambleEl.style.fontSize = `${fixedMobileBase}px`;
+    } else {
+        const computed = window.getComputedStyle(scrambleEl);
+        const baseFontPx = parseFloat(computed.fontSize) || 16;
+        scrambleEl.style.fontSize = `${baseFontPx * 1.26}px`;
     }
 }
 
