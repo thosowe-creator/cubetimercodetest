@@ -562,8 +562,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 :root {
   --toolMinH: 190px;
   --scrambleBottomH: 12px;
-  --scramblePad: 1.25rem;
-  --scrambleNavSafeInset: 2.9rem;
+  --scramblePad: 1.38rem;
+  --scrambleNavSafeInset: 2.72rem;
 }
 
 
@@ -572,7 +572,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   width: 100%;
   max-width: calc(100% - (var(--scrambleNavSafeInset) * 2));
   margin-inline: auto;
-  padding-inline: 0;
+  padding-inline: 0.1rem;
+  padding-block: 0.18rem;
   font-size: clamp(1.05rem, 1.0vw + 0.75rem, 2.05rem);
   line-height: 1.35;
   overflow: hidden;
@@ -595,8 +596,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 @media (max-width: 480px){
   :root{
     --toolMinH: 90px;
-    --scramblePad: 0.95rem;
-    --scrambleNavSafeInset: 2.7rem;
+    --scramblePad: 1.08rem;
+    --scrambleNavSafeInset: 2.5rem;
   }
   .scramble-text{
     text-wrap: wrap;
