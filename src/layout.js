@@ -54,11 +54,10 @@ function fitScrambleTextToBudget() {
     if (!scrambleEl || scrambleEl.classList.contains('hidden')) return;
     if (currentEvent === '333mbf') return;
 
-    // Let scramble box grow naturally when text gets long.
-    // This avoids internal scrolling and keeps full scramble visible.
-    scrambleEl.style.maxHeight = 'none';
-    scrambleEl.style.overflowX = 'visible';
-    scrambleEl.style.overflowY = 'visible';
+    if (scrambleBoxEl) {
+        scrambleBoxEl.style.maxHeight = '';
+        scrambleBoxEl.style.overflowY = '';
+    }
 
     // Reset to CSS baseline typography.
     scrambleEl.style.fontSize = '';
@@ -71,7 +70,30 @@ function fitScrambleTextToBudget() {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
         const fixedMobileBase = 15.5;
+        const minFontPx = 10;
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
+
+        if (!scrambleBoxEl) return;
+
+        // Mobile policy:
+        // 1) allow scramble box growth up to 1.5x baseline height
+        // 2) if content still overflows, keep box fixed and shrink text
+        const baselineHeight = Number(scrambleBoxEl.dataset.baseHeightPx) || scrambleBoxEl.offsetHeight;
+        if (!scrambleBoxEl.dataset.baseHeightPx && baselineHeight > 0) {
+            scrambleBoxEl.dataset.baseHeightPx = String(Math.round(baselineHeight));
+        }
+
+        const maxBoxHeightPx = Math.round(baselineHeight * 1.5);
+        if (maxBoxHeightPx > 0) {
+            scrambleBoxEl.style.maxHeight = `${maxBoxHeightPx}px`;
+            scrambleBoxEl.style.overflowY = 'hidden';
+
+            let fontPx = fixedMobileBase;
+            while (fontPx > minFontPx && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                fontPx -= 0.5;
+                scrambleEl.style.fontSize = `${fontPx}px`;
+            }
+        }
     } else {
         const computed = window.getComputedStyle(scrambleEl);
         const baseFontPx = parseFloat(computed.fontSize) || 16;
