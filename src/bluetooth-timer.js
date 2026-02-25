@@ -224,6 +224,7 @@ function startTimer() {
     // Prevent accidental page scroll while timing on mobile
     document.body.classList.add('no-scroll');
     setControlsLocked(true);
+    if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
     if (timerRafId) cancelAnimationFrame(timerRafId);
     const tick = () => {
         if (!isRunning) return;
@@ -265,6 +266,7 @@ function stopTimer(forcedTime = null) {
         lastSplitMarks = [];
         renderSplitLivePanel();
         saveData();
+        if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
         return;
     }
     let finalPenalty = inspectionPenalty;
@@ -306,4 +308,5 @@ function stopTimer(forcedTime = null) {
     currentSplitMarks = [];
     renderSplitLivePanel();
     saveData();
+    if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
 }

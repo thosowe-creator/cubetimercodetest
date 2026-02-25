@@ -39,6 +39,12 @@ function getSplitLabel() {
     return currentLang === 'ko' ? '스플릿' : 'Split';
 }
 
+function updateSolveUiVisibility() {
+    const active = !!appState.hideUiDuringSolve && (isRunning || inspectionState === 'inspecting');
+    document.body.classList.toggle('hide-ui-during-solve', active);
+}
+window.updateSolveUiVisibility = updateSolveUiVisibility;
+
 function appendSplitShareLine(container, solve) {
     const splitText = getSplitTextForSolve(solve);
     if (!splitText) return;
@@ -829,6 +835,7 @@ avgModeToggle.onchange = e => { appState.isAo5Mode = e.target.checked; updateUI(
 manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.classList.toggle('hidden', isManualMode); manualInput.classList.toggle('hidden', !isManualMode); statusHint.innerText = isManualMode ? (currentLang === 'ko' ? '시간 입력 후 Enter' : 'Type time & Enter') : t('holdToReady'); };
 if (splitToggle) splitToggle.checked = appState.splitEnabled;
 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount || 4);
+if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
 document.getElementById('clearHistoryBtn').onclick = () => {
   const sid = getCurrentSessionId();
   const msg = 'Clear all history for this session?';
@@ -878,6 +885,13 @@ function setupDomEventBindings() {
     const splitCountSelectEl = document.getElementById('splitCountSelect');
     if (splitCountSelectEl) splitCountSelectEl.addEventListener('change', (event) => {
         appState.splitCount = Number(event.target.value);
+        saveData();
+    });
+
+    const hideUiDuringSolveToggleEl = document.getElementById('hideUiDuringSolveToggle');
+    if (hideUiDuringSolveToggleEl) hideUiDuringSolveToggleEl.addEventListener('change', (event) => {
+        appState.hideUiDuringSolve = event.target.checked;
+        updateSolveUiVisibility();
         saveData();
     });
 

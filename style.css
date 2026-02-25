@@ -904,3 +904,23 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
 }
 .dark .split-row-label{ color:#94a3b8; }
 .dark .split-row-time{ color:#e2e8f0; }
+
+
+body.hide-ui-during-solve > :not(#mainContent) {
+  display: none !important;
+}
+body.hide-ui-during-solve #mainContent {
+  padding: 0 !important;
+  gap: 0 !important;
+}
+body.hide-ui-during-solve #timerSection {
+  gap: 0 !important;
+}
+body.hide-ui-during-solve #timerSection > :not(#timerContainer) {
+  display: none !important;
+}
+body.hide-ui-during-solve #timerInteractiveArea > :not(#timerDisplayContainer),
+body.hide-ui-during-solve #timerDisplayContainer > :not(#timer),
+body.hide-ui-during-solve #statusHint {
+  display: none !important;
+}
