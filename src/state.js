@@ -33,6 +33,7 @@ let hasSpoken12 = false;
 let lastStopTimestamp = 0;
 let splitEnabled = false;
 let splitCount = 4;
+let hideUiDuringSolve = false;
 
 const appState = {
     get solves() {
@@ -95,6 +96,12 @@ const appState = {
     set splitCount(value) {
         const n = Number(value);
         splitCount = Number.isFinite(n) ? Math.min(8, Math.max(2, Math.round(n))) : 4;
+    },
+    get hideUiDuringSolve() {
+        return hideUiDuringSolve;
+    },
+    set hideUiDuringSolve(value) {
+        hideUiDuringSolve = !!value;
     },
 };
 

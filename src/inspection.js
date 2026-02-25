@@ -27,6 +27,7 @@ function startInspection() {
     timerEl.classList.remove('text-ready');
     timerEl.style.setProperty('color', '#ef4444', 'important'); // Red color for inspection countdown
     statusHint.innerText = "Inspection";
+    if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
     if(inspectionInterval) clearInterval(inspectionInterval);
     inspectionInterval = setInterval(() => {
         const elapsed = (Date.now() - inspectionStartTime) / 1000;
@@ -63,6 +64,7 @@ function stopInspection() {
         else if (elapsed > 15) inspectionPenalty = '+2';
         else inspectionPenalty = null;
     }
+    if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
 }
 function speak(text) {
     if ('speechSynthesis' in window) {

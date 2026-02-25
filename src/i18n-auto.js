@@ -74,6 +74,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Precision', ko: '소숫점' },
   { en: 'Split Timer', ko: '분할 측정' },
   { en: 'Split Count', ko: '분할 측정 개수' },
+  { en: 'Hide UI while timing', ko: '측정 중 UI 숨기기' },
   { en: 'Account', ko: '계정' },
   { en: 'Login', ko: '로그인' },
   { en: 'Sign Up', ko: '가입' },
