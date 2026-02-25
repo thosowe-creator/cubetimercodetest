@@ -686,7 +686,7 @@ window.copyShareText = async () => {
         const btn = document.querySelector('[data-action="copy-share-text"]');
         if (btn) {
             const original = btn.innerHTML;
-            btn.innerHTML = (currentLang === 'ko') ? '복사됨!' : 'Copied!';
+            btn.innerHTML = (currentLang === 'ko') ? '복사되었습니다!' : 'Copied!';
             btn.classList.add('bg-green-600');
             setTimeout(() => {
                 btn.innerHTML = original;
