@@ -65,14 +65,16 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
 
+    // Mobile: keep same scramble sizing policy across all events (match 3x3 behavior).
+    // Desktop: tone down scramble text by ~10% for a less crowded look.
+    const isMobile = window.innerWidth < 768;
     const computed = window.getComputedStyle(scrambleEl);
-    // Keep scramble readability consistent across events by using the same base scale.
     const baseFontPx = parseFloat(computed.fontSize) || 16;
-    scrambleEl.style.fontSize = `${baseFontPx * 1.4}px`;
+    const baseScale = isMobile ? 1.4 : 1.26;
+    scrambleEl.style.fontSize = `${baseFontPx * baseScale}px`;
 
     // Keep prior mobile readability behavior: if text is very long,
     // we may shrink font a bit (without forcing internal scroll).
-    const isMobile = window.innerWidth < 768;
     if (!isMobile) return;
 
     const vh = window.innerHeight || 0;
