@@ -65,7 +65,8 @@ const AUTO_I18N_PAIRS = [
 
   // Settings rows
   { en: 'Dark Mode', ko: '다크 모드' },
-  { en: 'Prevent Sleep', ko: '화면 꺼짐 방지' },
+  { en: 'Prevent Sleep', ko: '화면 잠김 방지' },
+  { en: 'Prevent Sleep (Wake Lock)', ko: '화면 잠김 방지' },
   { en: 'Inspection', ko: '미리보기' },
   { en: '15s countdown + voice', ko: '15초 카운트다운 + 음성' },
   { en: 'Hold Duration', ko: '홀드 시간' },
