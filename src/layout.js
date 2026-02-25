@@ -74,6 +74,8 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
+    scrambleEl.style.maxHeight = '';
+    scrambleEl.style.overflowY = '';
 
     // Mobile: keep a fixed baseline font so event/scramble length never changes
     // scramble text size by event/length.
@@ -81,7 +83,7 @@ function fitScrambleTextToBudget() {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
         const fixedMobileBase = 15.5;
-        const minFontPx = 7;
+        const minFontPx = 5;
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
         scrambleEl.style.lineHeight = '1.32';
         scrambleEl.style.letterSpacing = '0';
@@ -102,37 +104,49 @@ function fitScrambleTextToBudget() {
             scrambleBoxEl.style.overflowY = 'hidden';
         }
 
-        // Progressively compact text until it fits in the fixed box.
+        // Constrain scramble text area itself, then compact until the text node fits.
+        const visibleChildren = Array.from(scrambleBoxEl.children || []).filter((el) => {
+            if (!el || el === scrambleEl) return false;
+            if (el.classList && el.classList.contains('hidden')) return false;
+            const pos = window.getComputedStyle(el).position;
+            // Exclude absolutely-positioned controls (prev/next arrows) from vertical budget.
+            return pos !== 'absolute' && pos !== 'fixed';
+        });
+        const fixedChildrenHeight = visibleChildren.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
+        const boxStyle = window.getComputedStyle(scrambleBoxEl);
+        const boxPaddingY = (parseFloat(boxStyle.paddingTop) || 0) + (parseFloat(boxStyle.paddingBottom) || 0);
+        const availableTextHeight = Math.max(8, Math.floor(scrambleBoxEl.clientHeight - fixedChildrenHeight - boxPaddingY));
+
+        scrambleEl.style.maxHeight = `${availableTextHeight}px`;
+        scrambleEl.style.overflowY = 'hidden';
+
         const compactSteps = [
-            { lineHeight: '1.25', letterSpacing: '0' },
-            { lineHeight: '1.15', letterSpacing: '-0.01em' },
-            { lineHeight: '1.05', letterSpacing: '-0.015em' },
-            { lineHeight: '0.98', letterSpacing: '-0.02em' }
+            { lineHeight: '1.24', letterSpacing: '0' },
+            { lineHeight: '1.14', letterSpacing: '-0.01em' },
+            { lineHeight: '1.04', letterSpacing: '-0.015em' },
+            { lineHeight: '0.96', letterSpacing: '-0.02em' },
+            { lineHeight: '0.90', letterSpacing: '-0.025em' }
         ];
 
         let fontPx = fixedMobileBase;
         for (const step of compactSteps) {
             scrambleEl.style.lineHeight = step.lineHeight;
             scrambleEl.style.letterSpacing = step.letterSpacing;
-            while (fontPx > minFontPx && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+            while (fontPx > minFontPx && scrambleEl.scrollHeight > scrambleEl.clientHeight) {
                 fontPx -= 0.5;
                 scrambleEl.style.fontSize = `${fontPx}px`;
             }
-            if (scrambleBoxEl.scrollHeight <= scrambleBoxEl.clientHeight) break;
+            if (scrambleEl.scrollHeight <= scrambleEl.clientHeight) break;
         }
 
         // Extreme fallback for unusually long custom scrambles.
-        if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+        if (scrambleEl.scrollHeight > scrambleEl.clientHeight) {
+            scrambleEl.style.lineHeight = '0.80';
+            scrambleEl.style.letterSpacing = '-0.03em';
             let emergencyFontPx = fontPx;
-            while (emergencyFontPx > 5 && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                emergencyFontPx -= 0.25;
+            while (emergencyFontPx > 1 && scrambleEl.scrollHeight > scrambleEl.clientHeight) {
+                emergencyFontPx -= 0.2;
                 scrambleEl.style.fontSize = `${emergencyFontPx}px`;
-            }
-
-            // If the content is still too tall, reduce line-height once more
-            // so every character remains visible inside the capped box.
-            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                scrambleEl.style.lineHeight = '1.05';
             }
         }
     } else {
