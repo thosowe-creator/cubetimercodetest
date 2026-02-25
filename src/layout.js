@@ -70,7 +70,7 @@ function fitScrambleTextToBudget() {
     // Desktop: tone down scramble text by ~10% for a less crowded look.
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
-        const fixedMobileBase = 22;
+        const fixedMobileBase = 15.5;
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
     } else {
         const computed = window.getComputedStyle(scrambleEl);
