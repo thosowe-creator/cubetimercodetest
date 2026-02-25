@@ -598,6 +598,10 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
     --scramblePad: 0.95rem;
     --scrambleNavSafeInset: 2.7rem;
   }
+  .scramble-text{
+    text-wrap: wrap;
+    text-align: left;
+  }
 }
 
 /* Apply budgets */
