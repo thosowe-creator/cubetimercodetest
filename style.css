@@ -563,15 +563,16 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   --toolMinH: 190px;
   --scrambleBottomH: 12px;
   --scramblePad: 1.25rem;
-  --scrambleNavSafeInset: 2.75rem;
+  --scrambleNavSafeInset: 3.35rem;
 }
 
 
 /* Scramble text sizing: JS may override inline for long scrambles */
 .scramble-text{
   width: 100%;
-  max-width: 100%;
-  padding-inline: var(--scrambleNavSafeInset);
+  max-width: calc(100% - (var(--scrambleNavSafeInset) * 2));
+  margin-inline: auto;
+  padding-inline: 0;
   font-size: clamp(1.05rem, 1.0vw + 0.75rem, 2.05rem);
   line-height: 1.35;
   overflow: hidden;
