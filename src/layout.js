@@ -5,6 +5,15 @@ const timerContainerEl = document.getElementById('timerContainer');
 let __layoutRAF = 0;
 let __timerLayoutLocked = false;
 
+if (scrambleBoxEl) {
+    // Capture the default scramble-box height once the first paint is done.
+    // This value is used as the fixed mobile scramble-box height baseline.
+    requestAnimationFrame(() => {
+        const initialH = Math.round(scrambleBoxEl.getBoundingClientRect().height);
+        if (initialH > 0) scrambleBoxEl.dataset.baseHeightPx = String(initialH);
+    });
+}
+
 /** Lock timer recentering while scramble/diagram is regenerating (prevents oscillation). */
 function lockTimerLayout() { __timerLayoutLocked = true; }
 /** Unlock and request a single recenter on next layout pass. */
@@ -56,6 +65,8 @@ function fitScrambleTextToBudget() {
 
     if (scrambleBoxEl) {
         scrambleBoxEl.style.maxHeight = '';
+        scrambleBoxEl.style.height = '';
+        scrambleBoxEl.style.minHeight = '';
         scrambleBoxEl.style.overflowY = '';
     }
 
@@ -63,6 +74,8 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
+    scrambleEl.style.maxHeight = '';
+    scrambleEl.style.overflowY = '';
 
     // Mobile: keep a fixed baseline font so event/scramble length never changes
     // scramble text size by event/length.
@@ -70,7 +83,7 @@ function fitScrambleTextToBudget() {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
         const fixedMobileBase = 15.5;
-        const minFontPx = 7;
+        const minFontPx = 5;
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
         scrambleEl.style.lineHeight = '1.32';
         scrambleEl.style.letterSpacing = '0';
@@ -78,39 +91,62 @@ function fitScrambleTextToBudget() {
         if (!scrambleBoxEl) return;
 
         // Mobile policy:
-        // 1) allow scramble box growth up to 1.5x baseline height
-        // 2) if content still overflows, keep box fixed and shrink text
-        const baselineHeight = Number(scrambleBoxEl.dataset.baseHeightPx) || scrambleBoxEl.offsetHeight;
-        if (!scrambleBoxEl.dataset.baseHeightPx && baselineHeight > 0) {
-            scrambleBoxEl.dataset.baseHeightPx = String(Math.round(baselineHeight));
+        // 1) keep scramble box height fixed to the baseline (no vertical movement)
+        // 2) if content overflows, shrink scramble typography to fit inside
+        const measuredHeight = Math.round(scrambleBoxEl.getBoundingClientRect().height);
+        const storedBaseline = Number(scrambleBoxEl.dataset.baseHeightPx) || 0;
+        const baselineHeight = storedBaseline > 0 ? storedBaseline : measuredHeight;
+        if (baselineHeight > 0) {
+            scrambleBoxEl.dataset.baseHeightPx = String(baselineHeight);
+            scrambleBoxEl.style.height = `${baselineHeight}px`;
+            scrambleBoxEl.style.maxHeight = `${baselineHeight}px`;
+            scrambleBoxEl.style.minHeight = `${baselineHeight}px`;
+            scrambleBoxEl.style.overflowY = 'hidden';
         }
 
-        const maxBoxHeightPx = Math.round(baselineHeight * 1.5);
-        if (maxBoxHeightPx > 0) {
-            scrambleBoxEl.style.maxHeight = `${maxBoxHeightPx}px`;
-            scrambleBoxEl.style.overflowY = 'hidden';
+        // Constrain scramble text area itself, then compact until the text node fits.
+        const visibleChildren = Array.from(scrambleBoxEl.children || []).filter((el) => {
+            if (!el || el === scrambleEl) return false;
+            if (el.classList && el.classList.contains('hidden')) return false;
+            const pos = window.getComputedStyle(el).position;
+            // Exclude absolutely-positioned controls (prev/next arrows) from vertical budget.
+            return pos !== 'absolute' && pos !== 'fixed';
+        });
+        const fixedChildrenHeight = visibleChildren.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
+        const boxStyle = window.getComputedStyle(scrambleBoxEl);
+        const boxPaddingY = (parseFloat(boxStyle.paddingTop) || 0) + (parseFloat(boxStyle.paddingBottom) || 0);
+        const availableTextHeight = Math.max(8, Math.floor(scrambleBoxEl.clientHeight - fixedChildrenHeight - boxPaddingY));
 
-            let fontPx = fixedMobileBase;
-            while (fontPx > minFontPx && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+        scrambleEl.style.maxHeight = `${availableTextHeight}px`;
+        scrambleEl.style.overflowY = 'hidden';
+
+        const compactSteps = [
+            { lineHeight: '1.24', letterSpacing: '0' },
+            { lineHeight: '1.14', letterSpacing: '-0.01em' },
+            { lineHeight: '1.04', letterSpacing: '-0.015em' },
+            { lineHeight: '0.96', letterSpacing: '-0.02em' },
+            { lineHeight: '0.90', letterSpacing: '-0.025em' }
+        ];
+
+        let fontPx = fixedMobileBase;
+        for (const step of compactSteps) {
+            scrambleEl.style.lineHeight = step.lineHeight;
+            scrambleEl.style.letterSpacing = step.letterSpacing;
+            while (fontPx > minFontPx && scrambleEl.scrollHeight > scrambleEl.clientHeight) {
                 fontPx -= 0.5;
                 scrambleEl.style.fontSize = `${fontPx}px`;
             }
+            if (scrambleEl.scrollHeight <= scrambleEl.clientHeight) break;
+        }
 
-            // Last-resort compaction for very long scrambles on short mobile screens.
-            // Keep everything inside the box instead of letting content clip.
-            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                scrambleEl.style.lineHeight = '1.2';
-            }
-            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                scrambleEl.style.lineHeight = '1.12';
-                scrambleEl.style.letterSpacing = '-0.01em';
-            }
-            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                let emergencyFontPx = minFontPx;
-                while (emergencyFontPx > 6 && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
-                    emergencyFontPx -= 0.25;
-                    scrambleEl.style.fontSize = `${emergencyFontPx}px`;
-                }
+        // Extreme fallback for unusually long custom scrambles.
+        if (scrambleEl.scrollHeight > scrambleEl.clientHeight) {
+            scrambleEl.style.lineHeight = '0.80';
+            scrambleEl.style.letterSpacing = '-0.03em';
+            let emergencyFontPx = fontPx;
+            while (emergencyFontPx > 1 && scrambleEl.scrollHeight > scrambleEl.clientHeight) {
+                emergencyFontPx -= 0.2;
+                scrambleEl.style.fontSize = `${emergencyFontPx}px`;
             }
         }
     } else {
