@@ -70,8 +70,10 @@ function fitScrambleTextToBudget() {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
         const fixedMobileBase = 15.5;
-        const minFontPx = 10;
+        const minFontPx = 7;
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
+        scrambleEl.style.lineHeight = '1.32';
+        scrambleEl.style.letterSpacing = '0';
 
         if (!scrambleBoxEl) return;
 
@@ -92,6 +94,23 @@ function fitScrambleTextToBudget() {
             while (fontPx > minFontPx && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
                 fontPx -= 0.5;
                 scrambleEl.style.fontSize = `${fontPx}px`;
+            }
+
+            // Last-resort compaction for very long scrambles on short mobile screens.
+            // Keep everything inside the box instead of letting content clip.
+            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                scrambleEl.style.lineHeight = '1.2';
+            }
+            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                scrambleEl.style.lineHeight = '1.12';
+                scrambleEl.style.letterSpacing = '-0.01em';
+            }
+            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                let emergencyFontPx = minFontPx;
+                while (emergencyFontPx > 6 && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                    emergencyFontPx -= 0.25;
+                    scrambleEl.style.fontSize = `${emergencyFontPx}px`;
+                }
             }
         }
     } else {
