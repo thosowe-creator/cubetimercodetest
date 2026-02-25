@@ -128,6 +128,12 @@ function fitScrambleTextToBudget() {
                 emergencyFontPx -= 0.25;
                 scrambleEl.style.fontSize = `${emergencyFontPx}px`;
             }
+
+            // If the content is still too tall, reduce line-height once more
+            // so every character remains visible inside the capped box.
+            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                scrambleEl.style.lineHeight = '1.05';
+            }
         }
     } else {
         const computed = window.getComputedStyle(scrambleEl);
