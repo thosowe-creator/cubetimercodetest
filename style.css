@@ -909,7 +909,18 @@ button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap
 body.hide-ui-during-solve #mainContent * {
   visibility: hidden !important;
 }
+/* Keep the full timer touch zone active while solving, not only the timer digits. */
+body.hide-ui-during-solve #timerSection,
+body.hide-ui-during-solve #timerContainer,
+body.hide-ui-during-solve #timerInteractiveArea,
+body.hide-ui-during-solve #timerDisplayContainer,
 body.hide-ui-during-solve #timer,
 body.hide-ui-during-solve #timer * {
   visibility: visible !important;
+}
+/* Preserve full-screen stop/start taps while still hiding non-essential timer UI. */
+body.hide-ui-during-solve #timerInteractiveArea .avg-badge,
+body.hide-ui-during-solve #statusHint,
+body.hide-ui-during-solve #splitLivePanel {
+  visibility: hidden !important;
 }
