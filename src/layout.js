@@ -60,10 +60,44 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.overflowX = 'visible';
     scrambleEl.style.overflowY = 'visible';
 
-    // Always reset to CSS baseline typography.
+    // Reset to CSS baseline typography.
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
+
+    // Keep prior mobile readability behavior: if text is very long,
+    // we may shrink font a bit (without forcing internal scroll).
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) return;
+
+    const vh = window.innerHeight || 0;
+    const isMinx = typeof currentEvent === 'string' && currentEvent.includes('minx');
+    const legacyCap = Math.max(52, Math.min(isMinx ? 160 : 120, Math.floor(vh * 0.18)));
+
+    const computed = window.getComputedStyle(scrambleEl);
+    let fontPx = parseFloat(computed.fontSize) || 16;
+    const minFont = 12; // readability floor (mobile)
+    const step = 0.75;
+
+    const tighten = (scale) => {
+        scrambleEl.style.lineHeight = scale < 0.9 ? '1.15' : '1.3';
+        scrambleEl.style.letterSpacing = scale < 0.85 ? '-0.02em' : '0';
+    };
+
+    let safety = 0;
+    while (safety++ < 60) {
+        // We only use legacy cap as a shrink trigger, not as a hard height limit.
+        if (scrambleEl.scrollHeight <= legacyCap + 1) break;
+        const next = fontPx - step;
+        if (next < minFont) {
+            scrambleEl.style.fontSize = `${minFont}px`;
+            tighten(minFont / 16);
+            break;
+        }
+        fontPx = next;
+        scrambleEl.style.fontSize = `${fontPx}px`;
+        tighten(fontPx / 16);
+    }
 }
 
 function positionTimerToViewportCenter() {
