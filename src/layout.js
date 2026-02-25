@@ -5,6 +5,15 @@ const timerContainerEl = document.getElementById('timerContainer');
 let __layoutRAF = 0;
 let __timerLayoutLocked = false;
 
+if (scrambleBoxEl) {
+    // Capture the default scramble-box height once the first paint is done.
+    // This value is used as the "1x" baseline for the mobile 1.5x cap.
+    requestAnimationFrame(() => {
+        const initialH = Math.round(scrambleBoxEl.getBoundingClientRect().height);
+        if (initialH > 0) scrambleBoxEl.dataset.baseHeightPx = String(initialH);
+    });
+}
+
 /** Lock timer recentering while scramble/diagram is regenerating (prevents oscillation). */
 function lockTimerLayout() { __timerLayoutLocked = true; }
 /** Unlock and request a single recenter on next layout pass. */
@@ -56,6 +65,7 @@ function fitScrambleTextToBudget() {
 
     if (scrambleBoxEl) {
         scrambleBoxEl.style.maxHeight = '';
+        scrambleBoxEl.style.height = '';
         scrambleBoxEl.style.overflowY = '';
     }
 
@@ -80,15 +90,25 @@ function fitScrambleTextToBudget() {
         // Mobile policy:
         // 1) allow scramble box growth up to 1.5x baseline height
         // 2) if content still overflows, keep box fixed and shrink text
-        const baselineHeight = Number(scrambleBoxEl.dataset.baseHeightPx) || scrambleBoxEl.offsetHeight;
-        if (!scrambleBoxEl.dataset.baseHeightPx && baselineHeight > 0) {
-            scrambleBoxEl.dataset.baseHeightPx = String(Math.round(baselineHeight));
+        const measuredHeight = Math.round(scrambleBoxEl.getBoundingClientRect().height);
+        const storedBaseline = Number(scrambleBoxEl.dataset.baseHeightPx) || 0;
+        const baselineHeight = storedBaseline > 0
+            ? Math.min(storedBaseline, measuredHeight || storedBaseline)
+            : measuredHeight;
+        if (baselineHeight > 0) {
+            scrambleBoxEl.dataset.baseHeightPx = String(baselineHeight);
         }
 
-        const maxBoxHeightPx = Math.round(baselineHeight * 1.5);
+        const maxBoxHeightPx = Math.floor(baselineHeight * 1.5);
         if (maxBoxHeightPx > 0) {
             scrambleBoxEl.style.maxHeight = `${maxBoxHeightPx}px`;
+            scrambleBoxEl.style.height = 'auto';
             scrambleBoxEl.style.overflowY = 'hidden';
+
+            // Hard clamp: never allow the scramble box to exceed 1.5x baseline.
+            if (scrambleBoxEl.getBoundingClientRect().height > maxBoxHeightPx) {
+                scrambleBoxEl.style.height = `${maxBoxHeightPx}px`;
+            }
 
             let fontPx = fixedMobileBase;
             while (fontPx > minFontPx && scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
@@ -111,6 +131,12 @@ function fitScrambleTextToBudget() {
                     emergencyFontPx -= 0.25;
                     scrambleEl.style.fontSize = `${emergencyFontPx}px`;
                 }
+            }
+
+            // If the content is still too tall, reduce line-height once more
+            // so every character remains visible inside the capped box.
+            if (scrambleBoxEl.scrollHeight > scrambleBoxEl.clientHeight) {
+                scrambleEl.style.lineHeight = '1.05';
             }
         }
     } else {
