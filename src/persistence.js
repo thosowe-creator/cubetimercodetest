@@ -200,6 +200,7 @@ function saveData() {
         }
     };
     localStorage.setItem('cubeTimerData_v5', JSON.stringify(data));
+    localStorage.setItem('hideUiDuringSolve', appState.hideUiDuringSolve ? '1' : '0');
 }
 function loadData() {
     const saved = localStorage.getItem('cubeTimerData_v5') || localStorage.getItem('cubeTimerData_v4');
@@ -218,7 +219,8 @@ function loadData() {
                 appState.isInspectionMode = data.settings.isInspectionMode ?? false;
                 appState.splitEnabled = data.settings.splitEnabled ?? false;
                 appState.splitCount = data.settings.splitCount ?? 4;
-                appState.hideUiDuringSolve = data.settings.hideUiDuringSolve ?? false;
+                const hideUiFromLegacyKey = localStorage.getItem('hideUiDuringSolve');
+                appState.hideUiDuringSolve = data.settings.hideUiDuringSolve ?? (hideUiFromLegacyKey === '1');
                 precisionToggle.checked = (appState.precision === 3);
                 avgModeToggle.checked = appState.isAo5Mode;
                 darkModeToggle.checked = isDark;
@@ -252,6 +254,11 @@ function loadData() {
                 if (conf) switchCategory(conf.cat, false);
             }
         } catch (e) { console.error('[Persistence] Load failed', e); }
+    } else {
+        const hideUiFromLegacyKey = localStorage.getItem('hideUiDuringSolve');
+        appState.hideUiDuringSolve = hideUiFromLegacyKey === '1';
+        if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
+        if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
     }
     initSessionIfNeeded(appState.currentEvent);
     
