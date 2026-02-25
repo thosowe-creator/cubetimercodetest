@@ -54,49 +54,16 @@ function fitScrambleTextToBudget() {
     if (!scrambleEl || scrambleEl.classList.contains('hidden')) return;
     if (currentEvent === '333mbf') return;
 
-    // Width: use as much as possible, but keep comfortable side padding via scrambleBox padding var.
-    // Height: keep scramble text from pushing the timer off-screen.
-    const isMobile = window.innerWidth < 768;
-    const vh = window.innerHeight || 0;
-    const isMinx = typeof currentEvent === 'string' && currentEvent.includes('minx');
-    const cap = isMobile ? (isMinx ? 160 : 120) : (isMinx ? 220 : 170);
-    const maxTextH = Math.max(52, Math.min(cap, Math.floor(vh * (isMobile ? 0.18 : 0.20))));
-    scrambleEl.style.maxHeight = `${maxTextH}px`;
-    scrambleEl.style.overflowX = 'hidden';
-    scrambleEl.style.overflowY = 'auto';
+    // Let scramble box grow naturally when text gets long.
+    // This avoids internal scrolling and keeps full scramble visible.
+    scrambleEl.style.maxHeight = 'none';
+    scrambleEl.style.overflowX = 'visible';
+    scrambleEl.style.overflowY = 'visible';
 
-    // Reset to CSS baseline before measuring
+    // Always reset to CSS baseline typography.
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
-
-    const computed = window.getComputedStyle(scrambleEl);
-    let fontPx = parseFloat(computed.fontSize) || (isMobile ? 16 : 20);
-    const minFont = isMobile ? 12 : 16; // readability floor
-    const step = isMobile ? 0.75 : 0.6;
-
-    // Slightly tighten when we have to shrink
-    const tighten = (scale) => {
-        scrambleEl.style.lineHeight = scale < 0.9 ? '1.15' : '1.3';
-        scrambleEl.style.letterSpacing = scale < 0.85 ? '-0.02em' : '0';
-    };
-
-    // Iterate down until it fits
-    let safety = 0;
-    while (safety++ < 60) {
-        const fits = scrambleEl.scrollHeight <= maxTextH + 1;
-        if (fits) break;
-        const next = fontPx - step;
-        if (next < minFont) {
-            // Hard stop: keep min font; overflow stays hidden but should be rare.
-            scrambleEl.style.fontSize = `${minFont}px`;
-            tighten(minFont / (isMobile ? 16 : 20));
-            break;
-        }
-        fontPx = next;
-        scrambleEl.style.fontSize = `${fontPx}px`;
-        tighten(fontPx / (isMobile ? 16 : 20));
-    }
 }
 
 function positionTimerToViewportCenter() {
