@@ -89,7 +89,7 @@ function handleGanBTData(event) {
                 isRunning = true;
                 if(timerInterval) clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
-                    timerEl.innerText = formatTime(Date.now() - startTime);
+                    updateRunningTimerText(Date.now() - startTime);
                 }, 16);
                 
                 timerEl.classList.remove('text-ready');
@@ -204,6 +204,15 @@ window.pushSplitMark = pushSplitMark;
 window.getSplitTextFromMarks = getSplitTextFromMarks;
 window.getSolveDisplayText = getSolveDisplayText;
 
+function updateRunningTimerText(elapsed) {
+    if (!timerEl) return;
+    if (appState.hideTimerDuringSolve && isRunning) {
+        timerEl.innerText = (typeof window.getSolveMaskText === 'function') ? window.getSolveMaskText() : 'Solve';
+        return;
+    }
+    timerEl.innerText = formatTime(elapsed);
+}
+
 function setControlsLocked(locked) {
     // RUNNING 중 실수 방지 (모바일 한 손 사용 가이드)
     const disabled = !!locked;
@@ -229,7 +238,7 @@ function startTimer() {
     const tick = () => {
         if (!isRunning) return;
         const elapsed = performance.now() - startPerf;
-        timerEl.innerText = formatTime(elapsed);
+        updateRunningTimerText(elapsed);
         timerRafId = requestAnimationFrame(tick);
     };
     timerRafId = requestAnimationFrame(tick);
@@ -259,7 +268,7 @@ function stopTimer(forcedTime = null) {
         // Ensure we don't keep the "running" (blue) timer color after stopping in MBF.
         timerEl.classList.remove('text-running', 'text-ready', 'text-hold', 'holding-status', 'ready-to-start');
         timerEl.style.removeProperty('color');
-        timerEl.innerText = formatTime(elapsed);
+        updateRunningTimerText(elapsed);
         statusHint.innerText = "Enter MBF Result";
         openMbfResultModal({ defaultTimeMs: elapsed });
         currentSplitMarks = [];

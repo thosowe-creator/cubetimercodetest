@@ -34,6 +34,7 @@ let lastStopTimestamp = 0;
 let splitEnabled = false;
 let splitCount = 4;
 let hideUiDuringSolve = false;
+let hideTimerDuringSolve = false;
 
 const appState = {
     get solves() {
@@ -102,6 +103,12 @@ const appState = {
     },
     set hideUiDuringSolve(value) {
         hideUiDuringSolve = !!value;
+    },
+    get hideTimerDuringSolve() {
+        return hideTimerDuringSolve;
+    },
+    set hideTimerDuringSolve(value) {
+        hideTimerDuringSolve = !!value;
     },
 };
 
