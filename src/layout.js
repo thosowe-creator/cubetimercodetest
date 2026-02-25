@@ -65,18 +65,26 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
 
+    const computed = window.getComputedStyle(scrambleEl);
+    const is333 = currentEvent === '333';
+    if (is333) {
+        // User-facing tweak: enlarge 3x3 scramble text, but keep it below the prior 2x bump.
+        const baseFontPx = parseFloat(computed.fontSize) || 16;
+        scrambleEl.style.fontSize = `${baseFontPx * 1.4}px`;
+    }
+
     // Keep prior mobile readability behavior: if text is very long,
     // we may shrink font a bit (without forcing internal scroll).
     const isMobile = window.innerWidth < 768;
     if (!isMobile) return;
 
     const vh = window.innerHeight || 0;
-    const isMinx = typeof currentEvent === 'string' && currentEvent.includes('minx');
-    const legacyCap = Math.max(52, Math.min(isMinx ? 160 : 120, Math.floor(vh * 0.18)));
+    // Keep the shrink trigger consistent across events so text size does not
+    // jump just because the event changed.
+    const legacyCap = Math.max(52, Math.min(120, Math.floor(vh * 0.18)));
 
-    const computed = window.getComputedStyle(scrambleEl);
-    let fontPx = parseFloat(computed.fontSize) || 16;
-    const minFont = 12; // readability floor (mobile)
+    let fontPx = parseFloat(window.getComputedStyle(scrambleEl).fontSize) || 16;
+    const minFont = is333 ? 16 : 14; // readability floor (mobile)
     const step = 0.75;
 
     const tighten = (scale) => {
