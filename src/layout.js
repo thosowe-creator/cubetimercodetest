@@ -62,7 +62,8 @@ function fitScrambleTextToBudget() {
     const cap = isMobile ? (isMinx ? 160 : 120) : (isMinx ? 220 : 170);
     const maxTextH = Math.max(52, Math.min(cap, Math.floor(vh * (isMobile ? 0.18 : 0.20))));
     scrambleEl.style.maxHeight = `${maxTextH}px`;
-    scrambleEl.style.overflow = 'hidden';
+    scrambleEl.style.overflowX = 'hidden';
+    scrambleEl.style.overflowY = 'auto';
 
     // Reset to CSS baseline before measuring
     scrambleEl.style.fontSize = '';

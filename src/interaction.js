@@ -48,10 +48,16 @@ function appendSplitShareLine(container, solve) {
     container.appendChild(splitLine);
 }
 
+function isTimerPointerAllowed(e) {
+    if (!e || !e.type || !e.type.startsWith('pointer')) return true;
+    return e.pointerType === 'touch' || e.pointerType === 'pen';
+}
+
 function handleStart(e) {
     // [FIX] Ignore touches on interactive elements like badges or buttons
     // This allows clicking on stats/settings without triggering the timer
     // Also ensuring e exists and checking target only for non-keyboard events to prevent errors or blocks
+    if (!isTimerPointerAllowed(e)) return;
     if (e && e.type !== 'keydown' && e.target && (e.target.closest('.avg-badge') || e.target.closest('button') || e.target.closest('.tools-dropdown'))) return;
     if (isBtConnected && !isInspectionMode) return; 
     
@@ -104,6 +110,7 @@ function handleStart(e) {
     }, holdDuration); 
 }
 function handleEnd(e) {
+    if (!isTimerPointerAllowed(e)) return;
     // Allow taps on UI controls inside the interactive area (avg badges, buttons, dropdown)
     // to behave like normal clicks on mobile (iOS can cancel the click if we preventDefault on touchend).
     if (e && e.type !== 'keydown' && e.target && (e.target.closest('.avg-badge') || e.target.closest('button') || e.target.closest('.tools-dropdown'))) return;
@@ -679,6 +686,14 @@ let splitLongPressStopTriggered = false;
 window.addEventListener('keydown', (e) => {
     const tag = (document.activeElement?.tagName || '').toUpperCase();
     const isTypingTarget = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    const targetEl = e.target instanceof Element ? e.target : null;
+    const isEventSelectionTarget = !!targetEl?.closest('#eventSelect, [data-action="change-event"]');
+
+    if (e.code === 'Space' && isEventSelectionTarget) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
 
     // If editing something, don't hijack keyboard (except manual input submit)
     if (editingSessionId || isTypingTarget) {
@@ -867,7 +882,15 @@ function setupDomEventBindings() {
     });
 
     const eventSelectEl = document.getElementById('eventSelect');
-    if (eventSelectEl) eventSelectEl.addEventListener('change', (event) => changeEvent(event.target.value));
+    if (eventSelectEl) {
+        eventSelectEl.addEventListener('change', (event) => changeEvent(event.target.value));
+        eventSelectEl.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
 
     const caseSelectEl = document.getElementById('caseSelect');
     if (caseSelectEl) caseSelectEl.addEventListener('change', (event) => changePracticeCase(event.target.value));
