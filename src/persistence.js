@@ -14,6 +14,7 @@ function buildBackupPayload() {
             splitEnabled: appState.splitEnabled,
             splitCount: appState.splitCount,
             hideUiDuringSolve: appState.hideUiDuringSolve,
+            hideTimerDuringSolve: appState.hideTimerDuringSolve,
             lightTheme: typeof window.getLightThemeForBackup === 'function'
                 ? window.getLightThemeForBackup()
                 : null
@@ -137,6 +138,7 @@ function applyRestoredData(data, successMessage) {
             appState.splitEnabled = data.settings.splitEnabled ?? false;
             appState.splitCount = data.settings.splitCount ?? 4;
             appState.hideUiDuringSolve = data.settings.hideUiDuringSolve ?? false;
+            appState.hideTimerDuringSolve = data.settings.hideTimerDuringSolve ?? false;
 
             precisionToggle.checked = (appState.precision === 3);
             avgModeToggle.checked = appState.isAo5Mode;
@@ -146,6 +148,7 @@ function applyRestoredData(data, successMessage) {
             if (splitToggle) splitToggle.checked = appState.splitEnabled;
             if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
             if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
+            if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
 
             toggleInspection(inspectionToggle);
             if (!appState.isInspectionMode) {
@@ -168,6 +171,7 @@ function applyRestoredData(data, successMessage) {
             }
             if (appState.isWakeLockEnabled) requestWakeLock();
             if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
+            if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
         }
         saveData();
         if (successMessage) {
@@ -196,7 +200,8 @@ function saveData() {
             isInspectionMode: appState.isInspectionMode,
             splitEnabled: appState.splitEnabled,
             splitCount: appState.splitCount,
-            hideUiDuringSolve: appState.hideUiDuringSolve
+            hideUiDuringSolve: appState.hideUiDuringSolve,
+            hideTimerDuringSolve: appState.hideTimerDuringSolve
         }
     };
     localStorage.setItem('cubeTimerData_v5', JSON.stringify(data));
@@ -221,6 +226,7 @@ function loadData() {
                 appState.splitCount = data.settings.splitCount ?? 4;
                 const hideUiFromLegacyKey = localStorage.getItem('hideUiDuringSolve');
                 appState.hideUiDuringSolve = data.settings.hideUiDuringSolve ?? (hideUiFromLegacyKey === '1');
+                appState.hideTimerDuringSolve = data.settings.hideTimerDuringSolve ?? false;
                 precisionToggle.checked = (appState.precision === 3);
                 avgModeToggle.checked = appState.isAo5Mode;
                 darkModeToggle.checked = isDark;
@@ -229,6 +235,7 @@ function loadData() {
                 if (splitToggle) splitToggle.checked = appState.splitEnabled;
                 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
                 if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
+                if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
                 
                 if (appState.isInspectionMode) {
                     toggleInspection(inspectionToggle);
@@ -249,6 +256,7 @@ function loadData() {
                 }
                 if(appState.isWakeLockEnabled) requestWakeLock();
                 if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
+                if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
                 const conf = configs[appState.currentEvent];
                 if (eventSelect) eventSelect.value = appState.currentEvent;
                 if (conf) switchCategory(conf.cat, false);
@@ -258,7 +266,10 @@ function loadData() {
         const hideUiFromLegacyKey = localStorage.getItem('hideUiDuringSolve');
         appState.hideUiDuringSolve = hideUiFromLegacyKey === '1';
         if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
+        appState.hideTimerDuringSolve = false;
+        if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
         if (typeof window.updateSolveUiVisibility === 'function') window.updateSolveUiVisibility();
+        if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
     }
     initSessionIfNeeded(appState.currentEvent);
     

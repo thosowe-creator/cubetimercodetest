@@ -69,6 +69,7 @@ function applyLanguageToUI() {
   if (scrambleRetryBtn) scrambleRetryBtn.textContent = t('scrambleRetry');
   const statusHint = document.getElementById('statusHint');
   if (statusHint && !isRunning && !isReady) statusHint.textContent = t('holdToReady');
+  if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
 
   // Update Log modal labels
   const updateOverlay = document.getElementById('updateLogOverlay');

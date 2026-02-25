@@ -45,6 +45,23 @@ function updateSolveUiVisibility() {
 }
 window.updateSolveUiVisibility = updateSolveUiVisibility;
 
+function getSolveMaskText() {
+    return currentLang === 'ko' ? '측정 중' : 'Solve';
+}
+window.getSolveMaskText = getSolveMaskText;
+
+function updateTimerMaskVisibility() {
+    if (!timerEl || !isRunning) return;
+    const active = !!appState.hideTimerDuringSolve;
+    if (active) {
+        timerEl.innerText = getSolveMaskText();
+        return;
+    }
+    const elapsed = isBtConnected ? (Date.now() - startTime) : (performance.now() - startPerf);
+    timerEl.innerText = formatTime(Math.max(0, elapsed));
+}
+window.updateTimerMaskVisibility = updateTimerMaskVisibility;
+
 function appendSplitShareLine(container, solve) {
     const splitText = getSplitTextForSolve(solve);
     if (!splitText) return;
@@ -836,6 +853,7 @@ manualEntryToggle.onchange = e => { isManualMode = e.target.checked; timerEl.cla
 if (splitToggle) splitToggle.checked = appState.splitEnabled;
 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount || 4);
 if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
+if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
 document.getElementById('clearHistoryBtn').onclick = () => {
   const sid = getCurrentSessionId();
   const msg = 'Clear all history for this session?';
@@ -892,6 +910,13 @@ function setupDomEventBindings() {
     if (hideUiDuringSolveToggleEl) hideUiDuringSolveToggleEl.addEventListener('change', (event) => {
         appState.hideUiDuringSolve = event.target.checked;
         updateSolveUiVisibility();
+        saveData();
+    });
+
+    const hideTimerDuringSolveToggleEl = document.getElementById('hideTimerDuringSolveToggle');
+    if (hideTimerDuringSolveToggleEl) hideTimerDuringSolveToggleEl.addEventListener('change', (event) => {
+        appState.hideTimerDuringSolve = event.target.checked;
+        if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
         saveData();
     });
 
