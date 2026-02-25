@@ -574,7 +574,7 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   margin-inline: auto;
   padding-inline: 0.1rem;
   padding-block: 0.18rem;
-  font-size: clamp(0.42rem, 0.40vw + 0.30rem, 0.82rem);
+  font-size: clamp(0.63rem, 0.60vw + 0.45rem, 1.23rem);
   line-height: 1.35;
   overflow: hidden;
   text-wrap: balance;
@@ -582,13 +582,13 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 }
 @media (min-width: 768px){
   .scramble-text{
-    font-size: clamp(0.54rem, 0.36vw + 0.36rem, 0.94rem);
+    font-size: clamp(0.81rem, 0.54vw + 0.54rem, 1.41rem);
     line-height: 1.35;
   }
 }
 @media (min-width: 1280px){
   .scramble-text{
-    font-size: clamp(0.60rem, 0.32vw + 0.40rem, 1.04rem);
+    font-size: clamp(0.90rem, 0.48vw + 0.60rem, 1.56rem);
   }
 }
 
