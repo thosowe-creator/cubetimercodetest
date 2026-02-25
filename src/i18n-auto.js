@@ -65,11 +65,11 @@ const AUTO_I18N_PAIRS = [
 
   // Settings rows
   { en: 'Dark Mode', ko: '다크 모드' },
-  { en: 'Prevent Sleep (Wake Lock)', ko: '화면 꺼짐 방지(Wake Lock)' },
+  { en: 'Prevent Sleep', ko: '화면 꺼짐 방지' },
   { en: 'Inspection', ko: '미리보기' },
   { en: '15s countdown + voice', ko: '15초 카운트다운 + 음성' },
   { en: 'Hold Duration', ko: '홀드 시간' },
-  { en: 'Average Mode', ko: '평균 모드' },
+  { en: 'Average Mode', ko: '평균 형식' },
   { en: 'Manual Entry', ko: '수동 입력' },
   { en: 'Precision', ko: '소숫점' },
   { en: 'Split Timer', ko: '분할 측정' },
@@ -109,7 +109,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Save & Close', ko: '저장하고 닫기' },
   { en: 'Share Single', ko: '싱글 공유' },
   { en: 'Copy Text', ko: '텍스트 복사' },
-  { en: 'Copied!', ko: '복사됨!' },
+  { en: 'Copied!', ko: '복사되었습니다!' },
   { en: 'Date :', ko: '날짜 :' },
 ];
 
