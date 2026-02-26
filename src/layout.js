@@ -60,8 +60,7 @@ function updateScrambleBottomAreaBudget() {
 }
 
 function fitScrambleTextToBudget() {
-    if (!scrambleEl || scrambleEl.classList.contains('hidden')) return;
-    if (currentEvent === '333mbf') return;
+    if (!scrambleEl) return;
 
     if (scrambleBoxEl) {
         scrambleBoxEl.style.maxHeight = '';
@@ -83,6 +82,11 @@ function fitScrambleTextToBudget() {
         scrambleLoadingRow.parentElement.style.removeProperty('height');
     }
 
+    // Keep non-standard events from inheriting aggressive compact styles.
+    if (scrambleEl.classList.contains('hidden') || currentEvent === '333mbf') {
+        return;
+    }
+
     // Mobile: keep a fixed baseline font so event/scramble length never changes
     // scramble text size by event/length.
     // Desktop: tone down scramble text by ~10% for a less crowded look.
@@ -93,6 +97,7 @@ function fitScrambleTextToBudget() {
         scrambleEl.style.fontSize = `${fixedMobileBase}px`;
         scrambleEl.style.lineHeight = '1.3';
         scrambleEl.style.letterSpacing = '0';
+        scrambleEl.style.textAlign = 'center';
 
         if (!scrambleBoxEl) return;
 
@@ -192,6 +197,7 @@ function fitScrambleTextToBudget() {
             }
         }
     } else {
+        scrambleEl.style.textAlign = '';
         const computed = window.getComputedStyle(scrambleEl);
         const baseFontPx = parseFloat(computed.fontSize) || 16;
         scrambleEl.style.fontSize = `${baseFontPx * 1.26}px`;
