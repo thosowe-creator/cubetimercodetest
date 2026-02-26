@@ -91,6 +91,16 @@ const AUTO_I18N_PAIRS = [
   { en: 'Confirm', ko: '비밀번호 확인' },
   { en: 'Repeat password', ko: '비밀번호 확인' },
   { en: 'Create Account', ko: '계정 만들기' },
+  { en: 'Account Email', ko: '계정 이메일' },
+  { en: 'Cloud Backup', ko: '클라우드 백업' },
+  { en: 'No cloud backup yet.', ko: '클라우드 백업 기록이 없습니다.' },
+  { en: 'Backup Now', ko: '지금 백업' },
+  { en: 'Restore Backup', ko: '백업 복원' },
+  { en: 'Change Password', ko: '비밀번호 변경' },
+  { en: 'Current password', ko: '현재 비밀번호' },
+  { en: 'New password', ko: '새 비밀번호' },
+  { en: 'Confirm new password', ko: '새 비밀번호 확인' },
+  { en: 'Update Password', ko: '비밀번호 변경' },
 
   // History footer
   { en: 'Avg of All', ko: '전체 평균' },

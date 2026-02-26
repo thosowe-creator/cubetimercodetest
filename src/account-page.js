@@ -8,12 +8,35 @@ const loginSubmit = document.getElementById('loginSubmit');
 const signupSubmit = document.getElementById('signupSubmit');
 const passwordReset = document.getElementById('passwordReset');
 const accountAuthViews = document.getElementById('accountAuthViews');
+const accountDashboard = document.getElementById('accountDashboard');
 
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
 const signupEmail = document.getElementById('signupEmail');
 const signupPassword = document.getElementById('signupPassword');
 const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
+
+const dashboardEmail = document.getElementById('dashboardEmail');
+const dashboardBackupAt = document.getElementById('dashboardBackupAt');
+const dashboardBackupBtn = document.getElementById('dashboardBackupBtn');
+const dashboardRestoreBtn = document.getElementById('dashboardRestoreBtn');
+const currentPassword = document.getElementById('currentPassword');
+const newPassword = document.getElementById('newPassword');
+const newPasswordConfirm = document.getElementById('newPasswordConfirm');
+const changePasswordBtn = document.getElementById('changePasswordBtn');
+
+const LOCAL_BACKUP_KEY = 'cubeTimerData_v5';
+
+function isKorean() {
+  const lang = (localStorage.getItem('lang') || '').toLowerCase();
+  if (lang === 'ko') return true;
+  if (lang === 'en') return false;
+  return (navigator.language || '').toLowerCase().startsWith('ko');
+}
+
+function t(en, ko) {
+  return isKorean() ? ko : en;
+}
 
 function setAccountTab(tab) {
   const isLogin = tab === 'login';
@@ -49,6 +72,31 @@ function reportAccountError(context, err, fallbackMessage) {
   showMessage((err && err.message) || fallbackMessage, true);
 }
 
+function toDateLabel(updatedAt) {
+  try {
+    if (!updatedAt) return t('No cloud backup yet.', '클라우드 백업 기록이 없습니다.');
+    const d = typeof updatedAt.toDate === 'function' ? updatedAt.toDate() : new Date(updatedAt);
+    if (!d || Number.isNaN(d.getTime())) return t('No cloud backup yet.', '클라우드 백업 기록이 없습니다.');
+    return `${t('Last backup:', '최근 백업:')} ${d.toLocaleString()}`;
+  } catch (_) {
+    return t('No cloud backup yet.', '클라우드 백업 기록이 없습니다.');
+  }
+}
+
+async function refreshBackupMeta(uid) {
+  if (!uid || !window.firebaseDbApi || !window.firebaseDb) return;
+  const { doc, getDoc } = window.firebaseDbApi;
+  try {
+    const ref = doc(window.firebaseDb, 'users', uid, 'backups', 'latest');
+    const snapshot = await getDoc(ref);
+    dashboardBackupAt.textContent = snapshot.exists()
+      ? toDateLabel(snapshot.data()?.updatedAt)
+      : t('No cloud backup yet.', '클라우드 백업 기록이 없습니다.');
+  } catch (err) {
+    console.error('[Account] Backup metadata load failed', err);
+    dashboardBackupAt.textContent = t('Failed to load backup info.', '백업 정보를 불러오지 못했습니다.');
+  }
+}
 
 function openPasswordResetModal() {
   return new Promise((resolve) => {
@@ -106,9 +154,13 @@ function setLoggedInUI(user) {
   if (user) {
     logoutBtn.classList.remove('hidden');
     accountAuthViews.classList.add('hidden');
+    accountDashboard.classList.remove('hidden');
+    dashboardEmail.textContent = user.email || '-';
+    refreshBackupMeta(user.uid);
   } else {
     logoutBtn.classList.add('hidden');
     accountAuthViews.classList.remove('hidden');
+    accountDashboard.classList.add('hidden');
     setAccountTab('login');
   }
 }
@@ -123,8 +175,17 @@ async function initAccountPage() {
     return;
   }
 
-  const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } = window.firebaseAuthApi;
-  const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
+  const {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider,
+    onAuthStateChanged,
+  } = window.firebaseAuthApi;
+  const { doc, setDoc, serverTimestamp, getDoc } = window.firebaseDbApi;
 
   loginSubmit.addEventListener('click', async () => {
     showMessage('');
@@ -136,7 +197,7 @@ async function initAccountPage() {
     }
     try {
       await signInWithEmailAndPassword(window.firebaseAuth, email, password);
-      showMessage('Logged in.');
+      showMessage(t('Logged in.', '로그인되었습니다.'));
     } catch (err) {
       reportAccountError('Login failed', err, 'Login failed.');
     }
@@ -161,7 +222,7 @@ async function initAccountPage() {
         email: result.user.email,
         createdAt: serverTimestamp(),
       }, { merge: true });
-      showMessage('Account created.');
+      showMessage(t('Account created.', '계정이 생성되었습니다.'));
     } catch (err) {
       reportAccountError('Signup failed', err, 'Sign up failed.');
     }
@@ -179,9 +240,101 @@ async function initAccountPage() {
     }
   });
 
+  dashboardBackupBtn?.addEventListener('click', async () => {
+    showMessage('');
+    const user = window.firebaseAuth.currentUser;
+    if (!user) {
+      showMessage(t('Login required.', '로그인이 필요합니다.'), true);
+      return;
+    }
+    const localRaw = localStorage.getItem(LOCAL_BACKUP_KEY);
+    if (!localRaw) {
+      showMessage(t('No local timer data to back up.', '백업할 로컬 타이머 데이터가 없습니다.'), true);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(localRaw);
+      const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
+      await setDoc(ref, {
+        payload: JSON.stringify(parsed),
+        updatedAt: serverTimestamp(),
+        version: 1,
+      }, { merge: true });
+      await refreshBackupMeta(user.uid);
+      showMessage(t('Backup saved to cloud.', '클라우드에 백업되었습니다.'));
+    } catch (err) {
+      reportAccountError('Dashboard backup failed', err, t('Cloud backup failed.', '클라우드 백업에 실패했습니다.'));
+    }
+  });
+
+  dashboardRestoreBtn?.addEventListener('click', async () => {
+    showMessage('');
+    const user = window.firebaseAuth.currentUser;
+    if (!user) {
+      showMessage(t('Login required.', '로그인이 필요합니다.'), true);
+      return;
+    }
+    try {
+      const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
+      const snapshot = await getDoc(ref);
+      if (!snapshot.exists()) {
+        showMessage(t('No cloud backup found.', '클라우드 백업이 없습니다.'), true);
+        return;
+      }
+      const data = snapshot.data();
+      if (!data || !data.payload) {
+        showMessage(t('Cloud backup is empty.', '클라우드 백업이 비어 있습니다.'), true);
+        return;
+      }
+      const restored = JSON.parse(data.payload);
+      localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(restored));
+      showMessage(t('Restore complete. Open timer page to apply.', '복원이 완료되었습니다. 타이머 페이지에서 적용됩니다.'));
+    } catch (err) {
+      reportAccountError('Dashboard restore failed', err, t('Cloud restore failed.', '클라우드 복원에 실패했습니다.'));
+    }
+  });
+
+  changePasswordBtn?.addEventListener('click', async () => {
+    showMessage('');
+    const user = window.firebaseAuth.currentUser;
+    const oldPw = (currentPassword?.value || '').trim();
+    const nextPw = (newPassword?.value || '').trim();
+    const nextPwConfirm = (newPasswordConfirm?.value || '').trim();
+
+    if (!user || !user.email) {
+      showMessage(t('Login required.', '로그인이 필요합니다.'), true);
+      return;
+    }
+    if (!oldPw || !nextPw || !nextPwConfirm) {
+      showMessage(t('Fill in all password fields.', '비밀번호 항목을 모두 입력해 주세요.'), true);
+      return;
+    }
+    if (nextPw !== nextPwConfirm) {
+      showMessage(t('New passwords do not match.', '새 비밀번호가 일치하지 않습니다.'), true);
+      return;
+    }
+    if (nextPw.length < 6) {
+      showMessage(t('New password must be at least 6 characters.', '새 비밀번호는 6자 이상이어야 합니다.'), true);
+      return;
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, oldPw);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, nextPw);
+      if (currentPassword) currentPassword.value = '';
+      if (newPassword) newPassword.value = '';
+      if (newPasswordConfirm) newPasswordConfirm.value = '';
+      showMessage(t('Password updated successfully.', '비밀번호가 변경되었습니다.'));
+    } catch (err) {
+      reportAccountError('Password update failed', err, t('Failed to update password.', '비밀번호 변경에 실패했습니다.'));
+    }
+  });
+
   logoutBtn.addEventListener('click', async () => {
     try {
       await signOut(window.firebaseAuth);
+      showMessage(t('Logged out.', '로그아웃되었습니다.'));
     } catch (err) {
       reportAccountError('Logout failed', err, 'Logout failed.');
     }
