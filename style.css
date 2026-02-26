@@ -601,7 +601,7 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   }
   .scramble-text{
     text-wrap: wrap;
-    text-align: left;
+    text-align: center;
   }
 }
 
