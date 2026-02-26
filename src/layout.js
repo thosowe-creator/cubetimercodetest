@@ -106,6 +106,7 @@ function fitScrambleTextToBudget() {
 
     scrambleEl.style.textAlign = '';
     scrambleEl.style.lineHeight = isMobile ? '1.2' : '';
+    scrambleEl.style.marginTop = isMobile ? '0.16rem' : '';
 
     const computed = window.getComputedStyle(scrambleEl);
     const baseFontPx = parseFloat(computed.fontSize) || 16;
@@ -113,8 +114,8 @@ function fitScrambleTextToBudget() {
     // Desktop only: make scramble font about 10% larger.
     let scale = isMobile ? 1.26 : 1.26 * 1.1;
 
-    // 6x6/7x7/megaminx scrambles should look about 20% smaller.
-    if (compactEvents.has(currentEvent)) scale *= 0.8;
+    // 6x6/7x7/megaminx scrambles should be compact, but slightly larger on mobile.
+    if (compactEvents.has(currentEvent)) scale *= isMobile ? 0.88 : 0.8;
 
     scrambleEl.style.fontSize = `${baseFontPx * scale}px`;
 }
