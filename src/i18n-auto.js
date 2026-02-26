@@ -131,7 +131,10 @@ const AUTO_I18N_LOOKUP = (() => {
   const map = new Map();
   for (const p of AUTO_I18N_PAIRS) {
     map.set(p.en, p);
-    map.set(p.ko, p);
+    // Keep the first KO->EN mapping when multiple EN phrases share one KO phrase.
+    // (e.g. "화면 잠김 방지" should resolve back to canonical "Prevent Sleep",
+    // not the later "Prevent Sleep (Wake Lock)" variant during KO -> EN switch.)
+    if (!map.has(p.ko)) map.set(p.ko, p);
   }
   return map;
 })();
