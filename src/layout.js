@@ -87,12 +87,36 @@ function fitScrambleTextToBudget() {
         return;
     }
 
-    // Keep the same scramble text/box behavior on all viewports.
-    // This avoids mobile-only overrides that made sizing/movement differ from desktop.
+    const isMobile = window.innerWidth < 768;
+    const compactEvents = new Set(['666', '777', 'minx']);
+
+    // Mobile: make scramble box feel more vertically packed (less top/bottom empty space).
+    if (scrambleBoxEl) {
+        if (isMobile) {
+            scrambleBoxEl.style.setProperty('padding-top', '0.45rem', 'important');
+            scrambleBoxEl.style.setProperty('padding-bottom', '0.45rem', 'important');
+            if (typeof scrambleLoadingRow !== 'undefined' && scrambleLoadingRow && scrambleLoadingRow.parentElement && scrambleLoadingRow.classList.contains('hidden')) {
+                scrambleLoadingRow.parentElement.style.setProperty('height', '0px');
+            }
+        } else {
+            scrambleBoxEl.style.removeProperty('padding-top');
+            scrambleBoxEl.style.removeProperty('padding-bottom');
+        }
+    }
+
     scrambleEl.style.textAlign = '';
+    scrambleEl.style.lineHeight = isMobile ? '1.2' : '';
+
     const computed = window.getComputedStyle(scrambleEl);
     const baseFontPx = parseFloat(computed.fontSize) || 16;
-    scrambleEl.style.fontSize = `${baseFontPx * 1.26}px`;
+
+    // Desktop only: make scramble font about 10% larger.
+    let scale = isMobile ? 1.26 : 1.26 * 1.1;
+
+    // 6x6/7x7/megaminx scrambles should look about 20% smaller.
+    if (compactEvents.has(currentEvent)) scale *= 0.8;
+
+    scrambleEl.style.fontSize = `${baseFontPx * scale}px`;
 }
 
 function positionTimerToViewportCenter() {
