@@ -1349,3 +1349,25 @@ window.applyLightThemeBackup = (theme) => {
   saveLightTheme();
   syncThemeRowsUI();
 };
+
+function setIndexBackupRestoreVisibility(isLoggedIn) {
+    const hide = !!isLoggedIn;
+    const groups = [
+        document.getElementById('headerBackupRestoreGroup'),
+        document.getElementById('settingsBackupRestoreGroup'),
+    ].filter(Boolean);
+    groups.forEach((group) => {
+        group.classList.toggle('hidden', hide);
+    });
+}
+
+async function initIndexBackupRestoreVisibility() {
+    await (window.firebaseReady || Promise.resolve(null));
+    const onAuthStateChanged = window.firebaseAuthApi && window.firebaseAuthApi.onAuthStateChanged;
+    if (!onAuthStateChanged || !window.firebaseAuth) return;
+    onAuthStateChanged(window.firebaseAuth, (user) => {
+        setIndexBackupRestoreVisibility(!!user);
+    });
+}
+
+initIndexBackupRestoreVisibility();
