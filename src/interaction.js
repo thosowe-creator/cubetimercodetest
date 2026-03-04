@@ -173,6 +173,10 @@ function handleEnd(e) {
             timerEl.style.setProperty('color', '#ef4444', 'important');
         }
     }
+
+    if (!isRunning && !isReady) {
+        tryHandleContinueCommandTap();
+    }
 }
 window.openSessionModal = () => { document.getElementById('sessionOverlay').classList.add('active'); renderSessionList(); };
 window.closeSessionModal = () => { document.getElementById('sessionOverlay').classList.remove('active'); document.getElementById('newSessionName').value = ""; editingSessionId = null; };
@@ -705,6 +709,51 @@ window.copyShareText = async () => {
 //   * running + split OFF -> first keydown stops immediately
 // - keyup finalizes hold/release behavior via handleEnd.
 let splitLongPressStopTriggered = false;
+const CONTINUE_COMMAND_MAX_GAP = 200;
+
+function getContinuePromptText() {
+    return currentLang === 'ko' ? '이어서 측정하기' : 'Continue Timing';
+}
+
+function tryHandleContinueCommandTap() {
+    if (!appState.timerPauseEnabled || isBtConnected || isRunning || isManualMode) return false;
+    if (!lastFinishedSolveId) return false;
+
+    const now = Date.now();
+    if (resumeCommandLastTapAt && (now - resumeCommandLastTapAt) <= CONTINUE_COMMAND_MAX_GAP) {
+        resumeCommandLastTapAt = 0;
+        if (continueArmed) {
+            continueArmed = false;
+            continueSolveId = null;
+            continueBaseTimeMs = 0;
+            continueEvent = null;
+            continueSessionId = null;
+            const target = solves.find(s => s.id === lastFinishedSolveId);
+            if (target) {
+                const base = target.penalty === 'DNF' ? 'DNF' : formatTime(target.penalty === '+2' ? target.time + 2000 : target.time);
+                timerEl.classList.remove('timer-continue-text');
+                timerEl.innerText = `${base}${target.penalty === '+2' ? '+' : ''}`;
+            }
+        } else {
+            const target = solves.find(s => s.id === lastFinishedSolveId);
+            if (!target) return true;
+            continueArmed = true;
+            continueSolveId = target.id;
+            continueBaseTimeMs = target.time;
+            continueEvent = target.event;
+            continueSessionId = target.sessionId;
+            timerEl.classList.add('timer-continue-text');
+            timerEl.innerText = getContinuePromptText();
+        }
+        return true;
+    }
+
+    resumeCommandLastTapAt = now;
+    setTimeout(() => {
+        if (Date.now() - resumeCommandLastTapAt > CONTINUE_COMMAND_MAX_GAP) resumeCommandLastTapAt = 0;
+    }, CONTINUE_COMMAND_MAX_GAP + 20);
+    return true;
+}
 
 window.addEventListener('keydown', (e) => {
     const tag = (document.activeElement?.tagName || '').toUpperCase();
@@ -731,6 +780,7 @@ window.addEventListener('keydown', (e) => {
         // Prevent default always, including key repeat, to stop page scrolling.
         e.preventDefault();
         e.stopPropagation();
+
         if (isRunning) {
             const canSplit = appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function';
             if (canSplit) {
@@ -854,6 +904,8 @@ if (splitToggle) splitToggle.checked = appState.splitEnabled;
 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount || 4);
 if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
 if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
+const timerPauseToggle = document.getElementById('timerPauseToggle');
+if (timerPauseToggle) timerPauseToggle.checked = appState.timerPauseEnabled;
 document.getElementById('clearHistoryBtn').onclick = () => {
   const sid = getCurrentSessionId();
   const msg = 'Clear all history for this session?';
@@ -917,6 +969,12 @@ function setupDomEventBindings() {
     if (hideTimerDuringSolveToggleEl) hideTimerDuringSolveToggleEl.addEventListener('change', (event) => {
         appState.hideTimerDuringSolve = event.target.checked;
         if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
+        saveData();
+    });
+
+    const timerPauseToggleEl = document.getElementById('timerPauseToggle');
+    if (timerPauseToggleEl) timerPauseToggleEl.addEventListener('change', (event) => {
+        appState.timerPauseEnabled = event.target.checked;
         saveData();
     });
 
@@ -1140,6 +1198,27 @@ function setupDomEventBindings() {
             case 'show-solve-details':
                 showSolveDetails(Number(actionEl.dataset.solveId));
                 break;
+            case 'toggle-history-sort-menu':
+                toggleHistorySortMenu();
+                break;
+            case 'set-history-sort':
+                event.stopPropagation();
+                setHistorySortMode(actionEl.dataset.sortMode);
+                closeHistorySortMenu();
+                break;
+            case 'toggle-history-selection-mode':
+                toggleHistorySelectionMode();
+                break;
+            case 'toggle-history-select':
+                event.stopPropagation();
+                toggleHistorySolveSelection(Number(actionEl.dataset.solveId));
+                break;
+            case 'clear-history-selection':
+                clearHistorySelection();
+                break;
+            case 'delete-selected-history-solves':
+                deleteSelectedHistorySolves();
+                break;
             case 'toggle-solve-penalty':
                 event.stopPropagation();
                 toggleSolvePenalty(Number(actionEl.dataset.solveId), actionEl.dataset.penalty);
@@ -1153,6 +1232,25 @@ function setupDomEventBindings() {
         }
     });
 }
+
+window.toggleHistorySortMenu = () => {
+    const menu = document.getElementById('historySortMenu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+};
+
+window.closeHistorySortMenu = () => {
+    const menu = document.getElementById('historySortMenu');
+    if (menu) menu.classList.add('hidden');
+};
+
+document.addEventListener('click', (event) => {
+    const menu = document.getElementById('historySortMenu');
+    const btn = document.getElementById('historySortMenuBtn');
+    if (!menu || menu.classList.contains('hidden')) return;
+    if (menu.contains(event.target) || (btn && btn.contains(event.target))) return;
+    closeHistorySortMenu();
+});
 
 setupDomEventBindings();
 
