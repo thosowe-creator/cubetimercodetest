@@ -54,13 +54,56 @@ function updateTimerMaskVisibility() {
     if (!timerEl || !isRunning) return;
     const active = !!appState.hideTimerDuringSolve;
     if (active) {
+        setTimerSecondaryTextActive(true);
         timerEl.innerText = getSolveMaskText();
         return;
     }
+    setTimerSecondaryTextActive(false);
     const elapsed = isBtConnected ? (Date.now() - startTime) : (performance.now() - startPerf);
     timerEl.innerText = formatTime(Math.max(0, elapsed));
 }
 window.updateTimerMaskVisibility = updateTimerMaskVisibility;
+
+function showSettingsToast(message) {
+    let host = document.getElementById('settingsToast');
+    if (!host) {
+        host = document.createElement('div');
+        host.id = 'settingsToast';
+        host.className = 'fixed left-1/2 -translate-x-1/2 bottom-20 md:bottom-8 z-[120] px-4 py-2 rounded-xl bg-slate-800/95 text-white text-[11px] font-bold shadow-lg max-w-[88vw] text-center';
+        host.style.display = 'none';
+        document.body.appendChild(host);
+    }
+    host.textContent = message;
+    host.style.display = 'block';
+    clearTimeout(showSettingsToast._t);
+    showSettingsToast._t = setTimeout(() => {
+        if (host) host.style.display = 'none';
+    }, 1900);
+}
+
+function getContinueHelpText() {
+    if (currentLang === 'ko') {
+        return '이미 종료된 최근 기록에서 시간을 이어서 측정할 수 있습니다.\n측정 종료 후 스페이스바를 빠르게 두 번 누르거나 화면을 빠르게 두 번 터치하면 활성화됩니다.\n활성화 후 측정을 시작하면 이전 기록 시간과 새 측정 시간이 합산되어 저장됩니다.\n분할 측정이 켜져 있으면 사용할 수 없습니다.';
+    }
+    return 'Resume from your most recently finished solve.\nAfter stopping, quickly press Space twice or double-tap the timer area to enable it.\nWhen enabled, the next solve time is added to the previous solve and saved as one combined result.\nUnavailable while Split Timer is enabled.';
+}
+
+function syncContinueHelpText() {
+    const help = document.getElementById('continueTimingHelp');
+    if (!help) return;
+    help.textContent = getContinueHelpText();
+}
+
+function setTimerSecondaryTextActive(active) {
+    if (!timerEl) return;
+    if (active) {
+        applyContinuePromptStyle();
+        timerEl.classList.add('timer-continue-text');
+    } else {
+        timerEl.classList.remove('timer-continue-text');
+        clearContinuePromptStyle();
+    }
+}
 
 function appendSplitShareLine(container, solve) {
     const splitText = getSplitTextForSolve(solve);
@@ -736,6 +779,8 @@ function clearContinuePromptStyle() {
 
 window.applyContinuePromptStyle = applyContinuePromptStyle;
 window.clearContinuePromptStyle = clearContinuePromptStyle;
+window.setTimerSecondaryTextActive = setTimerSecondaryTextActive;
+window.syncContinueHelpText = syncContinueHelpText;
 
 function tryHandleContinueCommandTap() {
     if (!appState.timerPauseEnabled || isBtConnected || isRunning || isManualMode) return false;
@@ -753,8 +798,7 @@ function tryHandleContinueCommandTap() {
             const target = solves.find(s => s.id === lastFinishedSolveId);
             if (target) {
                 const base = target.penalty === 'DNF' ? 'DNF' : formatTime(target.penalty === '+2' ? target.time + 2000 : target.time);
-                timerEl.classList.remove('timer-continue-text');
-                clearContinuePromptStyle();
+                setTimerSecondaryTextActive(false);
                 timerEl.innerText = `${base}${target.penalty === '+2' ? '+' : ''}`;
             }
         } else {
@@ -765,8 +809,7 @@ function tryHandleContinueCommandTap() {
             continueBaseTimeMs = target.time;
             continueEvent = target.event;
             continueSessionId = target.sessionId;
-            applyContinuePromptStyle();
-            timerEl.classList.add('timer-continue-text');
+            setTimerSecondaryTextActive(true);
             timerEl.innerText = getContinuePromptText();
         }
         return true;
@@ -972,7 +1015,16 @@ function setupDomEventBindings() {
 
     const splitToggleEl = document.getElementById('splitToggle');
     if (splitToggleEl) splitToggleEl.addEventListener('change', (event) => {
-        appState.splitEnabled = event.target.checked;
+        const next = !!event.target.checked;
+        if (next && appState.timerPauseEnabled) {
+            appState.timerPauseEnabled = false;
+            const timerPauseToggleEl2 = document.getElementById('timerPauseToggle');
+            if (timerPauseToggleEl2) timerPauseToggleEl2.checked = false;
+            showSettingsToast(currentLang === 'ko'
+                ? '이어서 측정하기를 꺼서 분할 측정을 켰습니다.'
+                : 'Continue Timing was turned off so Split Timer could be enabled.');
+        }
+        appState.splitEnabled = next;
         saveData();
     });
 
@@ -998,8 +1050,26 @@ function setupDomEventBindings() {
 
     const timerPauseToggleEl = document.getElementById('timerPauseToggle');
     if (timerPauseToggleEl) timerPauseToggleEl.addEventListener('change', (event) => {
-        appState.timerPauseEnabled = event.target.checked;
+        const next = !!event.target.checked;
+        if (next && appState.splitEnabled) {
+            appState.splitEnabled = false;
+            const splitToggleEl2 = document.getElementById('splitToggle');
+            if (splitToggleEl2) splitToggleEl2.checked = false;
+            showSettingsToast(currentLang === 'ko'
+                ? '분할 측정을 꺼서 이어서 측정하기를 켰습니다.'
+                : 'Split Timer was turned off so Continue Timing could be enabled.');
+        }
+        appState.timerPauseEnabled = next;
         saveData();
+    });
+
+    const continueHelpBtnEl = document.getElementById('continueTimingHelpBtn');
+    const continueHelpEl = document.getElementById('continueTimingHelp');
+    syncContinueHelpText();
+    if (continueHelpBtnEl && continueHelpEl) continueHelpBtnEl.addEventListener('click', (event) => {
+        event.preventDefault();
+        syncContinueHelpText();
+        continueHelpEl.classList.toggle('hidden');
     });
 
     const eventSelectEl = document.getElementById('eventSelect');

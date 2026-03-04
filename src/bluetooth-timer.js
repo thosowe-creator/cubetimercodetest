@@ -209,9 +209,11 @@ window.getSolveDisplayText = getSolveDisplayText;
 function updateRunningTimerText(elapsed) {
     if (!timerEl) return;
     if (appState.hideTimerDuringSolve && isRunning) {
+        if (typeof window.setTimerSecondaryTextActive === 'function') window.setTimerSecondaryTextActive(true);
         timerEl.innerText = (typeof window.getSolveMaskText === 'function') ? window.getSolveMaskText() : 'Solve';
         return;
     }
+    if (typeof window.setTimerSecondaryTextActive === 'function') window.setTimerSecondaryTextActive(false);
     timerEl.innerText = formatTime(elapsed);
 }
 
