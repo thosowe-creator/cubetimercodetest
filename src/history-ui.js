@@ -1,7 +1,46 @@
 // Updated UpdateUI with Lazy Loading support
+let historySelectionMode = false;
+let selectedHistorySolveIds = new Set();
+
+function getSortedHistorySolves() {
+    const sid = getCurrentSessionId();
+    const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
+    const mode = appState.historySortMode || 'latest';
+    if (mode === 'latest') return filtered;
+
+    const withIndex = filtered.map((solve, idx) => ({ solve, idx }));
+    withIndex.sort((a, b) => {
+        const av = a.solve.penalty === 'DNF' ? Infinity : (a.solve.penalty === '+2' ? a.solve.time + 2000 : a.solve.time);
+        const bv = b.solve.penalty === 'DNF' ? Infinity : (b.solve.penalty === '+2' ? b.solve.time + 2000 : b.solve.time);
+        if (av !== bv) return mode === 'worst' ? (bv - av) : (av - bv);
+        return a.idx - b.idx;
+    });
+    return withIndex.map(x => x.solve);
+}
+
+function syncHistorySelectionControls(sorted) {
+    const editBtn = document.getElementById('historyEditBtn');
+    const actions = document.getElementById('historySelectionActions');
+    const count = document.getElementById('historySelectionCount');
+    const delBtn = document.getElementById('deleteSelectedHistoryBtn');
+    if (editBtn) editBtn.textContent = historySelectionMode ? (currentLang === 'ko' ? '완료' : 'Done') : (currentLang === 'ko' ? '선택' : 'Select');
+    if (actions) actions.classList.toggle('hidden', !historySelectionMode);
+    if (count) count.textContent = currentLang === 'ko' ? `${selectedHistorySolveIds.size}개 선택됨` : `${selectedHistorySolveIds.size} selected`;
+    if (delBtn) delBtn.disabled = selectedHistorySolveIds.size === 0;
+
+    if (!historySelectionMode) {
+        selectedHistorySolveIds.clear();
+        return;
+    }
+
+    const validIds = new Set(sorted.map(s => s.id));
+    selectedHistorySolveIds = new Set([...selectedHistorySolveIds].filter(id => validIds.has(id)));
+}
+
 function updateUI() {
     const sid = getCurrentSessionId();
     const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
+    const sortedForList = getSortedHistorySolves();
 
     const activeSession = (appState.sessions[appState.currentEvent] || []).find(s => s.isActive);
     if (activeSession) {
@@ -10,7 +49,7 @@ function updateUI() {
     }
 
     // Lazy Render
-    const subset = filtered.slice(0, displayedSolvesCount);
+    const subset = sortedForList.slice(0, displayedSolvesCount);
 
     const solvePrimaryText = (s) => {
         if (s.event === '333mbf' && s.mbf) {
@@ -23,6 +62,8 @@ function updateUI() {
     };
 
     historyList.innerHTML = '';
+    syncHistorySelectionControls(sortedForList);
+
     if (!subset.length) {
         const empty = document.createElement('div');
         empty.className = 'text-center py-10 text-slate-300 text-[11px] italic';
@@ -30,13 +71,13 @@ function updateUI() {
         historyList.appendChild(empty);
     } else {
         subset.forEach((s, solveIndex) => {
-            const rowSlice = filtered.slice(solveIndex);
+            const rowSlice = sortedForList.slice(solveIndex);
             const ao5AtSolve = s.event === '333mbf' ? '-' : calculateAvg(rowSlice, 5);
             const ao12AtSolve = s.event === '333mbf' ? '-' : calculateAvg(rowSlice, 12);
 
             const row = document.createElement('div');
             row.className = 'bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 rounded-xl group cursor-pointer hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all';
-            row.dataset.action = 'show-solve-details';
+            row.dataset.action = historySelectionMode ? 'toggle-history-select' : 'show-solve-details';
             row.dataset.solveId = String(s.id);
 
             const rowGrid = document.createElement('div');
@@ -44,6 +85,19 @@ function updateUI() {
 
             const recordWrap = document.createElement('div');
             recordWrap.className = 'min-w-0 flex flex-col gap-2';
+
+            if (historySelectionMode) {
+                const selector = document.createElement('label');
+                selector.className = 'inline-flex items-center gap-2 text-[11px] text-slate-500';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedHistorySolveIds.has(s.id);
+                checkbox.dataset.action = 'toggle-history-select';
+                checkbox.dataset.solveId = String(s.id);
+                selector.appendChild(checkbox);
+                selector.appendChild(document.createTextNode(currentLang === 'ko' ? '선택' : 'Select'));
+                recordWrap.appendChild(selector);
+            }
 
             const timeText = document.createElement('span');
             timeText.className = 'font-bold text-slate-700 dark:text-slate-200 text-sm truncate';
@@ -61,7 +115,7 @@ function updateUI() {
             const controls = document.createElement('div');
             controls.className = 'flex items-center gap-2';
 
-            if (s.event !== '333mbf') {
+            if (!historySelectionMode && s.event !== '333mbf') {
                 const plus2Btn = document.createElement('button');
                 plus2Btn.className = `history-pen-btn ${s.penalty === '+2' ? 'active-plus2' : ''}`;
                 plus2Btn.dataset.action = 'toggle-solve-penalty';
@@ -79,29 +133,32 @@ function updateUI() {
                 controls.appendChild(dnfBtn);
             }
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 font-black text-lg leading-none';
-            deleteBtn.dataset.action = 'delete-solve';
-            deleteBtn.dataset.solveId = String(s.id);
-            deleteBtn.setAttribute('aria-label', 'Delete');
-            deleteBtn.textContent = '×';
-            controls.appendChild(deleteBtn);
+            if (!historySelectionMode) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 font-black text-lg leading-none';
+                deleteBtn.dataset.action = 'delete-solve';
+                deleteBtn.dataset.solveId = String(s.id);
+                deleteBtn.setAttribute('aria-label', 'Delete');
+                deleteBtn.textContent = '×';
+                controls.appendChild(deleteBtn);
+            }
 
             recordWrap.appendChild(controls);
 
+            const canShowAverageColumns = (appState.historySortMode || 'latest') === 'latest';
             const ao5El = document.createElement('span');
-            ao5El.className = `text-sm font-bold text-right pr-1 ${ao5AtSolve !== '-' ? 'text-blue-600 dark:text-blue-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
-            ao5El.textContent = ao5AtSolve;
-            if (ao5AtSolve !== '-') {
+            ao5El.className = `text-sm font-bold text-right pr-1 ${(canShowAverageColumns && ao5AtSolve !== '-') ? 'text-blue-600 dark:text-blue-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao5El.textContent = canShowAverageColumns ? ao5AtSolve : '-';
+            if (canShowAverageColumns && ao5AtSolve !== '-') {
                 ao5El.dataset.action = 'open-history-avg-share';
                 ao5El.dataset.shareCount = '5';
                 ao5El.dataset.shareStart = String(solveIndex);
             }
 
             const ao12El = document.createElement('span');
-            ao12El.className = `text-sm font-bold text-right pr-1 ${ao12AtSolve !== '-' ? 'text-purple-600 dark:text-purple-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
-            ao12El.textContent = ao12AtSolve;
-            if (ao12AtSolve !== '-') {
+            ao12El.className = `text-sm font-bold text-right pr-1 ${(canShowAverageColumns && ao12AtSolve !== '-') ? 'text-purple-600 dark:text-purple-400 hover:underline cursor-pointer' : 'text-slate-400 dark:text-slate-500'}`;
+            ao12El.textContent = canShowAverageColumns ? ao12AtSolve : '-';
+            if (canShowAverageColumns && ao12AtSolve !== '-') {
                 ao12El.dataset.action = 'open-history-avg-share';
                 ao12El.dataset.shareCount = '12';
                 ao12El.dataset.shareStart = String(solveIndex);
@@ -232,3 +289,43 @@ function updateUI() {
 
     if (activeTool === 'graph') renderHistoryGraph();
 }
+
+window.setHistorySortMode = (mode) => {
+    appState.historySortMode = mode;
+    updateUI();
+    saveData();
+};
+
+window.toggleHistorySelectionMode = () => {
+    historySelectionMode = !historySelectionMode;
+    if (!historySelectionMode) selectedHistorySolveIds.clear();
+    updateUI();
+};
+
+window.toggleHistorySolveSelection = (solveId) => {
+    if (!historySelectionMode) return;
+    if (selectedHistorySolveIds.has(solveId)) selectedHistorySolveIds.delete(solveId);
+    else selectedHistorySolveIds.add(solveId);
+    updateUI();
+};
+
+window.selectAllHistorySolves = () => {
+    if (!historySelectionMode) return;
+    const ids = getSortedHistorySolves().map(s => s.id);
+    selectedHistorySolveIds = new Set(ids);
+    updateUI();
+};
+
+window.clearHistorySelection = () => {
+    selectedHistorySolveIds.clear();
+    updateUI();
+};
+
+window.deleteSelectedHistorySolves = () => {
+    if (!historySelectionMode || !selectedHistorySolveIds.size) return;
+    solves = solves.filter(s => !selectedHistorySolveIds.has(s.id));
+    selectedHistorySolveIds.clear();
+    historySelectionMode = false;
+    updateUI();
+    saveData();
+};
