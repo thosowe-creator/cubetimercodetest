@@ -96,6 +96,13 @@ function handleStart(e) {
         return;
     }
     if (isManualMode) return;
+
+    // Timer Pause의 이어서 측정 더블탭 명령을 우선 처리: 두 번째 탭에서는 Ready hold를 시작하지 않음
+    if (!isRunning && !isBtConnected && appState.timerPauseEnabled && !isInspectionMode && lastFinishedSolveId) {
+        const now = Date.now();
+        const isSecondCommandTap = resumeCommandLastTapAt && (now - resumeCommandLastTapAt) <= CONTINUE_COMMAND_MAX_GAP;
+        if (isSecondCommandTap) return;
+    }
     
     // Inspection Logic Handling
     if (isInspectionMode && inspectionState === 'none') {
@@ -134,6 +141,8 @@ function handleStart(e) {
 }
 function handleEnd(e) {
     if (!isTimerPointerAllowed(e)) return;
+    // Always clear pending hold timer first to avoid stale ready-state race on rapid taps.
+    clearTimeout(holdTimer);
     // Allow taps on UI controls inside the interactive area (avg badges, buttons, dropdown)
     // to behave like normal clicks on mobile (iOS can cancel the click if we preventDefault on touchend).
     if (e && e.type !== 'keydown' && e.target && (e.target.closest('.avg-badge') || e.target.closest('button') || e.target.closest('.tools-dropdown'))) return;
@@ -150,7 +159,6 @@ function handleEnd(e) {
         return; 
     }
     if(e && e.cancelable) e.preventDefault();
-    clearTimeout(holdTimer);
     if (isManualMode) return;
     // Inspection Mode: Start Countdown on Release if Idle
     if (isInspectionMode && !isRunning && inspectionState === 'none') {

@@ -246,7 +246,7 @@ function startTimer() {
     timerEl.style.removeProperty('color');
     statusHint.innerText = "Timing...";
     timerEl.classList.add('text-running');
-    timerEl.classList.remove('text-ready', 'holding-status', 'ready-to-start');
+    timerEl.classList.remove('text-ready', 'holding-status', 'ready-to-start', 'timer-continue-text');
 }
 function stopTimer(forcedTime = null) {
     if (timerRafId) {

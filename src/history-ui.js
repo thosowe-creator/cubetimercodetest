@@ -35,7 +35,17 @@ function syncHistorySelectionControls(sorted) {
     const actions = document.getElementById('historySelectionActions');
     const count = document.getElementById('historySelectionCount');
     const delBtn = document.getElementById('deleteSelectedHistoryBtn');
-    if (editBtn) editBtn.textContent = historySelectionMode ? (currentLang === 'ko' ? '완료' : 'Done') : (currentLang === 'ko' ? '선택' : 'Select');
+    if (editBtn) {
+        editBtn.setAttribute('aria-pressed', historySelectionMode ? 'true' : 'false');
+        editBtn.setAttribute('aria-label', historySelectionMode
+            ? (currentLang === 'ko' ? '선택 모드 종료' : 'Exit selection mode')
+            : (currentLang === 'ko' ? '선택 모드 시작' : 'Enter selection mode'));
+        editBtn.title = historySelectionMode ? (currentLang === 'ko' ? '완료' : 'Done') : (currentLang === 'ko' ? '선택' : 'Select');
+        editBtn.classList.toggle('bg-blue-50', historySelectionMode);
+        editBtn.classList.toggle('text-blue-600', historySelectionMode);
+        editBtn.classList.toggle('dark:bg-blue-900/30', historySelectionMode);
+        editBtn.classList.toggle('dark:text-blue-300', historySelectionMode);
+    }
     if (actions) actions.classList.toggle('hidden', !historySelectionMode);
     if (count) count.textContent = currentLang === 'ko' ? `${selectedHistorySolveIds.size}개 선택됨` : `${selectedHistorySolveIds.size} selected`;
     if (delBtn) delBtn.disabled = selectedHistorySolveIds.size === 0;
