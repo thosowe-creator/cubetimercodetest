@@ -83,15 +83,15 @@ function showSettingsToast(message) {
 
 function getContinueHelpText() {
     if (currentLang === 'ko') {
-        return '이미 종료된 최근 기록에서 시간을 이어서 측정할 수 있습니다.\n측정 종료 후 스페이스바를 빠르게 두 번 누르거나 화면을 빠르게 두 번 터치하면 활성화됩니다.\n활성화 후 측정을 시작하면 이전 기록 시간과 새 측정 시간이 합산되어 저장됩니다.\n분할 측정이 켜져 있으면 사용할 수 없습니다.';
+        return '이미 종료된 기록에서 시간을 이어서 측정할 수 있습니다.<br><br>측정 종료 후 스페이스바를 빠르게 두 번 누르거나<br>화면을 빠르게 두 번 터치하면 기능이 활성화됩니다.<br>활성화된 상태에서 측정을 시작하면 이전 기록과 새 측정 시간이 합산되어 저장됩니다.<br><br>다시 빠르게 두 번 누르면 기능이 해제됩니다.<br><br><strong>분할 측정이 켜져 있으면 사용할 수 없습니다.</strong>';
     }
-    return 'Resume from your most recently finished solve.\nAfter stopping, quickly press Space twice or double-tap the timer area to enable it.\nWhen enabled, the next solve time is added to the previous solve and saved as one combined result.\nUnavailable while Split Timer is enabled.';
+    return 'You can continue timing from an already finished record.<br><br>After a solve ends, quickly press Space twice<br>or quickly double-tap the screen to activate this feature.<br>When activated, starting a new solve will save the previous record and new solve time as a combined result.<br><br>Quickly doing it twice again will deactivate the feature.<br><br><strong>This feature is unavailable when Split Timing is enabled.</strong>';
 }
 
 function syncContinueHelpText() {
     const help = document.getElementById('continueTimingHelp');
     if (!help) return;
-    help.textContent = getContinueHelpText();
+    help.innerHTML = getContinueHelpText();
 }
 
 function setTimerSecondaryTextActive(active) {
@@ -172,6 +172,8 @@ function handleStart(e) {
         return;
     }
     // Standard Logic (BT 연결 시 여기 도달 안함)
+    // Continue prompt should only affect idle hint text, never active holding/running timer size.
+    setTimerSecondaryTextActive(false);
     timerEl.style.setProperty('color', '#ef4444', 'important');
     timerEl.classList.add('holding-status');
     
