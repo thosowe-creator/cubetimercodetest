@@ -35,6 +35,15 @@ let splitEnabled = false;
 let splitCount = 4;
 let hideUiDuringSolve = false;
 let hideTimerDuringSolve = false;
+let historySortMode = 'latest';
+let timerPauseEnabled = false;
+let continueArmed = false;
+let continueSolveId = null;
+let continueBaseTimeMs = 0;
+let continueEvent = null;
+let continueSessionId = null;
+let lastFinishedSolveId = null;
+let resumeCommandLastTapAt = 0;
 
 const appState = {
     get solves() {
@@ -109,6 +118,18 @@ const appState = {
     },
     set hideTimerDuringSolve(value) {
         hideTimerDuringSolve = !!value;
+    },
+    get historySortMode() {
+        return historySortMode;
+    },
+    set historySortMode(value) {
+        historySortMode = (value === 'best' || value === 'worst') ? value : 'latest';
+    },
+    get timerPauseEnabled() {
+        return timerPauseEnabled;
+    },
+    set timerPauseEnabled(value) {
+        timerPauseEnabled = !!value;
     },
 };
 

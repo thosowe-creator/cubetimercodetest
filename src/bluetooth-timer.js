@@ -279,27 +279,49 @@ function stopTimer(forcedTime = null) {
         return;
     }
     let finalPenalty = inspectionPenalty;
+    let savedSolve = null;
     lastSplitMarks = currentSplitMarks.slice();
     if (elapsed > 10 || finalPenalty === 'DNF') {
         const splitMarks = (appState.splitEnabled && currentSplitMarks.length)
             ? currentSplitMarks.map(v => Math.round(v))
             : null;
-        solves.unshift({
-            id: Date.now(),
-            time: elapsed,
-            scramble: currentScramble,
-            event: currentEvent,
-            sessionId: getCurrentSessionId(),
-            penalty: finalPenalty,
-            splitMarks,
-            date: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "")
-        });
+        const canContinuePrevious = continueArmed && continueSolveId && continueEvent === currentEvent && continueSessionId === getCurrentSessionId();
+        if (canContinuePrevious) {
+            const target = solves.find(s => s.id === continueSolveId);
+            if (target) {
+                target.time = Math.max(0, continueBaseTimeMs) + elapsed;
+                target.penalty = finalPenalty;
+                target.splitMarks = splitMarks;
+                savedSolve = target;
+            }
+            continueArmed = false;
+            continueSolveId = null;
+            continueBaseTimeMs = 0;
+            continueEvent = null;
+            continueSessionId = null;
+        }
+
+        if (!savedSolve) {
+            savedSolve = {
+                id: Date.now(),
+                time: elapsed,
+                scramble: currentScramble,
+                event: currentEvent,
+                sessionId: getCurrentSessionId(),
+                penalty: finalPenalty,
+                splitMarks,
+                date: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.$/, "")
+            };
+            solves.unshift(savedSolve);
+        }
+
+        lastFinishedSolveId = savedSolve.id;
         if (finalPenalty === 'DNF') {
             timerEl.innerText = "DNF";
         } else {
-            let displayTime = formatTime(elapsed);
+            let displayTime = formatTime(savedSolve.time);
             if (finalPenalty === '+2') {
-                displayTime = formatTime(elapsed + 2000) + "+";
+                displayTime = formatTime(savedSolve.time + 2000) + "+";
             }
             timerEl.innerText = displayTime;
         }
