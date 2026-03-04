@@ -97,12 +97,14 @@ function syncContinueHelpText() {
 function setTimerSecondaryTextActive(active) {
     if (!timerEl) return;
     if (active) {
+        if (timerEl.classList.contains('timer-continue-text')) return;
         applyContinuePromptStyle();
         timerEl.classList.add('timer-continue-text');
-    } else {
-        timerEl.classList.remove('timer-continue-text');
-        clearContinuePromptStyle();
+        return;
     }
+    if (!timerEl.classList.contains('timer-continue-text')) return;
+    timerEl.classList.remove('timer-continue-text');
+    clearContinuePromptStyle();
 }
 
 function appendSplitShareLine(container, solve) {
@@ -1021,8 +1023,8 @@ function setupDomEventBindings() {
             const timerPauseToggleEl2 = document.getElementById('timerPauseToggle');
             if (timerPauseToggleEl2) timerPauseToggleEl2.checked = false;
             showSettingsToast(currentLang === 'ko'
-                ? '이어서 측정하기를 꺼서 분할 측정을 켰습니다.'
-                : 'Continue Timing was turned off so Split Timer could be enabled.');
+                ? '이어서 측정하기와 분할 측정은 같이 사용할 수 없습니다.'
+                : 'Continue Timing and Split Timer cannot be used together.');
         }
         appState.splitEnabled = next;
         saveData();
@@ -1056,8 +1058,8 @@ function setupDomEventBindings() {
             const splitToggleEl2 = document.getElementById('splitToggle');
             if (splitToggleEl2) splitToggleEl2.checked = false;
             showSettingsToast(currentLang === 'ko'
-                ? '분할 측정을 꺼서 이어서 측정하기를 켰습니다.'
-                : 'Split Timer was turned off so Continue Timing could be enabled.');
+                ? '이어서 측정하기와 분할 측정은 같이 사용할 수 없습니다.'
+                : 'Continue Timing and Split Timer cannot be used together.');
         }
         appState.timerPauseEnabled = next;
         saveData();
