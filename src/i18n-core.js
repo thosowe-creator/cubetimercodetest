@@ -7,7 +7,7 @@ if (currentLang !== 'ko' && currentLang !== 'en') {
 const I18N = {
   ko: {
     language: '언어',
-    updateLog: '업데이트',
+    updateLog: '업데이트 로그',
     latest: '최신',
     okGotIt: '확인',
     devLog: '개발자 로그',
