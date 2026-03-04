@@ -173,6 +173,10 @@ function handleStart(e) {
     }
     // Standard Logic (BT 연결 시 여기 도달 안함)
     // Continue prompt should only affect idle hint text, never active holding/running timer size.
+    if (continueArmed && lastFinishedSolveId) {
+        const target = solves.find(s => s.id === lastFinishedSolveId);
+        if (target) timerEl.innerText = getSolveShareTimeText(target);
+    }
     setTimerSecondaryTextActive(false);
     timerEl.style.setProperty('color', '#ef4444', 'important');
     timerEl.classList.add('holding-status');
