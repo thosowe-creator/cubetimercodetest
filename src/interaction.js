@@ -731,6 +731,7 @@ function tryHandleContinueCommandTap() {
             const target = solves.find(s => s.id === lastFinishedSolveId);
             if (target) {
                 const base = target.penalty === 'DNF' ? 'DNF' : formatTime(target.penalty === '+2' ? target.time + 2000 : target.time);
+                timerEl.classList.remove('timer-continue-text');
                 timerEl.innerText = `${base}${target.penalty === '+2' ? '+' : ''}`;
             }
         } else {
@@ -741,6 +742,7 @@ function tryHandleContinueCommandTap() {
             continueBaseTimeMs = target.time;
             continueEvent = target.event;
             continueSessionId = target.sessionId;
+            timerEl.classList.add('timer-continue-text');
             timerEl.innerText = getContinuePromptText();
         }
         return true;
@@ -902,8 +904,6 @@ if (splitToggle) splitToggle.checked = appState.splitEnabled;
 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount || 4);
 if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
 if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
-const historySortSelect = document.getElementById('historySortSelect');
-if (historySortSelect) historySortSelect.value = appState.historySortMode || 'latest';
 const timerPauseToggle = document.getElementById('timerPauseToggle');
 if (timerPauseToggle) timerPauseToggle.checked = appState.timerPauseEnabled;
 document.getElementById('clearHistoryBtn').onclick = () => {
@@ -970,11 +970,6 @@ function setupDomEventBindings() {
         appState.hideTimerDuringSolve = event.target.checked;
         if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
         saveData();
-    });
-
-    const historySortSelectEl = document.getElementById('historySortSelect');
-    if (historySortSelectEl) historySortSelectEl.addEventListener('change', (event) => {
-        if (typeof window.setHistorySortMode === 'function') window.setHistorySortMode(event.target.value);
     });
 
     const timerPauseToggleEl = document.getElementById('timerPauseToggle');
@@ -1203,15 +1198,20 @@ function setupDomEventBindings() {
             case 'show-solve-details':
                 showSolveDetails(Number(actionEl.dataset.solveId));
                 break;
+            case 'toggle-history-sort-menu':
+                toggleHistorySortMenu();
+                break;
+            case 'set-history-sort':
+                event.stopPropagation();
+                setHistorySortMode(actionEl.dataset.sortMode);
+                closeHistorySortMenu();
+                break;
             case 'toggle-history-selection-mode':
                 toggleHistorySelectionMode();
                 break;
             case 'toggle-history-select':
                 event.stopPropagation();
                 toggleHistorySolveSelection(Number(actionEl.dataset.solveId));
-                break;
-            case 'select-all-history-solves':
-                selectAllHistorySolves();
                 break;
             case 'clear-history-selection':
                 clearHistorySelection();
@@ -1232,6 +1232,25 @@ function setupDomEventBindings() {
         }
     });
 }
+
+window.toggleHistorySortMenu = () => {
+    const menu = document.getElementById('historySortMenu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+};
+
+window.closeHistorySortMenu = () => {
+    const menu = document.getElementById('historySortMenu');
+    if (menu) menu.classList.add('hidden');
+};
+
+document.addEventListener('click', (event) => {
+    const menu = document.getElementById('historySortMenu');
+    const btn = document.getElementById('historySortMenuBtn');
+    if (!menu || menu.classList.contains('hidden')) return;
+    if (menu.contains(event.target) || (btn && btn.contains(event.target))) return;
+    closeHistorySortMenu();
+});
 
 setupDomEventBindings();
 

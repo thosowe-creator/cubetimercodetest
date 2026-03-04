@@ -77,6 +77,7 @@ function handleGanBTData(event) {
              if (!isInspectionMode) {
                  timerEl.classList.remove('text-ready', 'text-running');
                  timerEl.style.removeProperty('color');
+    timerEl.classList.remove('timer-continue-text');
                  statusHint.innerText = "Timer Ready (BT)";
              }
         } else if (state === 3) { // RUNNING
@@ -316,6 +317,7 @@ function stopTimer(forcedTime = null) {
         }
 
         lastFinishedSolveId = savedSolve.id;
+        timerEl.classList.remove('timer-continue-text');
         if (finalPenalty === 'DNF') {
             timerEl.innerText = "DNF";
         } else {

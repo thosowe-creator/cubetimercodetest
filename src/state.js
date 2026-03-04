@@ -123,7 +123,7 @@ const appState = {
         return historySortMode;
     },
     set historySortMode(value) {
-        historySortMode = (value === 'best' || value === 'worst') ? value : 'latest';
+        historySortMode = (value === 'best' || value === 'worst' || value === 'oldest') ? value : 'latest';
     },
     get timerPauseEnabled() {
         return timerPauseEnabled;

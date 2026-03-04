@@ -7,6 +7,7 @@ function getSortedHistorySolves() {
     const filtered = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === sid);
     const mode = appState.historySortMode || 'latest';
     if (mode === 'latest') return filtered;
+    if (mode === 'oldest') return filtered.slice().reverse();
 
     const withIndex = filtered.map((solve, idx) => ({ solve, idx }));
     withIndex.sort((a, b) => {
@@ -16,6 +17,17 @@ function getSortedHistorySolves() {
         return a.idx - b.idx;
     });
     return withIndex.map(x => x.solve);
+}
+
+function syncHistorySortMenuUi() {
+    const mode = appState.historySortMode || 'latest';
+    document.querySelectorAll('.history-sort-option').forEach((el) => {
+        const active = el.dataset.sortMode === mode;
+        el.classList.toggle('bg-slate-100', active);
+        el.classList.toggle('dark:bg-slate-700', active);
+        el.classList.toggle('text-blue-600', active);
+        el.classList.toggle('dark:text-blue-300', active);
+    });
 }
 
 function syncHistorySelectionControls(sorted) {
@@ -63,6 +75,7 @@ function updateUI() {
 
     historyList.innerHTML = '';
     syncHistorySelectionControls(sortedForList);
+    syncHistorySortMenuUi();
 
     if (!subset.length) {
         const empty = document.createElement('div');
@@ -309,12 +322,6 @@ window.toggleHistorySolveSelection = (solveId) => {
     updateUI();
 };
 
-window.selectAllHistorySolves = () => {
-    if (!historySelectionMode) return;
-    const ids = getSortedHistorySolves().map(s => s.id);
-    selectedHistorySolveIds = new Set(ids);
-    updateUI();
-};
 
 window.clearHistorySelection = () => {
     selectedHistorySolveIds.clear();

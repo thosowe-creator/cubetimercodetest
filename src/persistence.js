@@ -153,8 +153,6 @@ function applyRestoredData(data, successMessage) {
             if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
             if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
             if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
-            const historySortSelect = document.getElementById('historySortSelect');
-            if (historySortSelect) historySortSelect.value = appState.historySortMode;
             const timerPauseToggle = document.getElementById('timerPauseToggle');
             if (timerPauseToggle) timerPauseToggle.checked = appState.timerPauseEnabled;
 
@@ -248,8 +246,6 @@ function loadData() {
                 if (splitCountSelect) splitCountSelect.value = String(appState.splitCount);
                 if (hideUiDuringSolveToggle) hideUiDuringSolveToggle.checked = appState.hideUiDuringSolve;
                 if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hideTimerDuringSolve;
-                const historySortSelect = document.getElementById('historySortSelect');
-                if (historySortSelect) historySortSelect.value = appState.historySortMode;
                 const timerPauseToggle = document.getElementById('timerPauseToggle');
                 if (timerPauseToggle) timerPauseToggle.checked = appState.timerPauseEnabled;
                 if (appState.isInspectionMode) {
