@@ -70,6 +70,7 @@ function applyLanguageToUI() {
   const statusHint = document.getElementById('statusHint');
   if (statusHint && !isRunning && !isReady) statusHint.textContent = t('holdToReady');
   if (typeof window.updateTimerMaskVisibility === 'function') window.updateTimerMaskVisibility();
+  if (typeof window.syncContinueHelpText === 'function') window.syncContinueHelpText();
 
   // Update Log modal labels
   const updateOverlay = document.getElementById('updateLogOverlay');

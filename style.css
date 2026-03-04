@@ -931,4 +931,4 @@ body.hide-ui-during-solve #splitLivePanel {
   visibility: hidden !important;
 }
 
-.timer-continue-text { font-size: 40% !important; line-height: 1.2; }
+.timer-continue-text { font-size: var(--continue-font-px, 50%) !important; line-height: 1.2; transition: none !important; }

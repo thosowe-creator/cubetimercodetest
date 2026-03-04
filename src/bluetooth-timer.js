@@ -78,6 +78,7 @@ function handleGanBTData(event) {
                  timerEl.classList.remove('text-ready', 'text-running');
                  timerEl.style.removeProperty('color');
     timerEl.classList.remove('timer-continue-text');
+                 if (typeof window.clearContinuePromptStyle === 'function') window.clearContinuePromptStyle();
                  statusHint.innerText = "Timer Ready (BT)";
              }
         } else if (state === 3) { // RUNNING
@@ -208,9 +209,11 @@ window.getSolveDisplayText = getSolveDisplayText;
 function updateRunningTimerText(elapsed) {
     if (!timerEl) return;
     if (appState.hideTimerDuringSolve && isRunning) {
+        if (typeof window.setTimerSecondaryTextActive === 'function') window.setTimerSecondaryTextActive(true);
         timerEl.innerText = (typeof window.getSolveMaskText === 'function') ? window.getSolveMaskText() : 'Solve';
         return;
     }
+    if (typeof window.setTimerSecondaryTextActive === 'function') window.setTimerSecondaryTextActive(false);
     timerEl.innerText = formatTime(elapsed);
 }
 
@@ -246,7 +249,8 @@ function startTimer() {
     timerEl.style.removeProperty('color');
     statusHint.innerText = "Timing...";
     timerEl.classList.add('text-running');
-    timerEl.classList.remove('text-ready', 'holding-status', 'ready-to-start');
+    timerEl.classList.remove('text-ready', 'holding-status', 'ready-to-start', 'timer-continue-text');
+    if (typeof window.clearContinuePromptStyle === 'function') window.clearContinuePromptStyle();
 }
 function stopTimer(forcedTime = null) {
     if (timerRafId) {
@@ -318,6 +322,7 @@ function stopTimer(forcedTime = null) {
 
         lastFinishedSolveId = savedSolve.id;
         timerEl.classList.remove('timer-continue-text');
+        if (typeof window.clearContinuePromptStyle === 'function') window.clearContinuePromptStyle();
         if (finalPenalty === 'DNF') {
             timerEl.innerText = "DNF";
         } else {
