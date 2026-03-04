@@ -245,9 +245,15 @@
                     <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300">Hide timer while timing</p></div>
                     <label class="switch"><input type="checkbox" id="hideTimerDuringSolveToggle"><span class="slider"></span></label>
                 </div>
-                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                    <div><p class="text-xs font-bold text-slate-600 dark:text-slate-300">Timer Pause</p></div>
-                    <label class="switch"><input type="checkbox" id="timerPauseToggle"><span class="slider"></span></label>
+                <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <p id="continueTimingLabel" class="text-xs font-bold text-slate-600 dark:text-slate-300">Continue Timing</p>
+                            <button type="button" id="continueTimingHelpBtn" data-action="toggle-continue-help" aria-label="Continue Timing Help" class="w-5 h-5 inline-flex items-center justify-center rounded-full border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-300 text-[10px] font-black hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">?</button>
+                        </div>
+                        <label class="switch"><input type="checkbox" id="timerPauseToggle"><span class="slider"></span></label>
+                    </div>
+                    <div id="continueTimingHelp" class="hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 px-2.5 py-2 text-[10px] leading-relaxed font-semibold text-slate-500 dark:text-slate-300"></div>
                 </div>
                 <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl" id="holdDurationContainer">
                     <div class="flex justify-between items-center mb-2">
@@ -733,7 +739,12 @@
                             <button data-action="set-history-sort" data-sort-mode="worst" class="history-sort-option w-full text-left px-2 py-1.5 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">Worst</button>
                         </div>
                     </div>
-                    <button id="historyEditBtn" data-action="toggle-history-selection-mode" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors">Select</button>
+                    <button id="historyEditBtn" data-action="toggle-history-selection-mode" aria-label="Toggle selection mode" aria-pressed="false" class="h-7 w-7 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Select">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                    </button>
                     <button id="clearHistoryBtn" class="text-[11px] font-bold text-slate-300 hover:text-red-400 transition-colors uppercase tracking-wider">Clear</button>
                 </div>
             </div>
