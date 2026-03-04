@@ -723,6 +723,20 @@ function getContinuePromptText() {
     return currentLang === 'ko' ? '이어서 측정하기' : 'Continue Timing';
 }
 
+function applyContinuePromptStyle() {
+    if (!timerEl) return;
+    const px = parseFloat(window.getComputedStyle(timerEl).fontSize) || 0;
+    if (px > 0) timerEl.style.setProperty('--continue-font-px', `${Math.max(1, px * 0.5)}px`);
+}
+
+function clearContinuePromptStyle() {
+    if (!timerEl) return;
+    timerEl.style.removeProperty('--continue-font-px');
+}
+
+window.applyContinuePromptStyle = applyContinuePromptStyle;
+window.clearContinuePromptStyle = clearContinuePromptStyle;
+
 function tryHandleContinueCommandTap() {
     if (!appState.timerPauseEnabled || isBtConnected || isRunning || isManualMode) return false;
     if (!lastFinishedSolveId) return false;
@@ -740,6 +754,7 @@ function tryHandleContinueCommandTap() {
             if (target) {
                 const base = target.penalty === 'DNF' ? 'DNF' : formatTime(target.penalty === '+2' ? target.time + 2000 : target.time);
                 timerEl.classList.remove('timer-continue-text');
+                clearContinuePromptStyle();
                 timerEl.innerText = `${base}${target.penalty === '+2' ? '+' : ''}`;
             }
         } else {
@@ -750,6 +765,7 @@ function tryHandleContinueCommandTap() {
             continueBaseTimeMs = target.time;
             continueEvent = target.event;
             continueSessionId = target.sessionId;
+            applyContinuePromptStyle();
             timerEl.classList.add('timer-continue-text');
             timerEl.innerText = getContinuePromptText();
         }
