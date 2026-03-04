@@ -29,7 +29,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Stats', ko: '기록' },
   { en: 'History', ko: '기록' },
   { en: 'Settings', ko: '설정' },
-  { en: 'Update Log', ko: '업데이트' },
+  { en: 'Update Log', ko: '업데이트 로그' },
   { en: 'Developer Log', ko: '개발자 로그' },
   { en: 'Event', ko: '종목' },
   { en: 'Scramble', ko: '스크램블' },
