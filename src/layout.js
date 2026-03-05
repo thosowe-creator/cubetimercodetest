@@ -153,6 +153,24 @@ function constrainScrambleBoxToKeepAveragesVisible() {
 function fitScrambleTypographyInsideBox() {
     if (!scrambleEl || !scrambleBoxEl || scrambleEl.classList.contains('hidden')) return;
 
+    const boxStyle = window.getComputedStyle(scrambleBoxEl);
+    const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
+    const boxPaddingBottom = parseFloat(boxStyle.paddingBottom) || 0;
+
+    // Exclude non-text blocks from the scramble text budget (loading row / diagram area / mbf input area).
+    const fixedContentHeight = Array.from(scrambleBoxEl.children)
+        .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
+        .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+
+    const textBudget = Math.floor(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
+    if (!Number.isFinite(textBudget) || textBudget <= 0) {
+        scrambleEl.style.maxHeight = '0px';
+        return;
+    }
+
+    scrambleEl.style.maxHeight = `${textBudget}px`;
+    scrambleEl.style.overflowY = 'hidden';
+
     const computed = window.getComputedStyle(scrambleEl);
     const initialFont = parseFloat(computed.fontSize) || 16;
     const initialLine = parseFloat(computed.lineHeight) || initialFont * 1.28;
@@ -161,8 +179,8 @@ function fitScrambleTypographyInsideBox() {
     let font = initialFont;
     let line = initialLine;
 
-    for (let i = 0; i < 10; i += 1) {
-        const overflowPx = scrambleBoxEl.scrollHeight - scrambleBoxEl.clientHeight;
+    for (let i = 0; i < 16; i += 1) {
+        const overflowPx = scrambleEl.scrollHeight - scrambleEl.clientHeight;
         if (overflowPx <= 1 || font <= minFont) break;
 
         font = Math.max(minFont, font * 0.94);
@@ -171,7 +189,7 @@ function fitScrambleTypographyInsideBox() {
         scrambleEl.style.lineHeight = `${line}px`;
     }
 
-    const finalOverflowPx = scrambleBoxEl.scrollHeight - scrambleBoxEl.clientHeight;
+    const finalOverflowPx = scrambleEl.scrollHeight - scrambleEl.clientHeight;
     if (finalOverflowPx > 1) {
         scrambleEl.style.letterSpacing = '-0.01em';
     }
