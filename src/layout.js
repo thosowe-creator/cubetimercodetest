@@ -5,6 +5,7 @@ const timerContainerEl = document.getElementById('timerContainer');
 const avgBadgeRowEl = document.getElementById('avgBadgeRow');
 let __layoutRAF = 0;
 let __timerLayoutLocked = false;
+let __scrambleBoxReferenceHeight = 0;
 
 if (scrambleBoxEl) {
     // Capture the default scramble-box height once the first paint is done.
