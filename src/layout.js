@@ -96,6 +96,8 @@ function fitScrambleTextToBudget() {
 
     // Mobile: make scramble box feel more vertically packed (less top/bottom empty space).
     if (scrambleBoxEl) {
+        // Keep scramble content anchored to the top area of the box.
+        scrambleBoxEl.style.justifyContent = 'flex-start';
         if (isMobile) {
             scrambleBoxEl.style.setProperty('padding-top', '0.45rem', 'important');
             scrambleBoxEl.style.setProperty('padding-bottom', '0.45rem', 'important');
@@ -109,9 +111,10 @@ function fitScrambleTextToBudget() {
     }
 
     scrambleEl.style.textAlign = '';
+    scrambleEl.style.alignSelf = 'stretch';
     scrambleEl.style.lineHeight = isMobile ? '1.2' : '';
-    scrambleEl.style.marginTop = isMobile ? '0.28rem' : '';
-    scrambleEl.style.marginBottom = isMobile ? '-0.12rem' : '';
+    scrambleEl.style.marginTop = isMobile ? '0.18rem' : '0.12rem';
+    scrambleEl.style.marginBottom = '0px';
 
     const computed = window.getComputedStyle(scrambleEl);
     const baseFontPx = parseFloat(computed.fontSize) || 16;
