@@ -2,6 +2,7 @@
 const scrambleBoxEl = document.getElementById('scrambleBox');
 const scrambleBottomAreaEl = document.querySelector('.scramble-bottom-area');
 const timerContainerEl = document.getElementById('timerContainer');
+const avgBadgeRowEl = document.getElementById('avgBadgeRow');
 let __layoutRAF = 0;
 let __timerLayoutLocked = false;
 
@@ -67,6 +68,7 @@ function fitScrambleTextToBudget() {
         scrambleBoxEl.style.height = '';
         scrambleBoxEl.style.minHeight = '';
         scrambleBoxEl.style.overflowY = '';
+        scrambleBoxEl.style.overflow = '';
         scrambleBoxEl.style.removeProperty('padding-top');
         scrambleBoxEl.style.removeProperty('padding-bottom');
     }
@@ -119,6 +121,78 @@ function fitScrambleTextToBudget() {
     if (compactEvents.has(currentEvent)) scale *= isMobile ? 0.92 : 0.8;
 
     scrambleEl.style.fontSize = `${baseFontPx * scale}px`;
+
+    constrainScrambleBoxToKeepAveragesVisible();
+    fitScrambleTypographyInsideBox();
+}
+
+function constrainScrambleBoxToKeepAveragesVisible() {
+    if (!scrambleBoxEl || !timerContainerEl) return;
+
+    const viewportH = window.innerHeight;
+    const timerRect = timerContainerEl.getBoundingClientRect();
+    const scrambleRect = scrambleBoxEl.getBoundingClientRect();
+
+    const timerGap = 14;
+    const bottomMargin = 22;
+    const avgSafeMargin = avgBadgeRowEl ? 14 : 12;
+    const maxScrambleBottom = viewportH - bottomMargin - timerGap - timerRect.height - avgSafeMargin;
+    const maxScrambleHeight = Math.floor(maxScrambleBottom - scrambleRect.top);
+
+    if (!Number.isFinite(maxScrambleHeight) || maxScrambleHeight <= 0) return;
+
+    if (scrambleRect.height > maxScrambleHeight) {
+        const minScrambleHeight = window.innerWidth < 768 ? 84 : 92;
+        const nextHeight = Math.max(minScrambleHeight, maxScrambleHeight);
+        scrambleBoxEl.style.height = `${nextHeight}px`;
+        scrambleBoxEl.style.maxHeight = `${nextHeight}px`;
+        scrambleBoxEl.style.overflow = 'hidden';
+    }
+}
+
+function fitScrambleTypographyInsideBox() {
+    if (!scrambleEl || !scrambleBoxEl || scrambleEl.classList.contains('hidden')) return;
+
+    const boxStyle = window.getComputedStyle(scrambleBoxEl);
+    const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
+    const boxPaddingBottom = parseFloat(boxStyle.paddingBottom) || 0;
+
+    // Exclude non-text blocks from the scramble text budget (loading row / diagram area / mbf input area).
+    const fixedContentHeight = Array.from(scrambleBoxEl.children)
+        .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
+        .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+
+    const textBudget = Math.floor(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
+    if (!Number.isFinite(textBudget) || textBudget <= 0) {
+        scrambleEl.style.maxHeight = '0px';
+        return;
+    }
+
+    scrambleEl.style.maxHeight = `${textBudget}px`;
+    scrambleEl.style.overflowY = 'hidden';
+
+    const computed = window.getComputedStyle(scrambleEl);
+    const initialFont = parseFloat(computed.fontSize) || 16;
+    const initialLine = parseFloat(computed.lineHeight) || initialFont * 1.28;
+
+    const minFont = window.innerWidth < 768 ? 10 : 11;
+    let font = initialFont;
+    let line = initialLine;
+
+    for (let i = 0; i < 16; i += 1) {
+        const overflowPx = scrambleEl.scrollHeight - scrambleEl.clientHeight;
+        if (overflowPx <= 1 || font <= minFont) break;
+
+        font = Math.max(minFont, font * 0.94);
+        line = Math.max(minFont * 1.08, line * 0.95);
+        scrambleEl.style.fontSize = `${font}px`;
+        scrambleEl.style.lineHeight = `${line}px`;
+    }
+
+    const finalOverflowPx = scrambleEl.scrollHeight - scrambleEl.clientHeight;
+    if (finalOverflowPx > 1) {
+        scrambleEl.style.letterSpacing = '-0.01em';
+    }
 }
 
 function positionTimerToViewportCenter() {
