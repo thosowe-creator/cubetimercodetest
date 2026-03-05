@@ -34,6 +34,7 @@ function scheduleLayout(reason = '') {
 function applyLayoutBudgets(reason = '') {
     try {
         updateScrambleBottomAreaBudget();
+        if (!__timerLayoutLocked) positionTimerToViewportCenter();
         fitScrambleTextToBudget();
         if (!__timerLayoutLocked) positionTimerToViewportCenter();
     } catch (e) {
@@ -122,36 +123,44 @@ function fitScrambleTextToBudget() {
 
     scrambleEl.style.fontSize = `${baseFontPx * scale}px`;
 
-    constrainScrambleBoxToKeepAveragesVisible();
-    fitScrambleTypographyInsideBox();
+    const isScrambleBoxConstrained = constrainScrambleBoxToKeepAveragesVisible();
+    fitScrambleTypographyInsideBox(isScrambleBoxConstrained);
 }
 
 function constrainScrambleBoxToKeepAveragesVisible() {
-    if (!scrambleBoxEl || !timerContainerEl) return;
+    if (!scrambleBoxEl || !avgBadgeRowEl) return false;
+
+    // Measure overflow after timer is centered for current frame.
+    if (!__timerLayoutLocked) positionTimerToViewportCenter();
 
     const viewportH = window.innerHeight;
-    const timerRect = timerContainerEl.getBoundingClientRect();
     const scrambleRect = scrambleBoxEl.getBoundingClientRect();
+    const avgRect = avgBadgeRowEl.getBoundingClientRect();
 
-    const timerGap = 14;
     const bottomMargin = 22;
-    const avgSafeMargin = avgBadgeRowEl ? 14 : 12;
-    const maxScrambleBottom = viewportH - bottomMargin - timerGap - timerRect.height - avgSafeMargin;
-    const maxScrambleHeight = Math.floor(maxScrambleBottom - scrambleRect.top);
+    const avgSafeMargin = 12;
+    const overflowToViewportBottom = Math.ceil((avgRect.bottom + bottomMargin) - viewportH);
 
-    if (!Number.isFinite(maxScrambleHeight) || maxScrambleHeight <= 0) return;
+    // Keep default scramble size when averages are already visible.
+    if (overflowToViewportBottom <= 0) return false;
 
-    if (scrambleRect.height > maxScrambleHeight) {
-        const minScrambleHeight = window.innerWidth < 768 ? 84 : 92;
-        const nextHeight = Math.max(minScrambleHeight, maxScrambleHeight);
-        scrambleBoxEl.style.height = `${nextHeight}px`;
-        scrambleBoxEl.style.maxHeight = `${nextHeight}px`;
-        scrambleBoxEl.style.overflow = 'hidden';
-    }
+    const minScrambleHeight = window.innerWidth < 768 ? 84 : 92;
+    const nextHeight = Math.max(minScrambleHeight, Math.floor(scrambleRect.height - overflowToViewportBottom - avgSafeMargin));
+
+    if (nextHeight >= scrambleRect.height) return false;
+
+    scrambleBoxEl.style.height = `${nextHeight}px`;
+    scrambleBoxEl.style.maxHeight = `${nextHeight}px`;
+    scrambleBoxEl.style.overflow = 'hidden';
+    return true;
 }
 
-function fitScrambleTypographyInsideBox() {
+function fitScrambleTypographyInsideBox(isScrambleBoxConstrained = false) {
     if (!scrambleEl || !scrambleBoxEl || scrambleEl.classList.contains('hidden')) return;
+
+    const baselineBoxHeight = parseFloat(scrambleBoxEl.dataset.baseHeightPx || '0');
+    const isBoxHeightReducedFromBaseline = baselineBoxHeight > 0 && (scrambleBoxEl.clientHeight < (baselineBoxHeight - 2));
+    if (!isScrambleBoxConstrained && !isBoxHeightReducedFromBaseline) return;
 
     const boxStyle = window.getComputedStyle(scrambleBoxEl);
     const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
@@ -164,7 +173,6 @@ function fitScrambleTypographyInsideBox() {
 
     const textBudget = Math.floor(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
     if (!Number.isFinite(textBudget) || textBudget <= 0) {
-        scrambleEl.style.maxHeight = '0px';
         return;
     }
 
@@ -178,6 +186,14 @@ function fitScrambleTypographyInsideBox() {
     const minFont = window.innerWidth < 768 ? 10 : 11;
     let font = initialFont;
     let line = initialLine;
+
+    if (isBoxHeightReducedFromBaseline && baselineBoxHeight > 0) {
+        const heightRatio = Math.max(0.72, Math.min(1, scrambleBoxEl.clientHeight / baselineBoxHeight));
+        font = Math.max(minFont, initialFont * heightRatio);
+        line = Math.max(minFont * 1.08, initialLine * heightRatio);
+        scrambleEl.style.fontSize = `${font}px`;
+        scrambleEl.style.lineHeight = `${line}px`;
+    }
 
     for (let i = 0; i < 16; i += 1) {
         const overflowPx = scrambleEl.scrollHeight - scrambleEl.clientHeight;
