@@ -151,17 +151,23 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     }
 
     const minScrambleHeight = window.innerWidth < 768 ? 84 : 92;
-    const nextHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom - avgSafeMargin));
+    const targetHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom - avgSafeMargin));
 
-    if (nextHeight >= originalHeight) {
+    if (targetHeight >= originalHeight) {
         // Already at minimum scramble-box size for this viewport: keep box, but still shrink text smoothly.
         return { isConstrained: true, originalHeight, constrainedHeight: originalHeight, overflowPx: overflowToViewportBottom };
     }
 
-    scrambleBoxEl.style.height = `${nextHeight}px`;
-    scrambleBoxEl.style.maxHeight = `${nextHeight}px`;
+    // Prevent one-frame "jump" while still reacting enough when overflow is large.
+    const maxStepBasePx = window.innerWidth < 768 ? 20 : 26;
+    const adaptiveStepPx = maxStepBasePx + Math.round(Math.max(0, overflowToViewportBottom) * 0.72);
+    const maxStepPx = Math.min(originalHeight - targetHeight, adaptiveStepPx);
+    const constrainedHeight = Math.max(targetHeight, originalHeight - maxStepPx);
+
+    scrambleBoxEl.style.height = `${constrainedHeight}px`;
+    scrambleBoxEl.style.maxHeight = `${constrainedHeight}px`;
     scrambleBoxEl.style.overflow = 'hidden';
-    return { isConstrained: true, originalHeight, constrainedHeight: nextHeight, overflowPx: overflowToViewportBottom };
+    return { isConstrained: true, originalHeight, constrainedHeight, overflowPx: overflowToViewportBottom };
 }
 
 function fitScrambleTypographyInsideBox(constraint = null) {
@@ -170,14 +176,10 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const currentBoxHeight = Math.max(1, scrambleBoxEl.getBoundingClientRect().height || scrambleBoxEl.clientHeight || 1);
     const isConstrained = Boolean(constraint && constraint.isConstrained);
 
-    if (!isConstrained && currentBoxHeight > __scrambleBoxReferenceHeight) {
-        __scrambleBoxReferenceHeight = currentBoxHeight;
-    }
+    if (!isConstrained) return;
 
     const referenceFromConstraint = Number(constraint && constraint.originalHeight) || 0;
-    const referenceHeight = Math.max(__scrambleBoxReferenceHeight || 0, referenceFromConstraint, currentBoxHeight);
-    const shouldScaleWithBox = isConstrained || (referenceHeight - currentBoxHeight > 2);
-    if (!shouldScaleWithBox) return;
+    const referenceHeight = Math.max(referenceFromConstraint, currentBoxHeight);
 
     const overflowPx = Math.max(0, Number(constraint && constraint.overflowPx) || 0);
 
@@ -191,10 +193,14 @@ function fitScrambleTypographyInsideBox(constraint = null) {
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
     const textBudget = Math.floor(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
-    const hasTextBudget = Number.isFinite(textBudget) && textBudget > 0;
+    const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
     if (hasTextBudget) {
         scrambleEl.style.maxHeight = `${textBudget}px`;
         scrambleEl.style.overflowY = 'hidden';
+    } else {
+        // Very tight layouts: prefer readable scaling over hard clipping.
+        scrambleEl.style.maxHeight = '';
+        scrambleEl.style.overflowY = '';
     }
 
     const computed = window.getComputedStyle(scrambleEl);
@@ -211,6 +217,7 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     let line = Math.max(minFont * 1.08, initialLine * smoothRatio);
     scrambleEl.style.fontSize = `${font}px`;
     scrambleEl.style.lineHeight = `${line}px`;
+    scrambleEl.style.marginBottom = '0px';
 
     // Final safety loop for very long scrambles (gentle slope to avoid step-like jumps).
     if (hasTextBudget) {
