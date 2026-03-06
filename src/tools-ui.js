@@ -452,17 +452,34 @@ window.generateMbfScrambles = async () => {
     const listContainer = document.getElementById('mbfScrambleList');
     document.getElementById('mbfCubeCountDisplay').innerText = `${count} Cubes`;
     listContainer.innerHTML = "";
+    const fragment = document.createDocumentFragment();
     for (let i = 1; i <= count; i++) {
         const scr = await generate3bldScrambleText();
-        listContainer.innerHTML += `
-            <div class="p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="w-6 h-6 flex items-center justify-center bg-blue-600 text-white rounded-full text-[10px] font-bold">#${i}</span>
-                    <span class="text-[10px] font-black uppercase text-slate-400">Scramble</span>
-                </div>
-                <p class="font-bold text-slate-600 dark:text-slate-300 leading-relaxed scramble-text">${scr}</p>
-            </div>`;
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center gap-2 mb-2';
+
+        const indexBadge = document.createElement('span');
+        indexBadge.className = 'w-6 h-6 flex items-center justify-center bg-blue-600 text-white rounded-full text-[10px] font-bold';
+        indexBadge.textContent = `#${i}`;
+
+        const label = document.createElement('span');
+        label.className = 'text-[10px] font-black uppercase text-slate-400';
+        label.textContent = 'Scramble';
+
+        const scrambleText = document.createElement('p');
+        scrambleText.className = 'font-bold text-slate-600 dark:text-slate-300 leading-relaxed scramble-text';
+        scrambleText.textContent = scr;
+
+        header.appendChild(indexBadge);
+        header.appendChild(label);
+        card.appendChild(header);
+        card.appendChild(scrambleText);
+        fragment.appendChild(card);
     }
+    listContainer.appendChild(fragment);
     document.getElementById('mbfScrambleOverlay').classList.add('active');
     setCurrentScramble(`Multi-Blind (${count} Cubes Attempt)`);
 };
