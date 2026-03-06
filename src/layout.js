@@ -169,7 +169,8 @@ function fitScrambleTypographyInsideBox(constraint = null) {
         .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
-    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight + 3);
+    const scrambleTextBottomGuardPx = 11; // ~0.3cm defensive space below scramble text
+    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight - scrambleTextBottomGuardPx + 3);
     const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
     if (hasTextBudget) {
         scrambleEl.style.maxHeight = `${textBudget}px`;
@@ -196,7 +197,7 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     let line = Math.max(minFont * minLineHeightRatio, initialLine * smoothRatio);
     scrambleEl.style.fontSize = `${font}px`;
     scrambleEl.style.lineHeight = `${line}px`;
-    scrambleEl.style.marginBottom = '0px';
+    scrambleEl.style.marginBottom = '11px';
 
     // Final safety loop for very long scrambles:
     // 1) prefer font-size reduction first, 2) then line-height reduction.
@@ -234,7 +235,7 @@ function positionTimerToViewportCenter() {
     const timerRect = timerContainerEl.getBoundingClientRect();
     const timerHalf = timerRect.height / 2;
 
-    const gap = 38; // ~1cm visual spacing between scramble block and timer
+    const gap = 19; // ~0.5cm visual spacing between scramble block and timer
     const minCenterY = scrambleRect.bottom + gap + timerHalf;
 
     // Target center is viewport center, but never collide with scramble area
