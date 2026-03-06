@@ -197,7 +197,7 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     let line = Math.max(minFont * minLineHeightRatio, initialLine * smoothRatio);
     scrambleEl.style.fontSize = `${font}px`;
     scrambleEl.style.lineHeight = `${line}px`;
-    scrambleEl.style.marginBottom = '0px';
+    scrambleEl.style.marginBottom = '11px';
 
     // Final safety loop for very long scrambles:
     // 1) prefer font-size reduction first, 2) then line-height reduction.
