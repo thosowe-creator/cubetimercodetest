@@ -36,11 +36,13 @@ function applyLayoutBudgets(reason = '') {
     try {
         updateScrambleBottomAreaBudget();
         if (!__timerLayoutLocked) positionTimerToViewportCenter();
-        fitScrambleTextToBudget();
+        const constraint = fitScrambleTextToBudget();
         if (!__timerLayoutLocked) positionTimerToViewportCenter();
+        return constraint;
     } catch (e) {
         // Never break the timer if layout calc fails
         console.warn('[CubeTimer] layout budget error', e);
+        return null;
     }
 }
 
@@ -63,7 +65,7 @@ function updateScrambleBottomAreaBudget() {
 }
 
 function fitScrambleTextToBudget() {
-    if (!scrambleEl) return;
+    if (!scrambleEl) return null;
 
     if (scrambleBoxEl) {
         scrambleBoxEl.style.maxHeight = '';
@@ -76,7 +78,7 @@ function fitScrambleTextToBudget() {
         scrambleBoxEl.style.justifyContent = '';
     }
 
-    // Keep scramble typography stable (no runtime shrinking/growing/scrolling).
+    // Keep scramble typography stable unless we hit viewport constraints.
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
@@ -94,8 +96,12 @@ function fitScrambleTextToBudget() {
 
     // Scramble text must stay consistently visible and large.
     if (scrambleEl.classList.contains('hidden') || currentEvent === '333mbf') {
-        return;
+        return null;
     }
+
+    const constraint = constrainScrambleBoxToKeepAveragesVisible();
+    fitScrambleTypographyInsideBox(constraint);
+    return constraint;
 }
 
 function constrainScrambleBoxToKeepAveragesVisible() {
@@ -111,8 +117,7 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     const originalHeight = Math.round(scrambleRect.height);
     const avgRect = avgBadgeRowEl.getBoundingClientRect();
 
-    const bottomMargin = 22;
-    const avgSafeMargin = 12;
+    const bottomMargin = 38; // ~1cm safety line above viewport edge
     const overflowToViewportBottom = Math.ceil((avgRect.bottom + bottomMargin) - viewportH);
 
     // Keep default scramble size when averages are already visible.
@@ -121,7 +126,7 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     }
 
     const minScrambleHeight = window.innerWidth < 768 ? 102 : 92;
-    const targetHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom - avgSafeMargin));
+    const targetHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom));
 
     if (targetHeight >= originalHeight) {
         // Already at minimum scramble-box size for this viewport: keep box, but still shrink text smoothly.
@@ -164,7 +169,8 @@ function fitScrambleTypographyInsideBox(constraint = null) {
         .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
-    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight + 3);
+    const scrambleTextBottomGuardPx = 11; // ~0.3cm defensive space below scramble text (single-source guard)
+    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight - scrambleTextBottomGuardPx + 3);
     const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
     if (hasTextBudget) {
         scrambleEl.style.maxHeight = `${textBudget}px`;
@@ -214,9 +220,8 @@ function fitScrambleTypographyInsideBox(constraint = null) {
             scrambleEl.style.lineHeight = `${line}px`;
         }
 
-        // If it still overflows after typography fitting, allow scrolling instead of clipping.
-        const residualOverflow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
-        scrambleEl.style.overflowY = residualOverflow > 1 ? 'auto' : 'hidden';
+        // Keep content inside by shrinking only (no internal scroll), preserving spacing budgets.
+        scrambleEl.style.overflowY = 'hidden';
     }
 }
 
@@ -230,7 +235,7 @@ function positionTimerToViewportCenter() {
     const timerRect = timerContainerEl.getBoundingClientRect();
     const timerHalf = timerRect.height / 2;
 
-    const gap = 14; // keep same spacing policy across mobile/desktop
+    const gap = 19; // ~0.5cm visual spacing between scramble block and timer
     const minCenterY = scrambleRect.bottom + gap + timerHalf;
 
     // Target center is viewport center, but never collide with scramble area
