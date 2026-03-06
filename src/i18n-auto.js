@@ -55,7 +55,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Cubes', ko: '개' },
   { en: 'Copy All', ko: '전체 복사' },
   { en: 'MBF Result', ko: 'MBF 결과' },
-  { en: 'WCA 형식(Attempted / Solved / Time)을 입력해 주세요.', ko: 'WCA 형식(시도 / 성공 / 시간)을 입력해 주세요.' },
+  { en: 'Please enter Attempts, Solves, Time.', ko: '시도 수, 성공 수, 시간을 입력해 주세요.' },
   { en: 'Attempted', ko: '시도' },
   { en: 'Solved', ko: '성공' },
   { en: 'Time', ko: '시간' },
