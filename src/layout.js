@@ -112,7 +112,7 @@ function fitScrambleTextToBudget() {
 
     scrambleEl.style.textAlign = '';
     scrambleEl.style.alignSelf = 'stretch';
-    scrambleEl.style.lineHeight = isMobile ? '1.2' : '';
+    scrambleEl.style.lineHeight = isMobile ? '1.28' : '';
     scrambleEl.style.marginTop = isMobile ? '0.18rem' : '0.12rem';
     scrambleEl.style.marginBottom = '0px';
 
@@ -153,7 +153,7 @@ function constrainScrambleBoxToKeepAveragesVisible() {
         return { isConstrained: false, originalHeight, constrainedHeight: originalHeight, overflowPx: 0 };
     }
 
-    const minScrambleHeight = window.innerWidth < 768 ? 84 : 92;
+    const minScrambleHeight = window.innerWidth < 768 ? 102 : 92;
     const targetHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom - avgSafeMargin));
 
     if (targetHeight >= originalHeight) {
@@ -195,10 +195,11 @@ function fitScrambleTypographyInsideBox(constraint = null) {
         .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
-    const textBudget = Math.floor(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
+    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight + 3);
     const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
     if (hasTextBudget) {
         scrambleEl.style.maxHeight = `${textBudget}px`;
+        // Keep clipping relaxed while we try font/line-height fitting first.
         scrambleEl.style.overflowY = 'hidden';
     } else {
         // Very tight layouts: prefer readable scaling over hard clipping.
@@ -216,25 +217,37 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const pressureRatio = Math.max(0.62, Math.min(1, 1 - (overflowRatio * 0.55)));
     const smoothRatio = Math.max(0.62, Math.min(1, Math.min(heightRatio, pressureRatio)));
 
+    const minLineHeightRatio = window.innerWidth < 768 ? 1.2 : 1.08;
     let font = Math.max(minFont, initialFont * smoothRatio);
-    let line = Math.max(minFont * 1.08, initialLine * smoothRatio);
+    let line = Math.max(minFont * minLineHeightRatio, initialLine * smoothRatio);
     scrambleEl.style.fontSize = `${font}px`;
     scrambleEl.style.lineHeight = `${line}px`;
     scrambleEl.style.marginBottom = '0px';
 
-    // Final safety loop for very long scrambles (gentle slope to avoid step-like jumps).
+    // Final safety loop for very long scrambles:
+    // 1) prefer font-size reduction first, 2) then line-height reduction.
     if (hasTextBudget) {
         for (let i = 0; i < 8; i += 1) {
             const overflowPxNow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
             if (overflowPxNow <= 1 || font <= minFont) break;
 
             const fontStep = overflowPxNow > 24 ? 0.985 : 0.993;
-            const lineStep = overflowPxNow > 24 ? 0.988 : 0.994;
             font = Math.max(minFont, font * fontStep);
-            line = Math.max(minFont * 1.08, line * lineStep);
             scrambleEl.style.fontSize = `${font}px`;
+        }
+
+        for (let i = 0; i < 8; i += 1) {
+            const overflowPxNow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
+            if (overflowPxNow <= 1) break;
+
+            const lineStep = overflowPxNow > 24 ? 0.988 : 0.994;
+            line = Math.max(minFont * minLineHeightRatio, line * lineStep);
             scrambleEl.style.lineHeight = `${line}px`;
         }
+
+        // If it still overflows after typography fitting, allow scrolling instead of clipping.
+        const residualOverflow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
+        scrambleEl.style.overflowY = residualOverflow > 1 ? 'auto' : 'hidden';
     }
 }
 
