@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
-  <main class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-2xl p-6">
+  <main class="min-h-screen flex items-start md:items-center justify-center p-3 md:p-4">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-2xl p-4 md:p-6 max-h-[66vh] md:max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-5">
         <div class="flex items-center gap-2">
           <a href="index.html" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-95 transition-all" aria-label="Back">
@@ -70,29 +70,6 @@
           <div class="grid grid-cols-2 gap-2">
             <button type="button" id="dashboardBackupBtn" class="py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black">Backup</button>
             <button type="button" id="dashboardRestoreBtn" class="py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-xs font-black">Restore</button>
-          </div>
-        </div>
-
-        <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200/70 dark:border-slate-700 space-y-3">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <p class="text-xs font-bold text-slate-700 dark:text-slate-100">Auto Sync</p>
-              <p class="text-[11px] font-bold text-slate-400 mt-1">When enabled, cloud backup runs automatically every N solves.</p>
-            </div>
-            <label class="inline-flex items-center cursor-pointer">
-              <input id="autoSyncToggle" type="checkbox" class="sr-only peer">
-              <span class="relative w-11 h-6 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-600 transition-colors">
-                <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow peer-checked:translate-x-5 transition-transform"></span>
-              </span>
-            </label>
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
-              <span>Sync Frequency</span>
-              <span id="autoSyncValue">Every 10 solves</span>
-            </div>
-            <input id="autoSyncRange" type="range" min="5" max="50" step="5" value="10" class="w-full accent-blue-600" />
-            <p id="autoSyncHint" class="text-[11px] font-bold text-slate-400">Manual backup/restore buttons are disabled while Auto Sync is on.</p>
           </div>
         </div>
 
