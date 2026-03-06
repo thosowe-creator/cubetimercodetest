@@ -5,41 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Cube Timer</title>
     <link rel="icon" href="favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            850: '#1e293b', 
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
-                    },
-                    screens: {
-                        'md': '768px' // iPad mini portrait width
-                    }
-                }
-            }
-        }
-    </script>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.cubing.net https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
+    <script src="src/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Mobile Bottom Nav Safe Area */
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        .mb-safe { margin-bottom: env(safe-area-inset-bottom); }
-    </style>
-
     <!-- cubing.js: scrambles + scramble diagrams -->
-    <script type="module">
-      import { randomScrambleForEvent } from 'https://cdn.cubing.net/v0/js/cubing/scramble';
-      // Expose for non-module scripts
-      window.__randomScrambleForEvent = randomScrambleForEvent;
-    </script>
-    <script src="https://cdn.cubing.net/v0/js/scramble-display" type="module"></script>
+    <script type="module" src="src/cubing-bridge.js"></script>
+    <script src="https://cdn.cubing.net/v0/js/scramble-display" type="module" crossorigin="anonymous"></script>
 
 </head>
 <body class="h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-200">
