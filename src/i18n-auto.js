@@ -35,12 +35,12 @@ const AUTO_I18N_PAIRS = [
   { en: 'Scramble', ko: '스크램블' },
   { en: 'Tools', ko: '도구' },
   { en: 'Scramble Image', ko: '스크램블 이미지' },
-  { en: 'Graph (Trends)', ko: '그래프(추세)' },
+  { en: 'Graph', ko: '그래프' },
   { en: 'Visualizer for standard cubes only', ko: '기본 큐브 종목만 지원합니다' },
 
   // Bluetooth
   { en: 'Bluetooth Timer', ko: '블루투스 타이머' },
-  { en: 'Connect your Gan Smart Timer', ko: 'Gan Smart Timer를 연결하세요' },
+  { en: 'Connect your Gan Smart Timer', ko: '간 스마트 타이머를 연결하세요' },
   { en: 'Device', ko: '기기' },
   { en: 'Connect Timer', ko: '타이머 연결' },
   { en: 'Disconnect', ko: '연결 해제' },
@@ -54,7 +54,7 @@ const AUTO_I18N_PAIRS = [
   { en: 'Multi-Blind Scrambles', ko: '멀티블라인드 스크램블' },
   { en: 'Cubes', ko: '개' },
   { en: 'Copy All', ko: '전체 복사' },
-  { en: 'MBF Result', ko: 'MBF 결과' },
+  { en: 'MBF Result', ko: '멀티블라인드 결과' },
   { en: 'Please enter Attempts, Solves, Time.', ko: '시도 수, 성공 수, 시간을 입력해 주세요.' },
   { en: 'Attempted', ko: '시도' },
   { en: 'Solved', ko: '성공' },
