@@ -169,7 +169,7 @@ function fitScrambleTypographyInsideBox(constraint = null) {
         .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
-    const scrambleTextBottomGuardPx = 11; // ~0.3cm defensive space below scramble text
+    const scrambleTextBottomGuardPx = 11; // ~0.3cm defensive space below scramble text (single-source guard)
     const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight - scrambleTextBottomGuardPx + 3);
     const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
     if (hasTextBudget) {
