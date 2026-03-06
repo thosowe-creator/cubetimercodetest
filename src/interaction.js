@@ -967,7 +967,7 @@ window.useThisScramble = () => {
             window.setCurrentScramble(s.scramble);
         } else {
             currentScramble = s.scramble;
-            scrambleEl.innerText = currentScramble;
+            if (scrambleEl) scrambleEl.innerText = currentScramble;
         }
         closeModal();
     }

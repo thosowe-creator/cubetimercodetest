@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Cube Timer</title>
     <link rel="icon" href="favicon.ico">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.cubing.net https://www.gstatic.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.cubing.net https://www.gstatic.com; worker-src 'self' blob: https://cdn.cubing.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
     <script src="src/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -629,41 +629,42 @@
                     </div>
                 </div>
 
-                <!-- Scramble -->
-                <div class="text-center w-full">
-                    <h2 class="text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] text-[10px] font-bold mb-3">Scramble</h2>
-                    <div id="scrambleBox" class="border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center md:p-8 p-6 relative rounded-3xl scramble-box transition-colors">
-                        <button id="scramblePrevBtn" type="button" class="scramble-nav-btn scramble-nav-prev" data-action="scramble-prev" aria-label="Previous scramble" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                        </button>
-                        <button id="scrambleNextBtn" type="button" class="scramble-nav-btn scramble-nav-next" data-action="scramble-next" aria-label="Next scramble" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                        </button>
-                        <!-- Layout-stable scramble area: reserve space to prevent timer shifting -->
-                        <div class="h-5 flex items-center justify-center">
-                            <div id="scrambleLoadingRow" class="hidden items-center gap-2">
-                                <span class="spinner"></span>
-                                <span id="scrambleLoadingText" class="text-[11px] font-bold text-slate-400">Loading scramble…</span>
-                            </div>
+            </div>
+
+            <!-- Scramble text/arrows kept, scramble box visual removed -->
+            <div class="text-center w-full">
+                <h2 class="text-slate-300 dark:text-slate-600 uppercase tracking-[0.2em] text-[10px] font-bold mb-3">Scramble</h2>
+                <div id="scrambleBox" class="flex flex-col items-center justify-center md:p-8 p-6 relative transition-colors">
+                    <button id="scramblePrevBtn" type="button" class="scramble-nav-btn scramble-nav-prev" data-action="scramble-prev" aria-label="Previous scramble" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <button id="scrambleNextBtn" type="button" class="scramble-nav-btn scramble-nav-next" data-action="scramble-next" aria-label="Next scramble" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <div class="h-5 flex items-center justify-center">
+                        <div id="scrambleLoadingRow" class="hidden items-center gap-2">
+                            <span class="spinner"></span>
+                            <span id="scrambleLoadingText" class="text-[11px] font-bold text-slate-400">Loading scramble…</span>
                         </div>
+                    </div>
 
-                        <div id="scramble" class="scramble-text font-bold text-slate-600 dark:text-slate-300 whitespace-pre-wrap text-center leading-relaxed">Generating...</div>
+                    <div id="scramble" class="scramble-text font-bold text-slate-600 dark:text-slate-300 whitespace-pre-wrap text-center leading-relaxed">Generating...</div>
 
-                        <div class="scramble-bottom-area relative w-full flex items-center justify-center">
-                            <div id="scrambleDiagramSkeleton" class="hidden scramble-skeleton"></div>
-                            <button id="scrambleRetryBtn" data-action="retry-scramble" class="hidden px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold active:scale-95 transition-all">Failed. Tap to retry.</button>
-                        </div>
+                    <div class="scramble-bottom-area relative w-full flex items-center justify-center">
+                        <div id="scrambleDiagramSkeleton" class="hidden scramble-skeleton"></div>
+                        <button id="scrambleRetryBtn" data-action="retry-scramble" class="hidden px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold active:scale-95 transition-all">Failed. Tap to retry.</button>
+                    </div>
 
-                        <div id="mbfInputArea" class="hidden flex flex-col items-center gap-4 w-full">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Enter number of cubes</p>
-                            <div class="flex gap-2 w-full max-w-xs">
-                                <input type="number" id="mbfCubeInput" min="2" max="100" placeholder="e.g. 10" class="flex-1 bg-slate-50 dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-lg font-bold text-center outline-none focus:border-blue-400 transition-all">
-                                <button data-action="generate-mbf-scrambles" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold active:scale-95 transition-all shadow-md">Go</button>
-                            </div>
+                    <div id="mbfInputArea" class="hidden flex flex-col items-center gap-4 w-full">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Enter number of cubes</p>
+                        <div class="flex gap-2 w-full max-w-xs">
+                            <input type="number" id="mbfCubeInput" min="2" max="100" placeholder="e.g. 10" class="flex-1 bg-slate-50 dark:bg-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-lg font-bold text-center outline-none focus:border-blue-400 transition-all">
+                            <button data-action="generate-mbf-scrambles" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold active:scale-95 transition-all shadow-md">Go</button>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- Timer Area -->
             <div id="timerContainer" class="flex flex-col items-center justify-center flex-grow w-full select-none timer-center-shift">
