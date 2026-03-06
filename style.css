@@ -574,11 +574,15 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   margin-inline: auto;
   padding-inline: 0.1rem;
   padding-block: 0.18rem;
+  padding-bottom: calc(0.18rem + 2px);
   font-size: clamp(0.63rem, 0.60vw + 0.45rem, 1.23rem);
   line-height: 1.35;
-  overflow: hidden;
   text-wrap: balance;
   word-break: break-word;
+}
+
+.scramble-text.is-constrained {
+  overflow: hidden;
 }
 @media (min-width: 768px){
   .scramble-text{

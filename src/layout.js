@@ -81,6 +81,7 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.letterSpacing = '';
     scrambleEl.style.maxHeight = '';
     scrambleEl.style.overflowY = '';
+    scrambleEl.classList.remove('is-constrained');
 
     if (typeof scrambleLoadingRow !== 'undefined' && scrambleLoadingRow && scrambleLoadingRow.parentElement) {
         scrambleLoadingRow.parentElement.style.removeProperty('height');
@@ -180,6 +181,8 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const isConstrained = Boolean(constraint && constraint.isConstrained);
 
     if (!isConstrained) return;
+
+    scrambleEl.classList.add('is-constrained');
 
     const referenceFromConstraint = Number(constraint && constraint.originalHeight) || 0;
     const referenceHeight = Math.max(referenceFromConstraint, currentBoxHeight);
