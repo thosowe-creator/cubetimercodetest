@@ -572,13 +572,14 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   width: 100%;
   max-width: calc(100% - (var(--scrambleNavSafeInset) * 2));
   margin-inline: auto;
-  padding-inline: 0.1rem;
-  padding-block: 0.18rem;
-  padding-bottom: calc(0.18rem + 2px);
-  font-size: clamp(0.63rem, 0.60vw + 0.45rem, 1.23rem);
-  line-height: 1.35;
+  padding-inline: 0.2rem;
+  padding-block: 0.38rem;
+  padding-bottom: calc(0.38rem + 2px);
+  font-size: clamp(1.28rem, 1.15vw + 0.95rem, 2.45rem);
+  line-height: 1.85;
   text-wrap: balance;
   word-break: break-word;
+  overflow-y: hidden !important;
 }
 
 .scramble-text.is-constrained {
@@ -586,13 +587,14 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 }
 @media (min-width: 768px){
   .scramble-text{
-    font-size: clamp(0.81rem, 0.54vw + 0.54rem, 1.41rem);
-    line-height: 1.35;
+    font-size: clamp(1.55rem, 0.95vw + 0.9rem, 2.9rem);
+    line-height: 1.95;
   }
 }
 @media (min-width: 1280px){
   .scramble-text{
-    font-size: clamp(0.90rem, 0.48vw + 0.60rem, 1.56rem);
+    font-size: clamp(1.7rem, 0.8vw + 1rem, 3.25rem);
+    line-height: 2.0;
   }
 }
 

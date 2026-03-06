@@ -73,63 +73,29 @@ function fitScrambleTextToBudget() {
         scrambleBoxEl.style.overflow = '';
         scrambleBoxEl.style.removeProperty('padding-top');
         scrambleBoxEl.style.removeProperty('padding-bottom');
+        scrambleBoxEl.style.justifyContent = '';
     }
 
-    // Reset to CSS baseline typography.
+    // Keep scramble typography stable (no runtime shrinking/growing/scrolling).
     scrambleEl.style.fontSize = '';
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
     scrambleEl.style.maxHeight = '';
-    scrambleEl.style.overflowY = '';
+    scrambleEl.style.overflowY = 'hidden';
+    scrambleEl.style.textAlign = '';
+    scrambleEl.style.alignSelf = '';
+    scrambleEl.style.marginTop = '';
+    scrambleEl.style.marginBottom = '';
     scrambleEl.classList.remove('is-constrained');
 
     if (typeof scrambleLoadingRow !== 'undefined' && scrambleLoadingRow && scrambleLoadingRow.parentElement) {
         scrambleLoadingRow.parentElement.style.removeProperty('height');
     }
 
-    // Keep non-standard events from inheriting aggressive compact styles.
+    // Scramble text must stay consistently visible and large.
     if (scrambleEl.classList.contains('hidden') || currentEvent === '333mbf') {
         return;
     }
-
-    const isMobile = window.innerWidth < 768;
-    const compactEvents = new Set(['666', '777', 'minx']);
-
-    // Mobile: make scramble box feel more vertically packed (less top/bottom empty space).
-    if (scrambleBoxEl) {
-        // Keep scramble content anchored to the top area of the box.
-        scrambleBoxEl.style.justifyContent = 'flex-start';
-        if (isMobile) {
-            scrambleBoxEl.style.setProperty('padding-top', '0.45rem', 'important');
-            scrambleBoxEl.style.setProperty('padding-bottom', '0.45rem', 'important');
-            if (typeof scrambleLoadingRow !== 'undefined' && scrambleLoadingRow && scrambleLoadingRow.parentElement && scrambleLoadingRow.classList.contains('hidden')) {
-                scrambleLoadingRow.parentElement.style.setProperty('height', '0px');
-            }
-        } else {
-            scrambleBoxEl.style.removeProperty('padding-top');
-            scrambleBoxEl.style.removeProperty('padding-bottom');
-        }
-    }
-
-    scrambleEl.style.textAlign = '';
-    scrambleEl.style.alignSelf = 'stretch';
-    scrambleEl.style.lineHeight = isMobile ? '1.28' : '';
-    scrambleEl.style.marginTop = isMobile ? '0.18rem' : '0.12rem';
-    scrambleEl.style.marginBottom = '0px';
-
-    const computed = window.getComputedStyle(scrambleEl);
-    const baseFontPx = parseFloat(computed.fontSize) || 16;
-
-    // Desktop only: make scramble font about 10% larger.
-    let scale = isMobile ? 1.26 : 1.26 * 1.1;
-
-    // 6x6/7x7/megaminx scrambles should be compact, but slightly larger on mobile.
-    if (compactEvents.has(currentEvent)) scale *= isMobile ? 0.92 : 0.8;
-
-    scrambleEl.style.fontSize = `${baseFontPx * scale}px`;
-
-    const scrambleConstraint = constrainScrambleBoxToKeepAveragesVisible();
-    fitScrambleTypographyInsideBox(scrambleConstraint);
 }
 
 function constrainScrambleBoxToKeepAveragesVisible() {
