@@ -152,13 +152,13 @@ function changeEvent(e) {
         isAo5Mode = true; avgModeToggle.checked = true; 
     }
     if (currentEvent === '333mbf') {
-        scrambleEl.classList.add('hidden');
-        mbfInputArea.classList.remove('hidden');
+        if (scrambleEl) scrambleEl.classList.add('hidden');
+        if (mbfInputArea) mbfInputArea.classList.remove('hidden');
         setScrambleLoadingState(false);
         updateScrambleNavButtons();
     } else {
-        scrambleEl.classList.remove('hidden');
-        mbfInputArea.classList.add('hidden');
+        if (scrambleEl) scrambleEl.classList.remove('hidden');
+        if (mbfInputArea) mbfInputArea.classList.add('hidden');
         setScrambleLoadingState(true, 'Loading scramble…');
         clearScrambleDiagram();
         generateScramble(); 
@@ -447,7 +447,7 @@ function updateScrambleDiagram() {
     scrambleDiagram.setAttribute('scramble', _diagScr);
 }
 window.generateMbfScrambles = async () => {
-    const count = parseInt(mbfCubeInput.value);
+    const count = parseInt(mbfCubeInput?.value);
     if (!count || count < 2 || count > 100) return;
     const listContainer = document.getElementById('mbfScrambleList');
     document.getElementById('mbfCubeCountDisplay').innerText = `${count} Cubes`;
