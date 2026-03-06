@@ -47,7 +47,7 @@ window.selectTool = (tool) => {
     activeTool = tool;
     document.getElementById('toolLabel').innerText = tool === 'scramble'
         ? (currentLang === 'ko' ? '스크램블 이미지' : 'Scramble Image')
-        : (currentLang === 'ko' ? '그래프(추세)' : 'Graph (Trends)');
+        : (currentLang === 'ko' ? '그래프' : 'Graph');
     document.getElementById('visualizerWrapper').classList.toggle('hidden', tool !== 'scramble');
     document.getElementById('graphWrapper').classList.toggle('hidden', tool !== 'graph');
     document.querySelectorAll('.tool-option').forEach(opt => opt.classList.remove('active'));
