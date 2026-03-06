@@ -68,11 +68,11 @@ function fitScrambleTextToBudget() {
     if (!scrambleEl) return null;
 
     if (scrambleBoxEl) {
-        scrambleBoxEl.style.maxHeight = '';
         scrambleBoxEl.style.height = '';
+        scrambleBoxEl.style.maxHeight = '';
         scrambleBoxEl.style.minHeight = '';
-        scrambleBoxEl.style.overflowY = '';
         scrambleBoxEl.style.overflow = '';
+        scrambleBoxEl.style.overflowY = '';
         scrambleBoxEl.style.removeProperty('padding-top');
         scrambleBoxEl.style.removeProperty('padding-bottom');
         scrambleBoxEl.style.justifyContent = '';
@@ -83,7 +83,8 @@ function fitScrambleTextToBudget() {
     scrambleEl.style.lineHeight = '';
     scrambleEl.style.letterSpacing = '';
     scrambleEl.style.maxHeight = '';
-    scrambleEl.style.overflowY = 'hidden';
+    scrambleEl.style.overflowY = '';
+    scrambleEl.style.overflow = '';
     scrambleEl.style.textAlign = '';
     scrambleEl.style.alignSelf = '';
     scrambleEl.style.marginTop = '';
@@ -106,7 +107,14 @@ function fitScrambleTextToBudget() {
 
 function constrainScrambleBoxToKeepAveragesVisible() {
     if (!scrambleBoxEl || !avgBadgeRowEl) {
-        return { isConstrained: false, originalHeight: 0, constrainedHeight: 0, overflowPx: 0 };
+        return {
+            isConstrained: false,
+            originalHeight: 0,
+            constrainedHeight: 0,
+            overflowPx: 0,
+            textBudgetWidth: 0,
+            textBudgetHeight: 0
+        };
     }
 
     // Measure overflow after timer is centered for current frame.
@@ -116,113 +124,102 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     const scrambleRect = scrambleBoxEl.getBoundingClientRect();
     const originalHeight = Math.round(scrambleRect.height);
     const avgRect = avgBadgeRowEl.getBoundingClientRect();
+    const boxStyle = window.getComputedStyle(scrambleBoxEl);
+    const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
+    const boxPaddingBottom = parseFloat(boxStyle.paddingBottom) || 0;
+    const boxPaddingLeft = parseFloat(boxStyle.paddingLeft) || 0;
+    const boxPaddingRight = parseFloat(boxStyle.paddingRight) || 0;
+
+    const fixedContentHeight = Array.from(scrambleBoxEl.children)
+        .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
+        .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
+
+    const textBudgetWidth = Math.max(0, scrambleBoxEl.clientWidth - boxPaddingLeft - boxPaddingRight);
+    const textBudgetHeight = Math.max(0, scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
 
     const bottomMargin = 38; // ~1cm safety line above viewport edge
     const overflowToViewportBottom = Math.ceil((avgRect.bottom + bottomMargin) - viewportH);
 
     // Keep default scramble size when averages are already visible.
     if (overflowToViewportBottom <= 0) {
-        return { isConstrained: false, originalHeight, constrainedHeight: originalHeight, overflowPx: 0 };
+        return {
+            isConstrained: false,
+            originalHeight,
+            constrainedHeight: originalHeight,
+            overflowPx: 0,
+            textBudgetWidth,
+            textBudgetHeight
+        };
     }
 
-    const minScrambleHeight = window.innerWidth < 768 ? 102 : 92;
-    const targetHeight = Math.max(minScrambleHeight, Math.floor(originalHeight - overflowToViewportBottom));
-
-    if (targetHeight >= originalHeight) {
-        // Already at minimum scramble-box size for this viewport: keep box, but still shrink text smoothly.
-        return { isConstrained: true, originalHeight, constrainedHeight: originalHeight, overflowPx: overflowToViewportBottom };
-    }
-
-    // Prevent one-frame "jump" while still reacting enough when overflow is large.
-    const maxStepBasePx = window.innerWidth < 768 ? 20 : 26;
-    const adaptiveStepPx = maxStepBasePx + Math.round(Math.max(0, overflowToViewportBottom) * 0.72);
-    const maxStepPx = Math.min(originalHeight - targetHeight, adaptiveStepPx);
-    const constrainedHeight = Math.max(targetHeight, originalHeight - maxStepPx);
-
-    scrambleBoxEl.style.height = `${constrainedHeight}px`;
-    scrambleBoxEl.style.maxHeight = `${constrainedHeight}px`;
-    scrambleBoxEl.style.overflow = 'hidden';
-    return { isConstrained: true, originalHeight, constrainedHeight, overflowPx: overflowToViewportBottom };
+    return {
+        isConstrained: true,
+        originalHeight,
+        constrainedHeight: originalHeight,
+        overflowPx: overflowToViewportBottom,
+        textBudgetWidth,
+        textBudgetHeight
+    };
 }
 
 function fitScrambleTypographyInsideBox(constraint = null) {
     if (!scrambleEl || !scrambleBoxEl || scrambleEl.classList.contains('hidden')) return;
 
-    const currentBoxHeight = Math.max(1, scrambleBoxEl.getBoundingClientRect().height || scrambleBoxEl.clientHeight || 1);
-    const isConstrained = Boolean(constraint && constraint.isConstrained);
-
-    if (!isConstrained) return;
+    const textBudgetWidth = Math.max(0, Number(constraint && constraint.textBudgetWidth) || 0);
+    const textBudgetHeight = Math.max(0, Number(constraint && constraint.textBudgetHeight) || 0);
+    const hasTextBudget = textBudgetWidth >= 20 && textBudgetHeight >= 20;
+    if (!hasTextBudget) return;
 
     scrambleEl.classList.add('is-constrained');
-
-    const referenceFromConstraint = Number(constraint && constraint.originalHeight) || 0;
-    const referenceHeight = Math.max(referenceFromConstraint, currentBoxHeight);
-
-    const overflowPx = Math.max(0, Number(constraint && constraint.overflowPx) || 0);
-
-    const boxStyle = window.getComputedStyle(scrambleBoxEl);
-    const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
-    const boxPaddingBottom = parseFloat(boxStyle.paddingBottom) || 0;
-
-    // Exclude non-text blocks from the scramble text budget (loading row / diagram area / mbf input area).
-    const fixedContentHeight = Array.from(scrambleBoxEl.children)
-        .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
-        .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
-
-    const scrambleTextBottomGuardPx = 11; // ~0.3cm defensive space below scramble text (single-source guard)
-    const textBudget = Math.ceil(scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight - scrambleTextBottomGuardPx + 3);
-    const hasTextBudget = Number.isFinite(textBudget) && textBudget >= 24;
-    if (hasTextBudget) {
-        scrambleEl.style.maxHeight = `${textBudget}px`;
-        // Keep clipping relaxed while we try font/line-height fitting first.
-        scrambleEl.style.overflowY = 'hidden';
-    } else {
-        // Very tight layouts: prefer readable scaling over hard clipping.
-        scrambleEl.style.maxHeight = '';
-        scrambleEl.style.overflowY = '';
-    }
 
     const computed = window.getComputedStyle(scrambleEl);
     const initialFont = parseFloat(computed.fontSize) || 16;
     const initialLine = parseFloat(computed.lineHeight) || initialFont * 1.28;
 
     const minFont = window.innerWidth < 768 ? 10 : 11;
-    const heightRatio = currentBoxHeight / referenceHeight;
-    const overflowRatio = overflowPx / referenceHeight;
-    const pressureRatio = Math.max(0.62, Math.min(1, 1 - (overflowRatio * 0.55)));
-    const smoothRatio = Math.max(0.62, Math.min(1, Math.min(heightRatio, pressureRatio)));
 
-    const minLineHeightRatio = window.innerWidth < 768 ? 1.2 : 1.08;
-    let font = Math.max(minFont, initialFont * smoothRatio);
-    let line = Math.max(minFont * minLineHeightRatio, initialLine * smoothRatio);
-    scrambleEl.style.fontSize = `${font}px`;
-    scrambleEl.style.lineHeight = `${line}px`;
+    const minLineHeightRatio = window.innerWidth < 768 ? 1.02 : 1.0;
+    const minLine = Math.max(minFont * minLineHeightRatio, initialLine * 0.62);
+    const minScale = Math.max(minFont / initialFont, minLine / initialLine, 0.45);
+
+    const fitsAtScale = (scale) => {
+        scrambleEl.style.fontSize = `${initialFont * scale}px`;
+        scrambleEl.style.lineHeight = `${initialLine * scale}px`;
+        const fitsHeight = scrambleEl.scrollHeight <= textBudgetHeight + 0.5;
+        const fitsWidth = scrambleEl.scrollWidth <= textBudgetWidth + 0.5;
+        return fitsHeight && fitsWidth;
+    };
+
+    scrambleEl.style.overflow = '';
+    scrambleEl.style.overflowY = '';
+    scrambleEl.style.maxHeight = '';
     scrambleEl.style.marginBottom = '11px';
 
-    // Final safety loop for very long scrambles:
-    // 1) prefer font-size reduction first, 2) then line-height reduction.
-    if (hasTextBudget) {
-        for (let i = 0; i < 8; i += 1) {
-            const overflowPxNow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
-            if (overflowPxNow <= 1 || font <= minFont) break;
-
-            const fontStep = overflowPxNow > 24 ? 0.985 : 0.993;
-            font = Math.max(minFont, font * fontStep);
-            scrambleEl.style.fontSize = `${font}px`;
-        }
-
-        for (let i = 0; i < 8; i += 1) {
-            const overflowPxNow = scrambleEl.scrollHeight - scrambleEl.clientHeight;
-            if (overflowPxNow <= 1) break;
-
-            const lineStep = overflowPxNow > 24 ? 0.988 : 0.994;
-            line = Math.max(minFont * minLineHeightRatio, line * lineStep);
-            scrambleEl.style.lineHeight = `${line}px`;
-        }
-
-        // Keep content inside by shrinking only (no internal scroll), preserving spacing budgets.
-        scrambleEl.style.overflowY = 'hidden';
+    if (fitsAtScale(1)) {
+        scrambleEl.style.fontSize = `${initialFont}px`;
+        scrambleEl.style.lineHeight = `${initialLine}px`;
+        return;
     }
+
+    let lo = minScale;
+    let hi = 1;
+    if (!fitsAtScale(lo)) {
+        scrambleEl.style.fontSize = `${initialFont * lo}px`;
+        scrambleEl.style.lineHeight = `${initialLine * lo}px`;
+        return;
+    }
+
+    for (let i = 0; i < 16; i += 1) {
+        const mid = (lo + hi) / 2;
+        if (fitsAtScale(mid)) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+
+    scrambleEl.style.fontSize = `${initialFont * lo}px`;
+    scrambleEl.style.lineHeight = `${initialLine * lo}px`;
 }
 
 function positionTimerToViewportCenter() {

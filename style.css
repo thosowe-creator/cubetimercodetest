@@ -576,25 +576,21 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
   padding-block: 0.38rem;
   padding-bottom: calc(0.38rem + 2px);
   font-size: clamp(1.28rem, 1.15vw + 0.95rem, 2.45rem);
-  line-height: 1.85;
-  text-wrap: balance;
+  line-height: 1.2;
+  text-wrap: wrap;
   word-break: break-word;
-  overflow-y: hidden !important;
 }
 
-.scramble-text.is-constrained {
-  overflow: hidden;
-}
 @media (min-width: 768px){
   .scramble-text{
     font-size: clamp(1.55rem, 0.95vw + 0.9rem, 2.9rem);
-    line-height: 1.95;
+    line-height: 1.22;
   }
 }
 @media (min-width: 1280px){
   .scramble-text{
     font-size: clamp(1.7rem, 0.8vw + 1rem, 3.25rem);
-    line-height: 2.0;
+    line-height: 1.24;
   }
 }
 
