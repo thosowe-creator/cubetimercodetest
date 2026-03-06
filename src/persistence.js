@@ -44,6 +44,56 @@ function compressPayload(payload) {
 function decompressPayload(payload) {
     return JSON.parse(payload);
 }
+
+let autoSyncLastSolveCount = null;
+let autoSyncInFlight = false;
+
+function getAutoSyncSettings() {
+    const enabled = localStorage.getItem('autoSyncEnabled') === '1';
+    const everyRaw = Number(localStorage.getItem('autoSyncEvery'));
+    const every = Number.isFinite(everyRaw)
+        ? Math.max(5, Math.min(50, Math.round(everyRaw / 5) * 5))
+        : 10;
+    return { enabled, every };
+}
+
+async function maybeRunAutoSync(payload) {
+    const { enabled, every } = getAutoSyncSettings();
+    const solveCount = Array.isArray(appState.solves) ? appState.solves.length : 0;
+    if (autoSyncLastSolveCount === null) {
+        autoSyncLastSolveCount = solveCount;
+        return;
+    }
+    const solveDelta = solveCount - autoSyncLastSolveCount;
+    autoSyncLastSolveCount = solveCount;
+    if (!enabled || solveDelta <= 0) return;
+
+    const pendingRaw = Number(localStorage.getItem('autoSyncPendingSolves'));
+    const nextPending = (Number.isFinite(pendingRaw) ? pendingRaw : 0) + solveDelta;
+    localStorage.setItem('autoSyncPendingSolves', String(nextPending));
+    if (nextPending < every || autoSyncInFlight) return;
+
+    await (window.firebaseReady || Promise.resolve(null));
+    const user = await (window.firebaseAuthReady || Promise.resolve(null));
+    if (!user || !window.firebaseDbApi || !window.firebaseDb) return;
+
+    autoSyncInFlight = true;
+    try {
+        const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
+        const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
+        await setDoc(ref, {
+            payload: compressPayload(payload),
+            updatedAt: serverTimestamp(),
+            version: 1,
+            trigger: 'auto-sync'
+        }, { merge: true });
+        localStorage.setItem('autoSyncPendingSolves', String(nextPending % every));
+    } catch (err) {
+        console.error('[Persistence] Auto sync failed', err);
+    } finally {
+        autoSyncInFlight = false;
+    }
+}
 async function exportData() {
     const payload = buildBackupPayload();
     await (window.firebaseReady || Promise.resolve(null));
@@ -214,6 +264,7 @@ function saveData() {
     };
     localStorage.setItem('cubeTimerData_v5', JSON.stringify(data));
     localStorage.setItem('hideUiDuringSolve', appState.hideUiDuringSolve ? '1' : '0');
+    maybeRunAutoSync(data);
 }
 function loadData() {
     const saved = localStorage.getItem('cubeTimerData_v5') || localStorage.getItem('cubeTimerData_v4');
@@ -287,6 +338,7 @@ function loadData() {
     if (!isBtConnected) {
         statusHint.innerText = appState.isInspectionMode ? "Start Inspection" : "Hold to Ready";
     }
+    autoSyncLastSolveCount = Array.isArray(appState.solves) ? appState.solves.length : 0;
 }
 function initSessionIfNeeded(eventId) {
     if (!appState.sessions[eventId] || appState.sessions[eventId].length === 0) {
