@@ -20,12 +20,24 @@ const dashboardEmail = document.getElementById('dashboardEmail');
 const dashboardBackupAt = document.getElementById('dashboardBackupAt');
 const dashboardBackupBtn = document.getElementById('dashboardBackupBtn');
 const dashboardRestoreBtn = document.getElementById('dashboardRestoreBtn');
+const autoSyncToggle = document.getElementById('autoSyncToggle');
+const autoSyncRange = document.getElementById('autoSyncRange');
+const autoSyncValue = document.getElementById('autoSyncValue');
+const autoSyncHint = document.getElementById('autoSyncHint');
 const currentPassword = document.getElementById('currentPassword');
 const newPassword = document.getElementById('newPassword');
 const newPasswordConfirm = document.getElementById('newPasswordConfirm');
 const changePasswordBtn = document.getElementById('changePasswordBtn');
 
 const LOCAL_BACKUP_KEY = 'cubeTimerData_v5';
+const AUTO_SYNC_ENABLED_KEY = 'autoSyncEnabled';
+const AUTO_SYNC_EVERY_KEY = 'autoSyncEvery';
+
+function normalizeAutoSyncEvery(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 10;
+  return Math.max(5, Math.min(50, Math.round(n / 5) * 5));
+}
 
 function isKorean() {
   const lang = (localStorage.getItem('lang') || '').toLowerCase();
@@ -70,6 +82,71 @@ function showMessage(message, isError = false) {
 function reportAccountError(context, err, fallbackMessage) {
   console.error(`[Account] ${context}`, err);
   showMessage((err && err.message) || fallbackMessage, true);
+}
+
+function setManualBackupButtonsDisabled(disabled) {
+  [dashboardBackupBtn, dashboardRestoreBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = disabled;
+    btn.classList.toggle('opacity-50', disabled);
+    btn.classList.toggle('cursor-not-allowed', disabled);
+  });
+}
+
+function syncAutoSyncUi() {
+  const enabled = !!autoSyncToggle?.checked;
+  const every = normalizeAutoSyncEvery(autoSyncRange?.value);
+  if (autoSyncRange) autoSyncRange.disabled = !enabled;
+  if (autoSyncValue) autoSyncValue.textContent = t(`Every ${every} solves`, `${every}회마다 동기화`);
+  if (autoSyncHint) {
+    autoSyncHint.textContent = enabled
+      ? t('Manual backup/restore are disabled while Auto Sync is on.', '자동 동기화가 켜져 있으면 수동 백업/복원은 비활성화됩니다.')
+      : t('Manual backup/restore are enabled while Auto Sync is off.', '자동 동기화가 꺼져 있으면 수동 백업/복원을 사용할 수 있습니다.');
+  }
+  setManualBackupButtonsDisabled(enabled);
+}
+
+async function persistAutoSyncPreference() {
+  const user = window.firebaseAuth?.currentUser;
+  if (!user || !window.firebaseDbApi || !window.firebaseDb) return;
+  const enabled = !!autoSyncToggle?.checked;
+  const every = normalizeAutoSyncEvery(autoSyncRange?.value);
+  localStorage.setItem(AUTO_SYNC_ENABLED_KEY, enabled ? '1' : '0');
+  localStorage.setItem(AUTO_SYNC_EVERY_KEY, String(every));
+  const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
+  const userRef = doc(window.firebaseDb, 'users', user.uid);
+  await setDoc(userRef, {
+    autoSyncEnabled: enabled,
+    autoSyncEvery: every,
+    autoSyncUpdatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+async function refreshAutoSyncPreference(uid) {
+  const localEnabled = localStorage.getItem(AUTO_SYNC_ENABLED_KEY) === '1';
+  const localEvery = normalizeAutoSyncEvery(localStorage.getItem(AUTO_SYNC_EVERY_KEY));
+  if (autoSyncToggle) autoSyncToggle.checked = localEnabled;
+  if (autoSyncRange) autoSyncRange.value = String(localEvery);
+  syncAutoSyncUi();
+
+  if (!uid || !window.firebaseDbApi || !window.firebaseDb) return;
+
+  try {
+    const { doc, getDoc } = window.firebaseDbApi;
+    const userRef = doc(window.firebaseDb, 'users', uid);
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) return;
+    const data = snapshot.data() || {};
+    const enabled = !!data.autoSyncEnabled;
+    const every = normalizeAutoSyncEvery(data.autoSyncEvery);
+    if (autoSyncToggle) autoSyncToggle.checked = enabled;
+    if (autoSyncRange) autoSyncRange.value = String(every);
+    localStorage.setItem(AUTO_SYNC_ENABLED_KEY, enabled ? '1' : '0');
+    localStorage.setItem(AUTO_SYNC_EVERY_KEY, String(every));
+    syncAutoSyncUi();
+  } catch (err) {
+    console.error('[Account] Auto sync preference load failed', err);
+  }
 }
 
 function toDateLabel(updatedAt) {
@@ -157,11 +234,15 @@ function setLoggedInUI(user) {
     accountDashboard.classList.remove('hidden');
     dashboardEmail.textContent = user.email || '-';
     refreshBackupMeta(user.uid);
+    refreshAutoSyncPreference(user.uid);
   } else {
     logoutBtn.classList.add('hidden');
     accountAuthViews.classList.remove('hidden');
     accountDashboard.classList.add('hidden');
     setAccountTab('login');
+    if (autoSyncToggle) autoSyncToggle.checked = false;
+    if (autoSyncRange) autoSyncRange.value = '10';
+    syncAutoSyncUi();
   }
 }
 
@@ -169,6 +250,7 @@ loginTab.addEventListener('click', () => setAccountTab('login'));
 signupTab.addEventListener('click', () => setAccountTab('signup'));
 
 async function initAccountPage() {
+  syncAutoSyncUi();
   const firebase = await (window.firebaseReady || Promise.resolve(null));
   if (!firebase || !window.firebaseAuthApi || !window.firebaseDbApi || !window.firebaseAuth || !window.firebaseDb) {
     reportAccountError('Firebase bootstrap failed', null, 'Firebase initialization failed. Reload and try again.');
@@ -291,6 +373,31 @@ async function initAccountPage() {
       showMessage(t('Restore complete. Open timer page to apply.', '복원이 완료되었습니다. 타이머 페이지에서 적용됩니다.'));
     } catch (err) {
       reportAccountError('Dashboard restore failed', err, t('Cloud restore failed.', '클라우드 복원에 실패했습니다.'));
+    }
+  });
+
+  autoSyncToggle?.addEventListener('change', async () => {
+    syncAutoSyncUi();
+    try {
+      await persistAutoSyncPreference();
+      showMessage(t('Auto sync setting saved.', '자동 동기화 설정이 저장되었습니다.'));
+    } catch (err) {
+      reportAccountError('Auto sync toggle save failed', err, t('Failed to save auto sync setting.', '자동 동기화 설정 저장에 실패했습니다.'));
+    }
+  });
+
+  autoSyncRange?.addEventListener('input', () => {
+    autoSyncRange.value = String(normalizeAutoSyncEvery(autoSyncRange.value));
+    syncAutoSyncUi();
+  });
+
+  autoSyncRange?.addEventListener('change', async () => {
+    syncAutoSyncUi();
+    try {
+      await persistAutoSyncPreference();
+      showMessage(t('Auto sync frequency saved.', '자동 동기화 주기가 저장되었습니다.'));
+    } catch (err) {
+      reportAccountError('Auto sync range save failed', err, t('Failed to save auto sync frequency.', '자동 동기화 주기 저장에 실패했습니다.'));
     }
   });
 
