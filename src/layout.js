@@ -106,23 +106,24 @@ function fitScrambleTextToBudget() {
 }
 
 function constrainScrambleBoxToKeepAveragesVisible() {
-    if (!scrambleBoxEl || !avgBadgeRowEl) {
+    if (!scrambleBoxEl || !avgBadgeRowEl || !timerContainerEl) {
         return {
             isConstrained: false,
-            originalHeight: 0,
-            constrainedHeight: 0,
             overflowPx: 0,
+            safeAreaTop: 0,
+            safeAreaBottom: 0,
+            safeAreaHeight: 0,
+            badgeOverflowPx: 0,
+            badgeTriggerPx: 38,
             textBudgetWidth: 0,
             textBudgetHeight: 0
         };
     }
 
-    // Measure overflow after timer is centered for current frame.
     if (!__timerLayoutLocked) positionTimerToViewportCenter();
 
     const viewportH = window.innerHeight;
-    const scrambleRect = scrambleBoxEl.getBoundingClientRect();
-    const originalHeight = Math.round(scrambleRect.height);
+    const timerRect = timerContainerEl.getBoundingClientRect();
     const avgRect = avgBadgeRowEl.getBoundingClientRect();
     const boxStyle = window.getComputedStyle(scrambleBoxEl);
     const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
@@ -130,33 +131,41 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     const boxPaddingLeft = parseFloat(boxStyle.paddingLeft) || 0;
     const boxPaddingRight = parseFloat(boxStyle.paddingRight) || 0;
 
+    const eventBottomCandidates = [];
+    if (eventSelect) eventBottomCandidates.push(eventSelect.getBoundingClientRect().bottom);
+    if (typeof caseSelectWrap !== 'undefined' && caseSelectWrap && !caseSelectWrap.classList.contains('hidden')) {
+        eventBottomCandidates.push(caseSelectWrap.getBoundingClientRect().bottom);
+    }
+    if (typeof legacyCategorySelect !== 'undefined' && legacyCategorySelect && !legacyCategorySelect.classList.contains('hidden')) {
+        eventBottomCandidates.push(legacyCategorySelect.getBoundingClientRect().bottom);
+    }
+    const eventUiBottom = eventBottomCandidates.length ? Math.max(...eventBottomCandidates) : 0;
+
+    const safeMarginTop = 10;
+    const safeMarginBottom = 12;
+    const safeAreaTop = Math.round(eventUiBottom + safeMarginTop);
+    const safeAreaBottom = Math.round(timerRect.top - safeMarginBottom);
+    const safeAreaHeight = Math.max(0, safeAreaBottom - safeAreaTop);
+
     const fixedContentHeight = Array.from(scrambleBoxEl.children)
         .filter((child) => child !== scrambleEl && !child.classList.contains('hidden'))
         .reduce((sum, child) => sum + child.getBoundingClientRect().height, 0);
 
     const textBudgetWidth = Math.max(0, scrambleBoxEl.clientWidth - boxPaddingLeft - boxPaddingRight);
-    const textBudgetHeight = Math.max(0, scrambleBoxEl.clientHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
+    const textBudgetHeight = Math.max(0, safeAreaHeight - boxPaddingTop - boxPaddingBottom - fixedContentHeight);
 
-    const bottomMargin = 38; // ~1cm safety line above viewport edge
-    const overflowToViewportBottom = Math.ceil((avgRect.bottom + bottomMargin) - viewportH);
-
-    // Keep default scramble size when averages are already visible.
-    if (overflowToViewportBottom <= 0) {
-        return {
-            isConstrained: false,
-            originalHeight,
-            constrainedHeight: originalHeight,
-            overflowPx: 0,
-            textBudgetWidth,
-            textBudgetHeight
-        };
-    }
+    const badgeTriggerPx = 38; // ~1cm overflow tolerance before shrinking starts
+    const badgeOverflowPx = Math.max(0, Math.ceil(avgRect.bottom - viewportH));
+    const overflowPx = Math.max(0, badgeOverflowPx - badgeTriggerPx);
 
     return {
-        isConstrained: true,
-        originalHeight,
-        constrainedHeight: originalHeight,
-        overflowPx: overflowToViewportBottom,
+        isConstrained: overflowPx > 0 || textBudgetHeight <= 0,
+        overflowPx,
+        safeAreaTop,
+        safeAreaBottom,
+        safeAreaHeight,
+        badgeOverflowPx,
+        badgeTriggerPx,
         textBudgetWidth,
         textBudgetHeight
     };
@@ -167,8 +176,12 @@ function fitScrambleTypographyInsideBox(constraint = null) {
 
     const textBudgetWidth = Math.max(0, Number(constraint && constraint.textBudgetWidth) || 0);
     const textBudgetHeight = Math.max(0, Number(constraint && constraint.textBudgetHeight) || 0);
+    const safeAreaTop = Number(constraint && constraint.safeAreaTop) || 0;
+    const safeAreaBottom = Number(constraint && constraint.safeAreaBottom) || 0;
+    const badgeTriggerPx = Number(constraint && constraint.badgeTriggerPx) || 38;
     const hasTextBudget = textBudgetWidth >= 20 && textBudgetHeight >= 20;
-    if (!hasTextBudget) return;
+    const hasSafeArea = (safeAreaBottom - safeAreaTop) > 0;
+    if (!hasTextBudget || !hasSafeArea) return;
 
     scrambleEl.classList.add('is-constrained');
 
@@ -185,9 +198,18 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const fitsAtScale = (scale) => {
         scrambleEl.style.fontSize = `${initialFont * scale}px`;
         scrambleEl.style.lineHeight = `${initialLine * scale}px`;
+
+        if (!__timerLayoutLocked) positionTimerToViewportCenter();
+
+        const scrambleRect = scrambleEl.getBoundingClientRect();
+        const avgRect = avgBadgeRowEl ? avgBadgeRowEl.getBoundingClientRect() : { bottom: 0 };
+        const badgeOverflow = Math.max(0, avgRect.bottom - window.innerHeight);
+
         const fitsHeight = scrambleEl.scrollHeight <= textBudgetHeight + 0.5;
         const fitsWidth = scrambleEl.scrollWidth <= textBudgetWidth + 0.5;
-        return fitsHeight && fitsWidth;
+        const fitsVerticalSafeArea = scrambleRect.top >= (safeAreaTop - 0.5) && scrambleRect.bottom <= (safeAreaBottom + 0.5);
+        const fitsBadgeBudget = badgeOverflow <= (badgeTriggerPx + 0.5);
+        return fitsHeight && fitsWidth && fitsVerticalSafeArea && fitsBadgeBudget;
     };
 
     scrambleEl.style.overflow = '';
@@ -249,6 +271,21 @@ function positionTimerToViewportCenter() {
     // Apply translation
     timerContainerEl.style.transform = `translateY(${dy}px)`;
     timerContainerEl.style.transition = 'transform 160ms ease';
+}
+
+
+// Recalculate on viewport + layout mutations affecting safe-area math.
+window.addEventListener('resize', () => scheduleLayout('resize'), { passive: true });
+window.addEventListener('orientationchange', () => scheduleLayout('orientation-change'), { passive: true });
+
+if (typeof ResizeObserver !== 'undefined') {
+    const layoutObserver = new ResizeObserver(() => scheduleLayout('layout-observer'));
+    if (scrambleBoxEl) layoutObserver.observe(scrambleBoxEl);
+    if (timerContainerEl) layoutObserver.observe(timerContainerEl);
+    if (avgBadgeRowEl) layoutObserver.observe(avgBadgeRowEl);
+    if (eventSelect) layoutObserver.observe(eventSelect);
+    if (typeof caseSelectWrap !== 'undefined' && caseSelectWrap) layoutObserver.observe(caseSelectWrap);
+    if (typeof legacyCategorySelect !== 'undefined' && legacyCategorySelect) layoutObserver.observe(legacyCategorySelect);
 }
 
 ;
