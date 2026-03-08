@@ -376,6 +376,8 @@ async function generateScramble() {
         let lastAxis = -1;
         let secondLastAxis = -1;
         let lastMoveBase = "";
+        let lastFace = "";
+        let secondLastFace = "";
         const getMoveAxis = (m) => {
             const c = m[0];
             if ("UD".includes(c)) return 0;
@@ -383,14 +385,24 @@ async function generateScramble() {
             if ("FB".includes(c)) return 2;
             return -1;
         };
+        const getMoveFace = (m) => {
+            const match = m.match(/[UDLRFB]/);
+            return match ? match[0] : "";
+        };
+        const oppositeFace = { U: "D", D: "U", L: "R", R: "L", F: "B", B: "F" };
         for (let i = 0; i < conf.len; i++) {
-            let move, axis, base;
+            let move, axis, base, face;
             let valid = false;
             while (!valid) {
                 move = conf.moves[Math.floor(Math.random() * conf.moves.length)];
                 axis = getMoveAxis(move);
                 base = move[0];
-                if (base === lastMoveBase) { valid = false; continue; }
+                face = getMoveFace(move);
+                if (currentEvent !== '666' && base === lastMoveBase) { valid = false; continue; }
+                if (currentEvent === '666' && face) {
+                    if (face === lastFace && face === secondLastFace) { valid = false; continue; }
+                    if (secondLastFace === face && lastFace === oppositeFace[face]) { valid = false; continue; }
+                }
                 if (axis !== -1 && axis === lastAxis && axis === secondLastAxis) { valid = false; continue; }
                 valid = true;
             }
@@ -398,6 +410,8 @@ async function generateScramble() {
             secondLastAxis = lastAxis;
             lastAxis = axis;
             lastMoveBase = base;
+            secondLastFace = lastFace;
+            lastFace = face;
         }
         if (currentEvent === '333bf') {
             const wideMoveCount = Math.floor(Math.random() * 2) + 1;
