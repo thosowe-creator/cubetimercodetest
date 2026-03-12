@@ -48,35 +48,63 @@ function applyLayoutBudgets(reason = '') {
 
 function updateScrambleBottomAreaBudget() {
     // Reduce the huge "dead space" below scramble text.
-    // Only keep extra space when showing diagram / loading skeleton / retry button.
+    // Keep budgets separated so tool/diagram reserve doesn't inflate scramble-bottom space.
     const root = document.documentElement;
+
     const isDiagramVisible = typeof scrambleDiagram !== 'undefined'
         && scrambleDiagram
         && !scrambleDiagram.classList.contains('hidden');
     const isSkeletonVisible = scrambleDiagramSkeleton && !scrambleDiagramSkeleton.classList.contains('hidden');
     const isRetryVisible = scrambleRetryBtn && !scrambleRetryBtn.classList.contains('hidden');
 
-    if (isDiagramVisible || isSkeletonVisible || isRetryVisible) {
-        const measuredHeights = [];
-        if (isDiagramVisible && scrambleDiagram) {
-            measuredHeights.push(scrambleDiagram.getBoundingClientRect().height);
+    const isDiagramInBottomArea = Boolean(
+        scrambleBottomAreaEl
+        && isDiagramVisible
+        && scrambleBottomAreaEl.contains(scrambleDiagram)
+    );
+
+    const needsBottomBudget = isDiagramInBottomArea || isSkeletonVisible || isRetryVisible;
+    const needsToolBudget = isDiagramVisible || isSkeletonVisible || isRetryVisible;
+
+    if (needsBottomBudget) {
+        const bottomHeights = [];
+        if (isDiagramInBottomArea && scrambleDiagram) {
+            bottomHeights.push(scrambleDiagram.getBoundingClientRect().height);
         }
         if (isSkeletonVisible && scrambleDiagramSkeleton) {
-            measuredHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
+            bottomHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
         }
         if (isRetryVisible && scrambleRetryBtn) {
-            measuredHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
+            bottomHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
         }
 
-        const measuredMax = Math.max(...measuredHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
-        const fallbackH = window.innerWidth >= 768 ? 220 : 190;
-        const h = Math.max(Math.round(measuredMax || fallbackH), 44);
-
-        root.style.setProperty('--scrambleBottomH', `${h}px`);
-        root.style.setProperty('--toolMinH', `${h}px`);
+        const measuredBottom = Math.max(...bottomHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
+        const fallbackBottom = window.innerWidth >= 768 ? 220 : 190;
+        const bottomH = Math.max(Math.round(measuredBottom || fallbackBottom), 44);
+        root.style.setProperty('--scrambleBottomH', `${bottomH}px`);
     } else {
-        // Keep a small cushion so the layout doesn't feel cramped
+        // Keep a small cushion so the layout doesn't feel cramped.
         root.style.setProperty('--scrambleBottomH', '10px');
+        root.style.setProperty('--toolMinH', '24px');
+    }
+
+    if (needsToolBudget) {
+        const toolHeights = [];
+        if (isDiagramVisible && scrambleDiagram) {
+            toolHeights.push(scrambleDiagram.getBoundingClientRect().height);
+        }
+        if (isSkeletonVisible && scrambleDiagramSkeleton) {
+            toolHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
+        }
+        if (isRetryVisible && scrambleRetryBtn) {
+            toolHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
+        }
+
+        const measuredTool = Math.max(...toolHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
+        const fallbackTool = window.innerWidth >= 768 ? 220 : 190;
+        const toolH = Math.max(Math.round(measuredTool || fallbackTool), 44);
+        root.style.setProperty('--toolMinH', `${toolH}px`);
+    } else {
         root.style.setProperty('--toolMinH', '24px');
     }
 }
