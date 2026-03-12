@@ -243,6 +243,14 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const initialFont = baseFont * startScale;
     const initialLine = baseLine * startScale;
 
+    // Keep all non-reduced events at the same default scramble text size as 5x5.
+    // Requested exception events: 6x6, 7x7, and megaminx.
+    if (!reducedStartEvents.has(currentEvent)) {
+        scrambleEl.style.fontSize = `${initialFont}px`;
+        scrambleEl.style.lineHeight = `${initialLine}px`;
+        return;
+    }
+
     const minFont = window.innerWidth < 768 ? 10 : 11;
 
     const minLineHeightRatio = window.innerWidth < 768 ? 1.02 : 1.0;
