@@ -84,8 +84,7 @@ function updateScrambleBottomAreaBudget() {
         root.style.setProperty('--scrambleBottomH', `${bottomH}px`);
     } else {
         // Keep a small cushion so the layout doesn't feel cramped.
-        root.style.setProperty('--scrambleBottomH', '10px');
-        root.style.setProperty('--toolMinH', '24px');
+        root.style.setProperty('--scrambleBottomH', '4px');
     }
 
     if (needsToolBudget) {
@@ -264,7 +263,7 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     scrambleEl.style.overflow = '';
     scrambleEl.style.overflowY = '';
     scrambleEl.style.maxHeight = '';
-    scrambleEl.style.marginBottom = '11px';
+    scrambleEl.style.marginBottom = '3px';
 
     if (fitsAtScale(1)) {
         scrambleEl.style.fontSize = `${initialFont}px`;
@@ -303,7 +302,7 @@ function positionTimerToViewportCenter() {
     const timerRect = timerContainerEl.getBoundingClientRect();
     const timerHalf = timerRect.height / 2;
 
-    const gap = 19; // ~0.5cm visual spacing between scramble block and timer
+    const gap = 6; // tighter visual spacing between scramble block and timer
     const minCenterY = scrambleRect.bottom + gap + timerHalf;
 
     // Target center is viewport center, but never collide with scramble area
