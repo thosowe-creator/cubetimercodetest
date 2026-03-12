@@ -85,6 +85,7 @@ function updateScrambleBottomAreaBudget() {
     } else {
         // Keep a small cushion so the layout doesn't feel cramped.
         root.style.setProperty('--scrambleBottomH', '10px');
+        root.style.setProperty('--toolMinH', '24px');
     }
 
     if (needsToolBudget) {
