@@ -48,19 +48,36 @@ function applyLayoutBudgets(reason = '') {
 
 function updateScrambleBottomAreaBudget() {
     // Reduce the huge "dead space" below scramble text.
-    // Only keep extra space when showing loading skeleton / retry button.
+    // Only keep extra space when showing diagram / loading skeleton / retry button.
     const root = document.documentElement;
+    const isDiagramVisible = typeof scrambleDiagram !== 'undefined'
+        && scrambleDiagram
+        && !scrambleDiagram.classList.contains('hidden');
     const isSkeletonVisible = scrambleDiagramSkeleton && !scrambleDiagramSkeleton.classList.contains('hidden');
     const isRetryVisible = scrambleRetryBtn && !scrambleRetryBtn.classList.contains('hidden');
 
-    if (isSkeletonVisible || isRetryVisible) {
-        // Match skeleton's rendered height (fallback to 160)
-        const rect = scrambleDiagramSkeleton ? scrambleDiagramSkeleton.getBoundingClientRect() : null;
-        const h = rect && rect.height ? rect.height : (window.innerWidth >= 768 ? 220 : 190);
-        root.style.setProperty('--scrambleBottomH', `${Math.round(h)}px`);
+    if (isDiagramVisible || isSkeletonVisible || isRetryVisible) {
+        const measuredHeights = [];
+        if (isDiagramVisible && scrambleDiagram) {
+            measuredHeights.push(scrambleDiagram.getBoundingClientRect().height);
+        }
+        if (isSkeletonVisible && scrambleDiagramSkeleton) {
+            measuredHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
+        }
+        if (isRetryVisible && scrambleRetryBtn) {
+            measuredHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
+        }
+
+        const measuredMax = Math.max(...measuredHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
+        const fallbackH = window.innerWidth >= 768 ? 220 : 190;
+        const h = Math.max(Math.round(measuredMax || fallbackH), 44);
+
+        root.style.setProperty('--scrambleBottomH', `${h}px`);
+        root.style.setProperty('--toolMinH', `${h}px`);
     } else {
         // Keep a small cushion so the layout doesn't feel cramped
         root.style.setProperty('--scrambleBottomH', '10px');
+        root.style.setProperty('--toolMinH', '24px');
     }
 }
 
@@ -186,8 +203,12 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     scrambleEl.classList.add('is-constrained');
 
     const computed = window.getComputedStyle(scrambleEl);
-    const initialFont = parseFloat(computed.fontSize) || 16;
-    const initialLine = parseFloat(computed.lineHeight) || initialFont * 1.28;
+    const baseFont = parseFloat(computed.fontSize) || 16;
+    const baseLine = parseFloat(computed.lineHeight) || baseFont * 1.28;
+    const reducedStartEvents = new Set(['666', '777', 'minx']);
+    const startScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
+    const initialFont = baseFont * startScale;
+    const initialLine = baseLine * startScale;
 
     const minFont = window.innerWidth < 768 ? 10 : 11;
 
