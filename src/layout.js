@@ -80,7 +80,13 @@ function updateScrambleBottomAreaBudget() {
 
         const measuredBottom = Math.max(...bottomHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
         const fallbackBottom = window.innerWidth >= 768 ? 220 : 190;
-        const bottomH = Math.max(Math.round(measuredBottom || fallbackBottom), 44);
+        const rawBottom = measuredBottom || fallbackBottom;
+
+        // Keep the visual spacer under scramble around half of the tool height,
+        // and damp viewport-based jitter so resize feels less awkward.
+        const viewportDamping = Math.min(1.06, Math.max(0.92, window.innerHeight / 900));
+        const reducedBottom = rawBottom * 0.5 * viewportDamping;
+        const bottomH = Math.min(120, Math.max(Math.round(reducedBottom), 20));
         root.style.setProperty('--scrambleBottomH', `${bottomH}px`);
     } else {
         // Keep a small cushion so the layout doesn't feel cramped.
