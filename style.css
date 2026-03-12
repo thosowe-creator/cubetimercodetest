@@ -560,8 +560,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 }
 
 :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.38rem;
   --scrambleNavSafeInset: 2.72rem;
 }
@@ -597,7 +597,7 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 /* Mobile: keep some side padding (not zero) but make it wider than before */
 @media (max-width: 480px){
   :root{
-    --toolMinH: 90px;
+    --toolMinH: 24px;
     --scramblePad: 1.08rem;
     --scrambleNavSafeInset: 2.5rem;
   }
@@ -626,8 +626,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 
 @media (max-height: 720px) {
   :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.25rem;
 }
   .timer-display { font-size: clamp(3.8rem, 15vmin, 11.5rem); }
@@ -635,8 +635,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 
 @media (max-height: 640px) {
   :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.25rem;
 }
   /* Hide diagram area earlier on very short screens */
@@ -647,8 +647,8 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 
 @media (max-height: 560px) {
   :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.25rem;
 }
   .timer-display { font-size: clamp(3.0rem, 13vmin, 9.5rem); }
@@ -661,16 +661,16 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 
 @media (max-width: 768px) {
   :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.25rem;
 }
 }
 
 @media (max-width: 480px) {
   :root {
-  --toolMinH: 190px;
-  --scrambleBottomH: 12px;
+  --toolMinH: 24px;
+  --scrambleBottomH: 10px;
   --scramblePad: 1.25rem;
 }
 }

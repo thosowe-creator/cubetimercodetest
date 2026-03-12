@@ -48,19 +48,63 @@ function applyLayoutBudgets(reason = '') {
 
 function updateScrambleBottomAreaBudget() {
     // Reduce the huge "dead space" below scramble text.
-    // Only keep extra space when showing loading skeleton / retry button.
+    // Keep budgets separated so tool/diagram reserve doesn't inflate scramble-bottom space.
     const root = document.documentElement;
+
+    const isDiagramVisible = typeof scrambleDiagram !== 'undefined'
+        && scrambleDiagram
+        && !scrambleDiagram.classList.contains('hidden');
     const isSkeletonVisible = scrambleDiagramSkeleton && !scrambleDiagramSkeleton.classList.contains('hidden');
     const isRetryVisible = scrambleRetryBtn && !scrambleRetryBtn.classList.contains('hidden');
 
-    if (isSkeletonVisible || isRetryVisible) {
-        // Match skeleton's rendered height (fallback to 160)
-        const rect = scrambleDiagramSkeleton ? scrambleDiagramSkeleton.getBoundingClientRect() : null;
-        const h = rect && rect.height ? rect.height : (window.innerWidth >= 768 ? 220 : 190);
-        root.style.setProperty('--scrambleBottomH', `${Math.round(h)}px`);
+    const isDiagramInBottomArea = Boolean(
+        scrambleBottomAreaEl
+        && isDiagramVisible
+        && scrambleBottomAreaEl.contains(scrambleDiagram)
+    );
+
+    const needsBottomBudget = isDiagramInBottomArea || isSkeletonVisible || isRetryVisible;
+    const needsToolBudget = isDiagramVisible || isSkeletonVisible || isRetryVisible;
+
+    if (needsBottomBudget) {
+        const bottomHeights = [];
+        if (isDiagramInBottomArea && scrambleDiagram) {
+            bottomHeights.push(scrambleDiagram.getBoundingClientRect().height);
+        }
+        if (isSkeletonVisible && scrambleDiagramSkeleton) {
+            bottomHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
+        }
+        if (isRetryVisible && scrambleRetryBtn) {
+            bottomHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
+        }
+
+        const measuredBottom = Math.max(...bottomHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
+        const fallbackBottom = window.innerWidth >= 768 ? 220 : 190;
+        const bottomH = Math.max(Math.round(measuredBottom || fallbackBottom), 44);
+        root.style.setProperty('--scrambleBottomH', `${bottomH}px`);
     } else {
-        // Keep a small cushion so the layout doesn't feel cramped
+        // Keep a small cushion so the layout doesn't feel cramped.
         root.style.setProperty('--scrambleBottomH', '10px');
+    }
+
+    if (needsToolBudget) {
+        const toolHeights = [];
+        if (isDiagramVisible && scrambleDiagram) {
+            toolHeights.push(scrambleDiagram.getBoundingClientRect().height);
+        }
+        if (isSkeletonVisible && scrambleDiagramSkeleton) {
+            toolHeights.push(scrambleDiagramSkeleton.getBoundingClientRect().height);
+        }
+        if (isRetryVisible && scrambleRetryBtn) {
+            toolHeights.push(scrambleRetryBtn.getBoundingClientRect().height + 18);
+        }
+
+        const measuredTool = Math.max(...toolHeights.filter((v) => Number.isFinite(v) && v > 0), 0);
+        const fallbackTool = window.innerWidth >= 768 ? 220 : 190;
+        const toolH = Math.max(Math.round(measuredTool || fallbackTool), 44);
+        root.style.setProperty('--toolMinH', `${toolH}px`);
+    } else {
+        root.style.setProperty('--toolMinH', '24px');
     }
 }
 
@@ -186,8 +230,12 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     scrambleEl.classList.add('is-constrained');
 
     const computed = window.getComputedStyle(scrambleEl);
-    const initialFont = parseFloat(computed.fontSize) || 16;
-    const initialLine = parseFloat(computed.lineHeight) || initialFont * 1.28;
+    const baseFont = parseFloat(computed.fontSize) || 16;
+    const baseLine = parseFloat(computed.lineHeight) || baseFont * 1.28;
+    const reducedStartEvents = new Set(['666', '777', 'minx']);
+    const startScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
+    const initialFont = baseFont * startScale;
+    const initialLine = baseLine * startScale;
 
     const minFont = window.innerWidth < 768 ? 10 : 11;
 
