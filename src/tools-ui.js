@@ -7,8 +7,18 @@ function updateScrambleNavButtons() {
     scrambleNextBtn.disabled = disableForState;
 }
 
+function formatScrambleDisplayText(text) {
+    const rawText = String(text || '');
+    if (currentEvent !== 'minx') return rawText;
+
+    return rawText
+        .split('\n')
+        .map((line) => line.replace(/\s+(U'?|U2)$/u, '\u00A0$1'))
+        .join('\n');
+}
+
 function setScrambleDisplay(text) {
-    if (scrambleEl) scrambleEl.innerText = text;
+    if (scrambleEl) scrambleEl.innerText = formatScrambleDisplayText(text);
 }
 
 function setCurrentScramble(nextScramble) {
