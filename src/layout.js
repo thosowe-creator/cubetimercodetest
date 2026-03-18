@@ -266,15 +266,19 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const baseLine = parseFloat(computed.lineHeight) || baseFont * 1.28;
     const isMobileViewport = window.innerWidth < 768;
     const reducedStartEvents = new Set(['666', '777', 'minx']);
-    const mobileFiveByFiveScale = isMobileViewport ? 0.7 : 1;
-    const mobileOverallScale = isMobileViewport ? 0.7 : 1;
-    const eventScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
-    const startScale = eventScale * mobileFiveByFiveScale * mobileOverallScale;
+    const mobileStartScaleByEvent = {
+        '555': 0.7,
+        '666': 0.7,
+        '777': 0.49,
+        minx: 0.49,
+    };
+    const eventScale = isMobileViewport ? (mobileStartScaleByEvent[currentEvent] || 1) : 1;
+    const startScale = eventScale;
     const initialFont = baseFont * startScale;
     const initialLine = baseLine * startScale;
 
-    // Keep all non-reduced events at the same default scramble text size as 5x5.
-    // Requested exception events: 6x6, 7x7, and megaminx.
+    // Only 6x6, 7x7, and megaminx use the reduced-event fitter below.
+    // 5x5 gets its own mobile start scale but otherwise follows the default path.
     if (!reducedStartEvents.has(currentEvent)) {
         scrambleEl.style.fontSize = `${initialFont}px`;
         scrambleEl.style.lineHeight = `${initialLine}px`;
