@@ -2,6 +2,7 @@
 const scrambleBoxEl = document.getElementById('scrambleBox');
 const scrambleBottomAreaEl = document.querySelector('.scramble-bottom-area');
 const timerContainerEl = document.getElementById('timerContainer');
+const timerDisplayContainerEl = document.getElementById('timerDisplayContainer');
 const avgBadgeRowEl = document.getElementById('avgBadgeRow');
 let __layoutRAF = 0;
 let __timerLayoutLocked = false;
@@ -155,6 +156,31 @@ function fitScrambleTextToBudget() {
     return constraint;
 }
 
+function getVisibleRect(el) {
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return null;
+    return rect;
+}
+
+function getTimerContentRect() {
+    const displayRect = getVisibleRect(timerDisplayContainerEl);
+    const avgRect = getVisibleRect(avgBadgeRowEl);
+
+    if (displayRect && avgRect) {
+        return {
+            top: Math.min(displayRect.top, avgRect.top),
+            bottom: Math.max(displayRect.bottom, avgRect.bottom),
+            left: Math.min(displayRect.left, avgRect.left),
+            right: Math.max(displayRect.right, avgRect.right),
+            height: Math.max(displayRect.bottom, avgRect.bottom) - Math.min(displayRect.top, avgRect.top),
+            width: Math.max(displayRect.right, avgRect.right) - Math.min(displayRect.left, avgRect.left)
+        };
+    }
+
+    return avgRect || displayRect || getVisibleRect(timerContainerEl);
+}
+
 function constrainScrambleBoxToKeepAveragesVisible() {
     if (!scrambleBoxEl || !avgBadgeRowEl || !timerContainerEl) {
         return {
@@ -173,7 +199,7 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     if (!__timerLayoutLocked) positionTimerToViewportCenter();
 
     const viewportH = window.innerHeight;
-    const timerRect = timerContainerEl.getBoundingClientRect();
+    const timerContentRect = getTimerContentRect() || timerContainerEl.getBoundingClientRect();
     const avgRect = avgBadgeRowEl.getBoundingClientRect();
     const boxStyle = window.getComputedStyle(scrambleBoxEl);
     const boxPaddingTop = parseFloat(boxStyle.paddingTop) || 0;
@@ -194,7 +220,7 @@ function constrainScrambleBoxToKeepAveragesVisible() {
     const safeMarginTop = 10;
     const safeMarginBottom = 12;
     const safeAreaTop = Math.round(eventUiBottom + safeMarginTop);
-    const safeAreaBottom = Math.round(timerRect.top - safeMarginBottom);
+    const safeAreaBottom = Math.round(timerContentRect.top - safeMarginBottom);
     const safeAreaHeight = Math.max(0, safeAreaBottom - safeAreaTop);
 
     const fixedContentHeight = Array.from(scrambleBoxEl.children)
@@ -238,8 +264,12 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const computed = window.getComputedStyle(scrambleEl);
     const baseFont = parseFloat(computed.fontSize) || 16;
     const baseLine = parseFloat(computed.lineHeight) || baseFont * 1.28;
+    const isMobileViewport = window.innerWidth < 768;
     const reducedStartEvents = new Set(['666', '777', 'minx']);
-    const startScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
+    const mobileFiveByFiveScale = isMobileViewport ? 0.7 : 1;
+    const mobileOverallScale = isMobileViewport ? 0.7 : 1;
+    const eventScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
+    const startScale = eventScale * mobileFiveByFiveScale * mobileOverallScale;
     const initialFont = baseFont * startScale;
     const initialLine = baseLine * startScale;
 
@@ -313,8 +343,8 @@ function positionTimerToViewportCenter() {
 
     const viewportCenterY = window.innerHeight / 2;
     const scrambleRect = scrambleBoxEl.getBoundingClientRect();
-    const timerRect = timerContainerEl.getBoundingClientRect();
-    const timerHalf = timerRect.height / 2;
+    const timerContentRect = getTimerContentRect() || timerContainerEl.getBoundingClientRect();
+    const timerHalf = timerContentRect.height / 2;
 
     const gap = 6; // tighter visual spacing between scramble block and timer
     const minCenterY = scrambleRect.bottom + gap + timerHalf;
@@ -325,9 +355,9 @@ function positionTimerToViewportCenter() {
     // Prevent pushing past bottom (keep at least a small margin)
     const bottomMargin = 22;
     const maxCenterY = window.innerHeight - bottomMargin - timerHalf;
-    targetCenterY = Math.min(targetCenterY, maxCenterY);
+    targetCenterY = maxCenterY < minCenterY ? maxCenterY : Math.min(targetCenterY, maxCenterY);
 
-    const currentCenterY = timerRect.top + timerHalf;
+    const currentCenterY = timerContentRect.top + timerHalf;
     const dy = Math.round(targetCenterY - currentCenterY);
 
     // Apply translation
