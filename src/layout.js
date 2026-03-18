@@ -266,10 +266,8 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const baseLine = parseFloat(computed.lineHeight) || baseFont * 1.28;
     const isMobileViewport = window.innerWidth < 768;
     const reducedStartEvents = new Set(['666', '777', 'minx']);
-    const mobileFiveByFiveScale = isMobileViewport ? 0.7 : 1;
-    const mobileOverallScale = isMobileViewport ? 0.91 : 1;
-    const eventScale = reducedStartEvents.has(currentEvent) ? 0.7 : 1;
-    const startScale = eventScale * mobileFiveByFiveScale * mobileOverallScale;
+    const eventScale = isMobileViewport && reducedStartEvents.has(currentEvent) ? 0.7 : 1;
+    const startScale = eventScale;
     const initialFont = baseFont * startScale;
     const initialLine = baseLine * startScale;
 
