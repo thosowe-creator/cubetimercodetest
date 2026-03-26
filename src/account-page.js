@@ -55,19 +55,11 @@ function setAccountTab(tab) {
   loginView.classList.toggle('hidden', !isLogin);
   signupView.classList.toggle('hidden', isLogin);
 
-  loginTab.classList.toggle('bg-slate-800', isLogin);
-  loginTab.classList.toggle('text-white', isLogin);
-  loginTab.classList.toggle('bg-slate-100', !isLogin);
-  loginTab.classList.toggle('dark:bg-slate-800', !isLogin);
-  loginTab.classList.toggle('text-slate-600', !isLogin);
-  loginTab.classList.toggle('dark:text-slate-300', !isLogin);
+  loginTab.classList.toggle('account-tab-active', isLogin);
+  loginTab.classList.toggle('account-tab-inactive', !isLogin);
 
-  signupTab.classList.toggle('bg-slate-800', !isLogin);
-  signupTab.classList.toggle('text-white', !isLogin);
-  signupTab.classList.toggle('bg-slate-100', isLogin);
-  signupTab.classList.toggle('dark:bg-slate-800', isLogin);
-  signupTab.classList.toggle('text-slate-600', isLogin);
-  signupTab.classList.toggle('dark:text-slate-300', isLogin);
+  signupTab.classList.toggle('account-tab-active', !isLogin);
+  signupTab.classList.toggle('account-tab-inactive', isLogin);
 }
 
 function showMessage(message, isError = false) {

@@ -6,6 +6,17 @@
     <title>Cube Timer</title>
     <link rel="icon" href="favicon.ico">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.cubing.net https://www.gstatic.com; worker-src 'self' blob: https://cdn.cubing.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
+    <script>
+        (function () {
+            try {
+                const raw = localStorage.getItem('cubeTimerData_v5') || localStorage.getItem('cubeTimerData_v4');
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                const isDark = !!(data && data.settings && data.settings.isDarkMode);
+                document.documentElement.classList.toggle('dark', isDark);
+            } catch (_) {}
+        })();
+    </script>
     <script src="src/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -668,7 +679,7 @@
 
             <!-- Timer Area -->
             <div id="timerContainer" class="flex flex-col items-center justify-center flex-grow w-full select-none timer-center-shift">
-                <div id="timerInteractiveArea" class="rounded-3xl transition-colors hover:bg-slate-100/30 dark:hover:bg-slate-800/30 w-full h-full flex flex-col justify-center items-center">
+                <div id="timerInteractiveArea" class="rounded-3xl w-full h-full flex flex-col justify-center items-center">
                     <div id="timerDisplayContainer" class="w-full flex justify-center items-start gap-4 md:gap-6">
                         <div id="splitLivePanel" class="hidden w-[120px] max-h-[160px] overflow-y-auto custom-scroll rounded-xl border border-slate-100 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-2.5 space-y-1.5 text-left"></div>
                         <div id="timer" class="timer-display dark:text-slate-100 transition-all duration-100">0.00</div>

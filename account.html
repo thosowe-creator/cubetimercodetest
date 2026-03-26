@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CubeTimer Account</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://www.gstatic.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
+  <script>
+    (function () {
+      try {
+        const raw = localStorage.getItem('cubeTimerData_v5') || localStorage.getItem('cubeTimerData_v4');
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        const isDark = !!(data && data.settings && data.settings.isDarkMode);
+        document.documentElement.classList.toggle('dark', isDark);
+      } catch (_) {}
+    })();
+  </script>
   <script src="src/tailwind-config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -24,8 +35,8 @@
 
       <div id="accountAuthViews">
         <div class="grid grid-cols-2 gap-2 mb-5">
-          <button type="button" id="accountTabLogin" class="py-2 rounded-xl text-xs font-black bg-slate-800 text-white">Login</button>
-          <button type="button" id="accountTabSignup" class="py-2 rounded-xl text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Sign Up</button>
+          <button type="button" id="accountTabLogin" class="py-2 rounded-xl text-xs font-black account-tab-active">Login</button>
+          <button type="button" id="accountTabSignup" class="py-2 rounded-xl text-xs font-black account-tab-inactive">Sign Up</button>
         </div>
 
         <div id="accountLoginView" class="space-y-3">

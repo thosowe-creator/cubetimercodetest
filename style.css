@@ -966,3 +966,24 @@ body.hide-ui-during-solve #splitLivePanel {
 /* Mobile Bottom Nav Safe Area */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 .mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+
+.account-tab-active {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+.account-tab-inactive {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.dark .account-tab-active {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.dark .account-tab-inactive {
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
