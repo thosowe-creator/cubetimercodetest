@@ -6,7 +6,25 @@
     <title>Cube Timer</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.cubing.net https://www.gstatic.com; worker-src 'self' blob: https://cdn.cubing.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://cdn.cubing.net https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com data:;">
     <script src="src/theme-init.js"></script>
-    <script src="src/tailwind-config.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                    },
+                    screens: {
+                        md: '768px',
+                    },
+                },
+            },
+        };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
