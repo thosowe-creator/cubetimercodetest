@@ -15,6 +15,7 @@ const loginPassword = document.getElementById('loginPassword');
 const signupEmail = document.getElementById('signupEmail');
 const signupPassword = document.getElementById('signupPassword');
 const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
+const signupPasswordHint = document.getElementById('signupPasswordHint');
 
 const dashboardEmail = document.getElementById('dashboardEmail');
 const dashboardBackupAt = document.getElementById('dashboardBackupAt');
@@ -48,6 +49,21 @@ function isKorean() {
 
 function t(en, ko) {
   return isKorean() ? ko : en;
+}
+
+function getPasswordPolicyHintText() {
+  return t(
+    'For account security, include uppercase/lowercase English letters, at least one number, and at least one special character.',
+    '계정 보안을 위해 비밀번호에 영문 대/소문자, 숫자 1개 이상, 특수문자 1개 이상을 포함해 주세요.'
+  );
+}
+
+function isPasswordPolicySatisfied(password) {
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+  return hasUpper && hasLower && hasDigit && hasSpecial;
 }
 
 function setAccountTab(tab) {
@@ -238,6 +254,9 @@ signupTab.addEventListener('click', () => setAccountTab('signup'));
 
 async function initAccountPage() {
   syncAutoSyncUi();
+  if (signupPasswordHint) {
+    signupPasswordHint.textContent = getPasswordPolicyHintText();
+  }
   const firebase = await (window.firebaseReady || Promise.resolve(null));
   if (!firebase || !window.firebaseAuthApi || !window.firebaseDbApi || !window.firebaseAuth || !window.firebaseDb) {
     reportAccountError('Firebase bootstrap failed', null, 'Firebase initialization failed. Reload and try again.');
@@ -283,6 +302,10 @@ async function initAccountPage() {
     }
     if (password !== confirm) {
       showMessage('Passwords do not match.', true);
+      return;
+    }
+    if (!isPasswordPolicySatisfied(password)) {
+      showMessage(getPasswordPolicyHintText(), true);
       return;
     }
     try {
