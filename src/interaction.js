@@ -982,24 +982,29 @@ if (hideTimerDuringSolveToggle) hideTimerDuringSolveToggle.checked = appState.hi
 const timerPauseToggle = document.getElementById('timerPauseToggle');
 if (timerPauseToggle) timerPauseToggle.checked = appState.timerPauseEnabled;
 document.getElementById('clearHistoryBtn').onclick = () => {
-  const sid = getCurrentSessionId();
-  const msg = 'Clear all history for this session?';
-  const customConfirm = document.createElement('div');
-  customConfirm.id = 'clearConfirmModal';
-  customConfirm.innerHTML = `<div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"><div class="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-xs shadow-2xl"><p class="text-sm font-bold text-slate-700 dark:text-white mb-6 text-center">${msg}</p><div class="flex gap-2"><button id="cancelClear" class="flex-1 py-3 text-slate-400 font-bold text-sm">Cancel</button><button id="confirmClear" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-sm">Clear All</button></div></div></div>`;
-  document.body.appendChild(customConfirm);
-  try { applyAutoI18n(customConfirm); } catch (_) {}
-  document.getElementById('cancelClear').onclick = () => {
-    document.body.removeChild(document.getElementById('clearConfirmModal'));
-  };
-  document.getElementById('confirmClear').onclick = () => {
+  openClearConfirmModal();
+};
+
+window.openClearConfirmModal = () => {
+    const overlay = document.getElementById('clearConfirmOverlay');
+    if (!overlay) return;
+    overlay.classList.add('active');
+};
+
+window.closeClearConfirmModal = () => {
+    const overlay = document.getElementById('clearConfirmOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('active');
+};
+
+window.confirmClearHistory = () => {
+    const sid = getCurrentSessionId();
     appState.solves = appState.solves.filter(s => !(s.event === appState.currentEvent && s.sessionId === sid));
     updateUI();
     saveData();
-    document.body.removeChild(document.getElementById('clearConfirmModal'));
+    closeClearConfirmModal();
     timerEl.innerText = (0).toFixed(appState.precision);
     resetPenalty();
-  };
 };
 
 function setupDomEventBindings() {
@@ -1206,6 +1211,13 @@ function setupDomEventBindings() {
             case 'close-stats-modal':
                 if (isOverlayClick()) return;
                 closeStatsModal();
+                break;
+            case 'close-clear-confirm':
+                if (isOverlayClick()) return;
+                closeClearConfirmModal();
+                break;
+            case 'confirm-clear-history':
+                confirmClearHistory();
                 break;
             case 'close-avg-share':
                 if (isOverlayClick()) return;
