@@ -385,6 +385,7 @@ async function generateScramble() {
     } else {
         let lastAxis = -1;
         let secondLastAxis = -1;
+        let lastMoveToken = "";
         let lastMoveBase = "";
         let lastFace = "";
         let secondLastFace = "";
@@ -408,6 +409,7 @@ async function generateScramble() {
                 axis = getMoveAxis(move);
                 base = move[0];
                 face = getMoveFace(move);
+                if (move === lastMoveToken) { valid = false; continue; }
                 if (currentEvent !== '666' && base === lastMoveBase) { valid = false; continue; }
                 if (currentEvent === '666' && face) {
                     if (face === lastFace && face === secondLastFace) { valid = false; continue; }
@@ -419,6 +421,7 @@ async function generateScramble() {
             res.push(move + suffixes[Math.floor(Math.random() * 3)]);
             secondLastAxis = lastAxis;
             lastAxis = axis;
+            lastMoveToken = move;
             lastMoveBase = base;
             secondLastFace = lastFace;
             lastFace = face;
