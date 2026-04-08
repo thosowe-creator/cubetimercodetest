@@ -268,9 +268,9 @@ function fitScrambleTypographyInsideBox(constraint = null) {
     const reducedStartEvents = new Set(['666', '777', 'minx']);
     const mobileStartScaleByEvent = {
         '555': 0.7,
-        '666': 0.7,
-        '777': 0.539,
-        minx: 0.539,
+        '666': 0.9,
+        '777': 0.85,
+        minx: 0.85,
     };
     const eventScale = isMobileViewport ? (mobileStartScaleByEvent[currentEvent] || 1) : 1;
     const startScale = eventScale;

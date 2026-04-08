@@ -1,11 +1,5 @@
 // --- Tools & UI ---
 window.toggleToolsMenu = (e) => { e.stopPropagation(); document.getElementById('toolsDropdown').classList.toggle('show'); };
-function updateScrambleNavButtons() {
-    if (!scramblePrevBtn || !scrambleNextBtn) return;
-    const disableForState = isScrambleLoading || isRunning || currentEvent === '333mbf';
-    scramblePrevBtn.disabled = disableForState || !previousScramble || isViewingPreviousScramble;
-    scrambleNextBtn.disabled = disableForState;
-}
 
 function formatScrambleDisplayText(text) {
     const rawText = String(text || '');
@@ -23,36 +17,11 @@ function setScrambleDisplay(text) {
 
 function setCurrentScramble(nextScramble) {
     const next = String(nextScramble || '').trim();
-    if (latestScramble) previousScramble = latestScramble;
-    latestScramble = next;
-    isViewingPreviousScramble = false;
-    currentScramble = latestScramble;
+    currentScramble = next;
     setScrambleDisplay(currentScramble);
-    updateScrambleNavButtons();
-}
-
-function showPreviousScramble() {
-    if (!previousScramble || isViewingPreviousScramble) return;
-    isViewingPreviousScramble = true;
-    currentScramble = previousScramble;
-    setScrambleDisplay(currentScramble);
-    updateScrambleDiagram();
-    updateScrambleNavButtons();
-}
-
-function showLatestScramble() {
-    if (!isViewingPreviousScramble) return;
-    isViewingPreviousScramble = false;
-    currentScramble = latestScramble;
-    setScrambleDisplay(currentScramble);
-    updateScrambleDiagram();
-    updateScrambleNavButtons();
 }
 
 window.setCurrentScramble = setCurrentScramble;
-window.showPreviousScramble = showPreviousScramble;
-window.showLatestScramble = showLatestScramble;
-window.updateScrambleNavButtons = updateScrambleNavButtons;
 window.selectTool = (tool) => {
     activeTool = tool;
     document.getElementById('toolLabel').innerText = tool === 'scramble'
@@ -165,7 +134,6 @@ function changeEvent(e) {
         if (scrambleEl) scrambleEl.classList.add('hidden');
         if (mbfInputArea) mbfInputArea.classList.remove('hidden');
         setScrambleLoadingState(false);
-        updateScrambleNavButtons();
     } else {
         if (scrambleEl) scrambleEl.classList.remove('hidden');
         if (mbfInputArea) mbfInputArea.classList.add('hidden');
@@ -206,12 +174,10 @@ function setScrambleLoadingState(isLoading, message = 'Loading scramble…', sho
         lockTimerLayout();
         // 종목 변경/재생성 시 이전 내용 즉시 숨김
         if (scrambleEl) scrambleEl.innerText = '';
-        updateScrambleNavButtons();
         clearScrambleDiagram();
         // Prevent blind-only message from sticking across events
         if (noVisualizerMsg) noVisualizerMsg.classList.add('hidden');
     }
-    updateScrambleNavButtons();
     scheduleLayout(isLoading ? 'scramble-loading' : 'scramble-ready');
 }
 

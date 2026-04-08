@@ -1260,14 +1260,6 @@ function setupDomEventBindings() {
             case 'retry-scramble':
                 retryScramble();
                 break;
-            case 'scramble-prev':
-                if (typeof window.showPreviousScramble === 'function') {
-                    window.showPreviousScramble();
-                }
-                break;
-            case 'scramble-next':
-                if (!isRunning) generateScramble();
-                break;
             case 'generate-mbf-scrambles':
                 generateMbfScrambles();
                 break;
