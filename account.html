@@ -38,7 +38,12 @@
             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
             <input id="loginPassword" type="password" placeholder="••••••••" class="mt-2 w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-200 outline-none focus:border-blue-400 transition-all">
           </div>
+          <label class="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 cursor-pointer">
+            <input id="rememberLogin" type="checkbox" class="accent-blue-600" checked>
+            <span>Keep me signed in</span>
+          </label>
           <button type="button" id="loginSubmit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all">Login</button>
+          <button type="button" id="resendVerification" class="hidden w-full py-2.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900 font-bold rounded-xl text-xs">Resend verification email</button>
           <button type="button" id="passwordReset" class="w-full py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">Forgot password?</button>
         </div>
 
@@ -51,7 +56,7 @@
             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
             <input id="signupPassword" type="password" placeholder="Create a password" class="mt-2 w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-200 outline-none focus:border-blue-400 transition-all">
             <p id="signupPasswordHint" class="mt-2 text-[11px] font-bold text-slate-400 leading-relaxed">
-              Use at least one uppercase and one lowercase English letter, one number, and one special character.
+              Use at least 8 characters with uppercase/lowercase English letters, a number, and a special character.
             </p>
           </div>
           <div>
@@ -133,6 +138,7 @@
 
   <script src="src/i18n-core.js"></script>
   <script src="src/i18n-auto.js"></script>
+  <script src="src/backup-schema.js"></script>
   <script type="module" src="src/firebase.js"></script>
   <script type="module" src="src/account-page.js"></script>
 </body>

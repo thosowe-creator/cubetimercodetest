@@ -264,4 +264,4 @@ applyLightTheme();
 
 loadData();
 applyLanguageToUI();
-changeEvent(currentEvent);
+changeEvent(currentEvent, { preserveAverageMode: true });

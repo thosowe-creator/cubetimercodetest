@@ -9,6 +9,10 @@ function resetPenalty() {
     updatePenaltyBtns(null);
 }
 function deleteSolve(id) {
+    const approved = window.confirm(currentLang === 'ko'
+        ? '이 기록을 삭제할까요?'
+        : 'Delete this solve?');
+    if (!approved) return;
     solves = solves.filter(s => s.id !== id);
     updateUI();
     saveData();

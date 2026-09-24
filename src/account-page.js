@@ -7,11 +7,13 @@ const logoutBtn = document.getElementById('logoutBtn');
 const loginSubmit = document.getElementById('loginSubmit');
 const signupSubmit = document.getElementById('signupSubmit');
 const passwordReset = document.getElementById('passwordReset');
+const resendVerification = document.getElementById('resendVerification');
 const accountAuthViews = document.getElementById('accountAuthViews');
 const accountDashboard = document.getElementById('accountDashboard');
 
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
+const rememberLogin = document.getElementById('rememberLogin');
 const signupEmail = document.getElementById('signupEmail');
 const signupPassword = document.getElementById('signupPassword');
 const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
@@ -33,6 +35,7 @@ const changePasswordBtn = document.getElementById('changePasswordBtn');
 const LOCAL_BACKUP_KEY = 'cubeTimerData_v5';
 const AUTO_SYNC_ENABLED_KEY = 'autoSyncEnabled';
 const AUTO_SYNC_EVERY_KEY = 'autoSyncEvery';
+const REMEMBER_LOGIN_KEY = 'rememberLogin';
 
 function normalizeAutoSyncEvery(value) {
   const n = Number(value);
@@ -53,17 +56,18 @@ function t(en, ko) {
 
 function getPasswordPolicyHintText() {
   return t(
-    'For account security, include uppercase/lowercase English letters, at least one number, and at least one special character.',
-    '계정 보안을 위해 비밀번호에 영문 대/소문자, 숫자 1개 이상, 특수문자 1개 이상을 포함해 주세요.'
+    'Use at least 8 characters with uppercase/lowercase English letters, a number, and a special character.',
+    '8자 이상으로 영문 대/소문자, 숫자, 특수문자를 각각 1개 이상 포함해 주세요.'
   );
 }
 
 function isPasswordPolicySatisfied(password) {
+  const hasMinimumLength = password.length >= 8;
   const hasUpper = /[A-Z]/.test(password);
   const hasLower = /[a-z]/.test(password);
   const hasDigit = /[0-9]/.test(password);
-  const hasSpecial = /[^A-Za-z0-9]/.test(password);
-  return hasUpper && hasLower && hasDigit && hasSpecial;
+  const hasSpecial = /[^A-Za-z0-9\s]/.test(password);
+  return hasMinimumLength && hasUpper && hasLower && hasDigit && hasSpecial;
 }
 
 function setAccountTab(tab) {
@@ -231,11 +235,12 @@ function openPasswordResetModal() {
 }
 
 function setLoggedInUI(user) {
-  if (user) {
+  if (user?.emailVerified) {
     logoutBtn.classList.remove('hidden');
     accountAuthViews.classList.add('hidden');
     accountDashboard.classList.remove('hidden');
     dashboardEmail.textContent = user.email || '-';
+    resendVerification?.classList.add('hidden');
     refreshBackupMeta(user.uid);
     refreshAutoSyncPreference(user.uid);
   } else {
@@ -254,6 +259,7 @@ signupTab.addEventListener('click', () => setAccountTab('signup'));
 
 async function initAccountPage() {
   syncAutoSyncUi();
+  if (rememberLogin) rememberLogin.checked = localStorage.getItem(REMEMBER_LOGIN_KEY) !== '0';
   if (signupPasswordHint) {
     signupPasswordHint.textContent = getPasswordPolicyHintText();
   }
@@ -268,23 +274,55 @@ async function initAccountPage() {
     signInWithEmailAndPassword,
     signOut,
     sendPasswordResetEmail,
+    sendEmailVerification,
     updatePassword,
     reauthenticateWithCredential,
     EmailAuthProvider,
     onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence,
   } = window.firebaseAuthApi;
   const { doc, setDoc, serverTimestamp, getDoc } = window.firebaseDbApi;
+
+  async function ensureVerifiedUserDocument(user) {
+    if (!user?.emailVerified) throw new Error('Verified email required');
+    const userRef = doc(window.firebaseDb, 'users', user.uid);
+    const snapshot = await getDoc(userRef);
+    if (!snapshot.exists()) {
+      await setDoc(userRef, { email: user.email, createdAt: serverTimestamp() });
+    } else {
+      await setDoc(userRef, { email: user.email, lastLoginAt: serverTimestamp() }, { merge: true });
+    }
+  }
 
   loginSubmit.addEventListener('click', async () => {
     showMessage('');
     const email = loginEmail.value.trim();
-    const password = loginPassword.value.trim();
+    const password = loginPassword.value;
     if (!email || !password) {
       showMessage('Enter email and password.', true);
       return;
     }
     try {
-      await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+      const shouldRemember = !!rememberLogin?.checked;
+      localStorage.setItem(REMEMBER_LOGIN_KEY, shouldRemember ? '1' : '0');
+      await setPersistence(
+        window.firebaseAuth,
+        shouldRemember ? browserLocalPersistence : browserSessionPersistence
+      );
+      const result = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+      await result.user.reload();
+      if (!result.user.emailVerified) {
+        resendVerification?.classList.remove('hidden');
+        await signOut(window.firebaseAuth);
+        showMessage(t(
+          'Verify your email before logging in. You can resend the verification email below.',
+          '로그인 전에 이메일 인증을 완료해 주세요. 아래에서 인증 메일을 다시 보낼 수 있습니다.'
+        ), true);
+        return;
+      }
+      await ensureVerifiedUserDocument(result.user);
       showMessage(t('Logged in.', '로그인되었습니다.'));
     } catch (err) {
       reportAccountError('Login failed', err, 'Login failed.');
@@ -294,8 +332,8 @@ async function initAccountPage() {
   signupSubmit.addEventListener('click', async () => {
     showMessage('');
     const email = signupEmail.value.trim();
-    const password = signupPassword.value.trim();
-    const confirm = signupPasswordConfirm.value.trim();
+    const password = signupPassword.value;
+    const confirm = signupPasswordConfirm.value;
     if (!email || !password || !confirm) {
       showMessage('Fill in all fields.', true);
       return;
@@ -310,13 +348,47 @@ async function initAccountPage() {
     }
     try {
       const result = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
-      await setDoc(doc(window.firebaseDb, 'users', result.user.uid), {
-        email: result.user.email,
-        createdAt: serverTimestamp(),
-      }, { merge: true });
-      showMessage(t('Account created.', '계정이 생성되었습니다.'));
+      await sendEmailVerification(result.user);
+      await signOut(window.firebaseAuth);
+      if (loginEmail) loginEmail.value = email;
+      setAccountTab('login');
+      resendVerification?.classList.remove('hidden');
+      showMessage(t(
+        'Account created. Check your inbox and verify your email before logging in.',
+        '계정이 생성되었습니다. 받은 편지함에서 이메일 인증을 완료한 뒤 로그인해 주세요.'
+      ));
     } catch (err) {
       reportAccountError('Signup failed', err, 'Sign up failed.');
+    }
+  });
+
+  resendVerification?.addEventListener('click', async () => {
+    showMessage('');
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+    if (!email || !password) {
+      showMessage(t('Enter email and password to resend verification.', '인증 메일을 다시 보내려면 이메일과 비밀번호를 입력해 주세요.'), true);
+      return;
+    }
+    try {
+      const shouldRemember = !!rememberLogin?.checked;
+      await setPersistence(window.firebaseAuth, shouldRemember ? browserLocalPersistence : browserSessionPersistence);
+      const result = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+      await result.user.reload();
+      if (result.user.emailVerified) {
+        await ensureVerifiedUserDocument(result.user);
+        resendVerification.classList.add('hidden');
+        showMessage(t('Email is already verified. You are now logged in.', '이미 이메일 인증이 완료되어 로그인되었습니다.'));
+        return;
+      }
+      await sendEmailVerification(result.user);
+      await signOut(window.firebaseAuth);
+      showMessage(t('Verification email sent.', '인증 이메일을 보냈습니다.'));
+    } catch (err) {
+      if (window.firebaseAuth.currentUser && !window.firebaseAuth.currentUser.emailVerified) {
+        try { await signOut(window.firebaseAuth); } catch (_) {}
+      }
+      reportAccountError('Verification resend failed', err, t('Could not resend verification email.', '인증 이메일을 다시 보내지 못했습니다.'));
     }
   });
 
@@ -346,16 +418,18 @@ async function initAccountPage() {
     }
     try {
       const parsed = JSON.parse(localRaw);
-      const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
-      await setDoc(ref, {
+      await window.firebaseCloudApi.writeLatestBackupSafely(user, {
         payload: JSON.stringify(parsed),
-        updatedAt: serverTimestamp(),
         version: 1,
-      }, { merge: true });
+        trigger: 'account-manual-backup',
+      });
       await refreshBackupMeta(user.uid);
       showMessage(t('Backup saved to cloud.', '클라우드에 백업되었습니다.'));
     } catch (err) {
-      reportAccountError('Dashboard backup failed', err, t('Cloud backup failed.', '클라우드 백업에 실패했습니다.'));
+      const message = err?.code === 'cloud-backup-conflict'
+        ? t('A newer cloud backup exists. Restore it first.', '더 최신 클라우드 백업이 있습니다. 먼저 복원해 주세요.')
+        : t('Cloud backup failed.', '클라우드 백업에 실패했습니다.');
+      reportAccountError('Dashboard backup failed', err, message);
     }
   });
 
@@ -379,7 +453,19 @@ async function initAccountPage() {
         return;
       }
       const restored = JSON.parse(data.payload);
-      localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(restored));
+      const validated = window.CubeTimerBackupSchema.validate(restored);
+      if (validated.error) {
+        showMessage(validated.error, true);
+        return;
+      }
+      if (!window.CubeTimerBackupSchema.confirmRestore()) return;
+      window.CubeTimerBackupSchema.backupCurrentData();
+      localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify({
+        solves: validated.solves,
+        sessions: validated.sessions,
+        settings: validated.settings,
+      }));
+      window.firebaseCloudApi?.markCloudRevisionSeen(user.uid, data.updatedAt);
       showMessage(t('Restore complete. Open timer page to apply.', '복원이 완료되었습니다. 타이머 페이지에서 적용됩니다.'));
     } catch (err) {
       reportAccountError('Dashboard restore failed', err, t('Cloud restore failed.', '클라우드 복원에 실패했습니다.'));
@@ -414,9 +500,9 @@ async function initAccountPage() {
   changePasswordBtn?.addEventListener('click', async () => {
     showMessage('');
     const user = window.firebaseAuth.currentUser;
-    const oldPw = (currentPassword?.value || '').trim();
-    const nextPw = (newPassword?.value || '').trim();
-    const nextPwConfirm = (newPasswordConfirm?.value || '').trim();
+    const oldPw = currentPassword?.value || '';
+    const nextPw = newPassword?.value || '';
+    const nextPwConfirm = newPasswordConfirm?.value || '';
 
     if (!user || !user.email) {
       showMessage(t('Login required.', '로그인이 필요합니다.'), true);
@@ -430,8 +516,8 @@ async function initAccountPage() {
       showMessage(t('New passwords do not match.', '새 비밀번호가 일치하지 않습니다.'), true);
       return;
     }
-    if (nextPw.length < 6) {
-      showMessage(t('New password must be at least 6 characters.', '새 비밀번호는 6자 이상이어야 합니다.'), true);
+    if (!isPasswordPolicySatisfied(nextPw)) {
+      showMessage(getPasswordPolicyHintText(), true);
       return;
     }
 

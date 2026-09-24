@@ -2,6 +2,7 @@
 // (e.g. switching tabs, re-rendering history/settings)
 let i18nObserver = null;
 let i18nRaf = 0;
+let i18nObserverApplying = false;
 function ensureI18nObserver() {
   if (i18nObserver) return;
 
@@ -27,11 +28,16 @@ function ensureI18nObserver() {
   const debounced = () => {
     if (i18nRaf) cancelAnimationFrame(i18nRaf);
     i18nRaf = requestAnimationFrame(() => {
-      if (isRunning) return;
+      i18nRaf = 0;
+      if (isRunning || i18nObserverApplying) return;
+      i18nObserverApplying = true;
       try {
         // Translate only modal roots (fast)
         for (const r of roots()) applyAutoI18n(r);
-      } catch (_) {}
+      } catch (_) {
+      } finally {
+        i18nObserverApplying = false;
+      }
     });
   };
 
@@ -103,4 +109,3 @@ function applyLanguageToUI() {
     try { applyAutoI18n(document); } catch (_) {}
   }
 }
-

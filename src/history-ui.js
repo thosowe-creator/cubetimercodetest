@@ -158,7 +158,7 @@ function updateUI() {
 
             if (!historySelectionMode) {
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 font-black text-lg leading-none';
+                deleteBtn.className = 'history-delete-btn text-slate-300 hover:text-red-400 font-black text-lg leading-none';
                 deleteBtn.dataset.action = 'delete-solve';
                 deleteBtn.dataset.solveId = String(s.id);
                 deleteBtn.setAttribute('aria-label', 'Delete');
@@ -340,6 +340,11 @@ window.clearHistorySelection = () => {
 
 window.deleteSelectedHistorySolves = () => {
     if (!historySelectionMode || !selectedHistorySolveIds.size) return;
+    const count = selectedHistorySolveIds.size;
+    const approved = window.confirm(currentLang === 'ko'
+        ? `선택한 기록 ${count}개를 삭제할까요?`
+        : `Delete ${count} selected solve${count === 1 ? '' : 's'}?`);
+    if (!approved) return;
     solves = solves.filter(s => !selectedHistorySolveIds.has(s.id));
     selectedHistorySolveIds.clear();
     historySelectionMode = false;
