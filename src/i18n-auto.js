@@ -90,6 +90,8 @@ const AUTO_I18N_PAIRS = [
   { en: 'Account', ko: '계정' },
   { en: 'Login', ko: '로그인' },
   { en: 'Logout', ko: '로그아웃' },
+  { en: 'Keep me signed in', ko: '로그인 상태 유지' },
+  { en: 'Resend verification email', ko: '인증 이메일 다시 보내기' },
   { en: 'Sign Up', ko: '가입' },
   { en: 'Forgot password?', ko: '비밀번호를 잊으셨나요?' },
   { en: 'Password', ko: '비밀번호' },
@@ -178,17 +180,17 @@ function applyAutoI18n(root = document) {
     for (const el of scope.querySelectorAll('input[placeholder], textarea[placeholder]')) {
       const ph = normalizeAutoI18nText(el.getAttribute('placeholder'));
       const pair = AUTO_I18N_LOOKUP.get(ph);
-      if (pair) el.setAttribute('placeholder', pair[targetLang]);
+      if (pair && el.getAttribute('placeholder') !== pair[targetLang]) el.setAttribute('placeholder', pair[targetLang]);
     }
 
     // Translate common label attributes
     for (const el of scope.querySelectorAll('[aria-label],[title]')) {
       const aria = normalizeAutoI18nText(el.getAttribute('aria-label'));
       const pairA = aria ? AUTO_I18N_LOOKUP.get(aria) : null;
-      if (pairA) el.setAttribute('aria-label', pairA[targetLang]);
+      if (pairA && el.getAttribute('aria-label') !== pairA[targetLang]) el.setAttribute('aria-label', pairA[targetLang]);
       const title = normalizeAutoI18nText(el.getAttribute('title'));
       const pairT = title ? AUTO_I18N_LOOKUP.get(title) : null;
-      if (pairT) el.setAttribute('title', pairT[targetLang]);
+      if (pairT && el.getAttribute('title') !== pairT[targetLang]) el.setAttribute('title', pairT[targetLang]);
     }
 
     // Translate visible value text on <input> buttons (value="...")
@@ -198,14 +200,14 @@ function applyAutoI18n(root = document) {
       if (!['button', 'submit', 'reset'].includes(type)) continue;
       const v = normalizeAutoI18nText(el.getAttribute('value'));
       const pairV = v ? AUTO_I18N_LOOKUP.get(v) : null;
-      if (pairV) el.setAttribute('value', pairV[targetLang]);
+      if (pairV && el.getAttribute('value') !== pairV[targetLang]) el.setAttribute('value', pairV[targetLang]);
     }
 
     // Translate data-* label helpers if present
     for (const el of scope.querySelectorAll('[data-label]')) {
       const v = normalizeAutoI18nText(el.getAttribute('data-label'));
       const pairV = v ? AUTO_I18N_LOOKUP.get(v) : null;
-      if (pairV) el.setAttribute('data-label', pairV[targetLang]);
+      if (pairV && el.getAttribute('data-label') !== pairV[targetLang]) el.setAttribute('data-label', pairV[targetLang]);
     }
   } catch (_) {}
 
@@ -242,6 +244,7 @@ function applyAutoI18n(root = document) {
     // Preserve leading/trailing whitespace
     const leading = raw.match(/^\s*/)?.[0] ?? '';
     const trailing = raw.match(/\s*$/)?.[0] ?? '';
-    node.nodeValue = `${leading}${pair[targetLang]}${trailing}`;
+    const translated = `${leading}${pair[targetLang]}${trailing}`;
+    if (node.nodeValue !== translated) node.nodeValue = translated;
   }
 }

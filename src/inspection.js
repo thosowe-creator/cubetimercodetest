@@ -1,21 +1,23 @@
 // --- Inspection Logic ---
 function toggleInspection(checkbox) {
     isInspectionMode = checkbox.checked;
-    
-    // Force set hold duration to ~0 if inspection is ON
+
+    // Inspection uses an instant effective hold without overwriting the user's
+    // normal hold preference.
     if (isInspectionMode) {
-        updateHoldDuration(0.01); // Basically instant
-        holdDurationSlider.value = 0.01;
         holdDurationSlider.disabled = true;
         document.getElementById('holdDurationContainer').classList.add('opacity-50', 'pointer-events-none');
     } else {
-        updateHoldDuration(0.3);
-        holdDurationSlider.value = 0.3;
+        holdDurationSlider.value = String(holdDuration / 1000);
+        holdDurationValue.innerText = holdDuration < 100 ? 'Instant' : `${holdDuration / 1000}s`;
         holdDurationSlider.disabled = false;
         document.getElementById('holdDurationContainer').classList.remove('opacity-50', 'pointer-events-none');
     }
     
     saveData();
+}
+function getEffectiveHoldDuration() {
+    return isInspectionMode ? 10 : holdDuration;
 }
 function startInspection() {
     inspectionState = 'inspecting';

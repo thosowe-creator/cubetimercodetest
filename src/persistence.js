@@ -47,6 +47,16 @@ function decompressPayload(payload) {
 
 let autoSyncLastSolveCount = null;
 let autoSyncInFlight = false;
+let autoSyncQueued = false;
+
+function getPendingAutoSyncCount() {
+    const raw = Number(localStorage.getItem('autoSyncPendingSolves'));
+    return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+}
+
+function setPendingAutoSyncCount(value) {
+    localStorage.setItem('autoSyncPendingSolves', String(Math.max(0, Math.round(value))));
+}
 
 function getAutoSyncSettings() {
     const enabled = localStorage.getItem('autoSyncEnabled') === '1';
@@ -57,61 +67,99 @@ function getAutoSyncSettings() {
     return { enabled, every };
 }
 
-async function maybeRunAutoSync(payload) {
-    const { enabled, every } = getAutoSyncSettings();
-    const solveCount = Array.isArray(appState.solves) ? appState.solves.length : 0;
-    if (autoSyncLastSolveCount === null) {
-        autoSyncLastSolveCount = solveCount;
+async function drainAutoSyncQueue() {
+    if (autoSyncInFlight) {
+        autoSyncQueued = true;
         return;
     }
-    const solveDelta = solveCount - autoSyncLastSolveCount;
-    autoSyncLastSolveCount = solveCount;
-    if (!enabled || solveDelta <= 0) return;
 
-    const pendingRaw = Number(localStorage.getItem('autoSyncPendingSolves'));
-    const nextPending = (Number.isFinite(pendingRaw) ? pendingRaw : 0) + solveDelta;
-    localStorage.setItem('autoSyncPendingSolves', String(nextPending));
-    if (nextPending < every || autoSyncInFlight) return;
-
-    await (window.firebaseReady || Promise.resolve(null));
-    const user = await (window.firebaseAuthReady || Promise.resolve(null));
-    if (!user || !window.firebaseDbApi || !window.firebaseDb) return;
+    const { enabled, every } = getAutoSyncSettings();
+    if (!enabled || getPendingAutoSyncCount() < every) return;
 
     autoSyncInFlight = true;
     try {
-        const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
-        const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
-        await setDoc(ref, {
-            payload: compressPayload(payload),
-            updatedAt: serverTimestamp(),
-            version: 1,
-            trigger: 'auto-sync'
-        }, { merge: true });
-        localStorage.setItem('autoSyncPendingSolves', String(nextPending % every));
+        do {
+            autoSyncQueued = false;
+            const pendingAtStart = getPendingAutoSyncCount();
+            if (pendingAtStart < every) break;
+
+            await (window.firebaseReady || Promise.resolve(null));
+            const currentUser = window.firebaseAuth?.currentUser || null;
+            const user = currentUser?.emailVerified ? currentUser : null;
+            if (!user || !window.firebaseDbApi || !window.firebaseDb) break;
+
+            const payload = buildBackupPayload();
+            await window.firebaseCloudApi.writeLatestBackupSafely(user, {
+                payload: compressPayload(payload),
+                version: 1,
+                trigger: 'auto-sync'
+            });
+
+            // Only remove the pending solves covered by this upload. Solves added
+            // while the request was in flight remain queued for the next upload.
+            const pendingAfterUpload = getPendingAutoSyncCount();
+            setPendingAutoSyncCount(pendingAfterUpload - pendingAtStart);
+            if (getPendingAutoSyncCount() >= every) autoSyncQueued = true;
+        } while (autoSyncQueued);
     } catch (err) {
+        // Keep pending solves intact so an online/auth-state retry can upload them.
         console.error('[Persistence] Auto sync failed', err);
+        if (err?.code === 'cloud-backup-conflict') {
+            localStorage.setItem('cubeTimerCloudConflict', '1');
+            if (typeof statusHint !== 'undefined' && statusHint) {
+                statusHint.innerText = currentLang === 'ko'
+                    ? '더 최신 클라우드 백업이 있어 자동 동기화가 중지되었습니다'
+                    : 'Auto sync paused: a newer cloud backup exists';
+            }
+        }
     } finally {
         autoSyncInFlight = false;
     }
 }
+
+async function maybeRunAutoSync() {
+    const { enabled } = getAutoSyncSettings();
+    const solveCount = Array.isArray(appState.solves) ? appState.solves.length : 0;
+    if (autoSyncLastSolveCount === null) {
+        autoSyncLastSolveCount = solveCount;
+    }
+    const solveDelta = solveCount - autoSyncLastSolveCount;
+    autoSyncLastSolveCount = solveCount;
+    if (solveDelta > 0) setPendingAutoSyncCount(getPendingAutoSyncCount() + solveDelta);
+    if (!enabled) return;
+    await drainAutoSyncQueue();
+}
+
+window.addEventListener('online', () => {
+    drainAutoSyncQueue();
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await (window.firebaseReady || Promise.resolve(null));
+    const onAuthStateChanged = window.firebaseAuthApi?.onAuthStateChanged;
+    if (!onAuthStateChanged || !window.firebaseAuth) return;
+    onAuthStateChanged(window.firebaseAuth, (user) => {
+        if (user?.emailVerified) drainAutoSyncQueue();
+    });
+});
 async function exportData() {
     const payload = buildBackupPayload();
     await (window.firebaseReady || Promise.resolve(null));
     const user = await (window.firebaseAuthReady || Promise.resolve(null));
-    if (user) {
+    if (user?.emailVerified) {
         try {
-            const { doc, setDoc, serverTimestamp } = window.firebaseDbApi;
-            const ref = doc(window.firebaseDb, 'users', user.uid, 'backups', 'latest');
-            await setDoc(ref, {
+            await window.firebaseCloudApi.writeLatestBackupSafely(user, {
                 payload: compressPayload(payload),
-                updatedAt: serverTimestamp(),
-                version: 1
-            }, { merge: true });
+                version: 1,
+                trigger: 'manual-backup'
+            });
             alert('Backup saved to cloud.');
             return;
         } catch (err) {
             console.error('[Persistence] Cloud backup failed', err);
-            alert('Cloud backup failed.');
+            alert(err?.code === 'cloud-backup-conflict'
+                ? 'A newer cloud backup exists. Restore it before backing up this device.'
+                : 'Cloud backup failed.');
         }
     }
     const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
@@ -127,7 +175,7 @@ async function exportData() {
 async function triggerImport() {
     await (window.firebaseReady || Promise.resolve(null));
     const user = await (window.firebaseAuthReady || Promise.resolve(null));
-    if (user) {
+    if (user?.emailVerified) {
         await restoreFromCloud(user.uid);
         return;
     }
@@ -136,6 +184,11 @@ async function triggerImport() {
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
+    if (file.size > window.CubeTimerBackupSchema.MAX_IMPORT_BYTES) {
+        alert('Failed to restore data. Backup file is larger than 5 MB.');
+        event.target.value = '';
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
@@ -145,6 +198,7 @@ function importData(event) {
             console.error('[Persistence] Local restore parse failed', err);
             alert("Failed to restore data. Invalid JSON.");
         }
+        event.target.value = '';
     };
     reader.readAsText(file);
 }
@@ -164,7 +218,8 @@ async function restoreFromCloud(uid) {
             return;
         }
         const restored = decompressPayload(data.payload);
-        applyRestoredData(restored, 'Cloud restore complete.');
+        const applied = applyRestoredData(restored, 'Cloud restore complete.');
+        if (applied) window.firebaseCloudApi?.markCloudRevisionSeen(uid, data.updatedAt);
     } catch (err) {
         console.error('[Persistence] Cloud restore failed', err);
         alert('Cloud restore failed.');
@@ -172,6 +227,9 @@ async function restoreFromCloud(uid) {
 }
 
 function validateRestoredData(data) {
+    if (window.CubeTimerBackupSchema?.validate) {
+        return window.CubeTimerBackupSchema.validate(data);
+    }
     if (!data || typeof data !== 'object') {
         return { error: 'Failed to restore data. Invalid backup format.' };
     }
@@ -292,15 +350,18 @@ function applyRestoredData(data, successMessage) {
     if (isRunning) {
         console.warn('[Persistence] Restore blocked while timer is running');
         alert('Stop the timer before restoring data.');
-        return;
+        return false;
     }
 
     const validated = validateRestoredData(data);
     if (validated.error) {
         console.error('[Persistence] Restore validation failed:', validated.error, data);
         alert(validated.error);
-        return;
+        return false;
     }
+
+    if (!window.CubeTimerBackupSchema.confirmRestore()) return false;
+    window.CubeTimerBackupSchema.backupCurrentData();
 
     appState.solves = validated.solves;
     appState.sessions = validated.sessions;
@@ -365,6 +426,7 @@ function applyRestoredData(data, successMessage) {
     renderSessionList();
     updateUI();
     generateScramble();
+    return true;
 }
 function saveData() {
     const data = {

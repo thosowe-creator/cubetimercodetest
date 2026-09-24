@@ -741,6 +741,28 @@ html:not(.dark) .event-tab.active { background-color: rgb(var(--ct-accent-rgb));
 /* Make tap targets consistently clickable on iOS inside scroll areas */
 button, .history-pen-btn, .penalty-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
+.history-delete-btn,
+.session-row-action {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.group:hover .history-delete-btn,
+.group:focus-within .history-delete-btn,
+.group:hover .session-row-action,
+.group:focus-within .session-row-action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .history-delete-btn,
+  .session-row-action {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 /* History list (mobile/desktop): smooth scroll + reliable taps */
 #historyList { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
 

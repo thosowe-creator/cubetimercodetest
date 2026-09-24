@@ -131,13 +131,21 @@ function handleStart(e) {
     
     if(e && e.cancelable) e.preventDefault();
     if (isRunning) {
-        const isTouchSplit = e && e.type === 'touchstart';
+        const isTouchSplit = e
+            && e.type === 'pointerdown'
+            && (e.pointerType === 'touch' || e.pointerType === 'pen');
         if (isTouchSplit && appState.splitEnabled && !isBtConnected && !isManualMode && typeof window.pushSplitMark === 'function') {
             const elapsed = performance.now() - startPerf;
             window.pushSplitMark(elapsed);
             return;
         }
         stopTimer();
+        return;
+    }
+    if (isScrambleLoading) {
+        statusHint.innerText = currentLang === 'ko'
+            ? '스크램블 생성 중입니다'
+            : 'Scramble is loading';
         return;
     }
     if (isManualMode) return;
@@ -168,7 +176,7 @@ function handleStart(e) {
             timerEl.style.setProperty('color', readyColor, 'important');
             timerEl.classList.replace('holding-status','ready-to-start'); 
             statusHint.innerText="Ready!"; 
-        }, holdDuration); 
+        }, getEffectiveHoldDuration());
         return;
     }
     // Standard Logic (BT 연결 시 여기 도달 안함)
@@ -188,7 +196,7 @@ function handleStart(e) {
         timerEl.style.setProperty('color', readyColor, 'important');
         timerEl.classList.replace('holding-status','ready-to-start'); 
         statusHint.innerText="Ready!"; 
-    }, holdDuration); 
+    }, getEffectiveHoldDuration());
 }
 function handleEnd(e) {
     if (!isTimerPointerAllowed(e)) return;
@@ -235,6 +243,25 @@ function handleEnd(e) {
 
     if (!isRunning && !isReady) {
         tryHandleContinueCommandTap();
+    }
+}
+
+function handlePointerCancel(e) {
+    if (!isTimerPointerAllowed(e)) return;
+    clearTimeout(holdTimer);
+    holdTimer = null;
+
+    // A cancelled pointer must never start or stop a solve.
+    if (isRunning) return;
+
+    isReady = false;
+    timerEl.classList.remove('holding-status', 'ready-to-start');
+    if (isInspectionMode && inspectionState === 'inspecting') {
+        timerEl.style.setProperty('color', '#ef4444', 'important');
+        statusHint.innerText = 'Inspection';
+    } else {
+        timerEl.style.removeProperty('color');
+        statusHint.innerText = isInspectionMode ? 'Start Inspection' : 'Hold to Ready';
     }
 }
 window.openSessionModal = () => { document.getElementById('sessionOverlay').classList.add('active'); renderSessionList(); };
@@ -285,7 +312,7 @@ function renderSessionList() {
             sessionButtonWrap.appendChild(sessionBtn);
 
             const editBtn = document.createElement('button');
-            editBtn.className = 'p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-blue-500 transition-all';
+            editBtn.className = 'session-row-action p-2 text-slate-300 hover:text-blue-500 transition-all';
             editBtn.dataset.action = 'edit-session-name';
             editBtn.dataset.sessionId = String(s.id);
             editBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
@@ -295,7 +322,7 @@ function renderSessionList() {
 
             if (eventSessions.length > 1) {
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'p-2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all';
+                deleteBtn.className = 'session-row-action p-2 text-slate-300 hover:text-red-400 transition-all';
                 deleteBtn.dataset.action = 'delete-session';
                 deleteBtn.dataset.sessionId = String(s.id);
                 deleteBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>';
@@ -353,6 +380,12 @@ window.deleteSession = (id) => {
     if (!eventSessions || eventSessions.length <= 1) return;
     const targetIdx = eventSessions.findIndex(s => s.id === id);
     if (targetIdx === -1) return;
+    const target = eventSessions[targetIdx];
+    const solveCount = appState.solves.filter(s => s.event === appState.currentEvent && s.sessionId === id).length;
+    const approved = window.confirm(currentLang === 'ko'
+        ? `"${target.name}" 세션과 기록 ${solveCount}개를 삭제할까요?`
+        : `Delete "${target.name}" and its ${solveCount} solve${solveCount === 1 ? '' : 's'}?`);
+    if (!approved) return;
     const wasActive = eventSessions[targetIdx].isActive;
     appState.sessions[appState.currentEvent] = eventSessions.filter(s => s.id !== id);
     appState.solves = appState.solves.filter(s => !(s.event === appState.currentEvent && s.sessionId === id));
@@ -880,6 +913,12 @@ window.addEventListener('keydown', (e) => {
     }
 
     if (isManualMode && e.code === 'Enter') {
+        if (isScrambleLoading) {
+            statusHint.innerText = currentLang === 'ko'
+                ? '스크램블 생성 중입니다'
+                : 'Scramble is loading';
+            return;
+        }
         let v = parseFloat(manualInput.value);
         if (v > 0) {
             appState.solves.unshift({
@@ -911,7 +950,7 @@ const interactiveArea = document.getElementById('timerInteractiveArea');
 if (interactiveArea) {
     interactiveArea.addEventListener('pointerdown', handleStart, { passive: false });
     interactiveArea.addEventListener('pointerup', handleEnd, { passive: false });
-    interactiveArea.addEventListener('pointercancel', handleEnd, { passive: false });
+    interactiveArea.addEventListener('pointercancel', handlePointerCancel, { passive: false });
 }
 // [UPDATED] Toggle Settings: Acts as open/close toggle
 window.openSettings = () => { 
@@ -1199,7 +1238,7 @@ function setupDomEventBindings() {
                 closeMbfScrambleModal();
                 break;
             case 'copy-mbf-text':
-                copyMbfText();
+                copyMbfText(actionEl);
                 break;
             case 'close-mbf-result-modal':
                 if (isOverlayClick()) return;
@@ -1570,7 +1609,7 @@ async function initIndexBackupRestoreVisibility() {
     const onAuthStateChanged = window.firebaseAuthApi && window.firebaseAuthApi.onAuthStateChanged;
     if (!onAuthStateChanged || !window.firebaseAuth) return;
     onAuthStateChanged(window.firebaseAuth, (user) => {
-        setIndexBackupRestoreVisibility(!!user);
+        setIndexBackupRestoreVisibility(!!user?.emailVerified);
     });
 }
 

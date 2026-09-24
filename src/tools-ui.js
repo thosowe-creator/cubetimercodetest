@@ -50,8 +50,13 @@ function renderHistoryGraph() {
     const polyline = document.getElementById('graphLine');
     if (filtered.length < 2) { polyline.setAttribute('points', ""); return; }
     const validTimes = filtered.map(s => s.penalty === 'DNF' ? null : (s.penalty === '+2' ? s.time + 2000 : s.time));
-    const maxTime = Math.max(...validTimes.filter(t => t !== null));
-    const minTime = Math.min(...validTimes.filter(t => t !== null));
+    const finiteTimes = validTimes.filter(Number.isFinite);
+    if (finiteTimes.length === 0) {
+        polyline.setAttribute('points', '');
+        return;
+    }
+    const maxTime = Math.max(...finiteTimes);
+    const minTime = Math.min(...finiteTimes);
     const range = maxTime - minTime || 1;
     const chartLeft = 4;
     const chartRight = 98;
@@ -89,7 +94,7 @@ function switchCategory(cat, autoSelectFirst = true) {
         if (firstButton) changeEvent(firstButton.id.replace('tab-', ''));
     }
 }
-function changeEvent(e) {
+function changeEvent(e, options = {}) {
   // Normalize incoming event id (guards against stray whitespace from HTML/select values)
   e = String(e || '').trim();
   ensureCaseSelectorDOM();
@@ -125,10 +130,12 @@ function changeEvent(e) {
         if (activeTool === 'graph') selectTool('graph');
         else selectTool('scramble');
     }
-    if (['666', '777', '333bf', '444bf', '555bf', '333mbf'].includes(e)) { 
-        isAo5Mode = false; avgModeToggle.checked = false; 
-    } else { 
-        isAo5Mode = true; avgModeToggle.checked = true; 
+    if (!options.preserveAverageMode) {
+        if (['666', '777', '333bf', '444bf', '555bf', '333mbf'].includes(e)) {
+            isAo5Mode = false; avgModeToggle.checked = false;
+        } else {
+            isAo5Mode = true; avgModeToggle.checked = true;
+        }
     }
     if (currentEvent === '333mbf') {
         if (scrambleEl) scrambleEl.classList.add('hidden');
@@ -477,14 +484,34 @@ window.generateMbfScrambles = async () => {
     setCurrentScramble(`Multi-Blind (${count} Cubes Attempt)`);
 };
 window.closeMbfScrambleModal = () => document.getElementById('mbfScrambleOverlay').classList.remove('active');
-window.copyMbfText = () => {
+window.copyMbfText = async (button) => {
     const texts = Array.from(document.querySelectorAll('.scramble-text')).map((el, i) => `${i+1}. ${el.innerText}`).join('\n\n');
-    const countText = document.getElementById('mbfCubeCountDisplay').innerText;
+    const countText = document.getElementById('mbfCubeCountDisplay')?.innerText || '';
     const fullText = `[CubeTimer] Multi-Blind Scrambles (${countText})\n\n${texts}`;
-    const textArea = document.createElement("textarea"); textArea.value = fullText; document.body.appendChild(textArea); textArea.select();
-    document.execCommand('copy'); document.body.removeChild(textArea);
-    const btn = document.querySelector('[onclick="copyMbfText()"]');
-    const original = btn.innerText; btn.innerText = "Copied!"; setTimeout(() => btn.innerText = original, 2000);
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(fullText);
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = fullText;
+            textArea.setAttribute('readonly', '');
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            const copied = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (!copied) throw new Error('Copy command was rejected');
+        }
+        if (button) {
+            const original = button.innerText;
+            button.innerText = 'Copied!';
+            setTimeout(() => { button.innerText = original; }, 2000);
+        }
+    } catch (err) {
+        console.error('[CubeTimer] Multi-blind copy failed', err);
+        alert(currentLang === 'ko' ? '복사하지 못했습니다.' : 'Could not copy the scrambles.');
+    }
 };
 
 function formatClockTime(ms) {
